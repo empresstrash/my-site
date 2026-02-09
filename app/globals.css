@@ -201,6 +201,49 @@ body {
   opacity: 0.04;
 }
 
+/* Deeper nested submenu levels: make them visually smaller/different */
+.level-2 > .menu-button,
+.level-2 > .menu-link,
+.menu-submenu .menu-submenu .menu-item > .menu-button,
+.menu-submenu .menu-submenu .menu-item > .menu-link {
+  padding-top: 0.32rem;
+  padding-bottom: 0.32rem;
+  padding-left: 0.28rem;
+  padding-right: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,182,193,0.12);
+  font-size: 0.85rem;
+  margin-left: 0.75rem;
+  color: rgba(255,255,255,0.94);
+  max-width: calc(100% - 0.8rem);
+  text-align: right;
+}
+
+.level-3 > .menu-button,
+.level-3 > .menu-link,
+.menu-submenu .menu-submenu .menu-submenu .menu-item > .menu-button,
+.menu-submenu .menu-submenu .menu-submenu .menu-item > .menu-link {
+  padding-top: 0.24rem;
+  padding-bottom: 0.24rem;
+  padding-left: 0.22rem;
+  padding-right: 0.68rem;
+  border-radius: 6px;
+  border: 1px dashed rgba(255,182,193,0.08);
+  font-size: 0.78rem;
+  margin-left: 1rem;
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.02);
+  max-width: calc(100% - 1rem);
+  text-align: right;
+}
+
+.level-2 > .menu-button::before,
+.level-2 > .menu-link::before,
+.level-3 > .menu-button::before,
+.level-3 > .menu-link::before {
+  opacity: 0.02;
+}
+
 .menu-item { list-style:none; }
 .menu-button { background:transparent; border:none; color:var(--color-text); cursor:pointer; text-align:left; width:100%; padding:0.6rem 0; font-family:inherit; font-size:inherit; }
 .menu-button:hover, .menu-link:hover { color:var(--accent-pink); }

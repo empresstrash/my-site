@@ -51,7 +51,7 @@ const menuItems: MenuItem[] = [
         ],
       },
       {
-        label: 'tezos',
+        label: 'tezos art',
         children: [
           { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
           { label: 'teia', external: 'https://teia.art/empresstrash' },
@@ -93,6 +93,14 @@ const menuItems: MenuItem[] = [
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
         ],
       },
+    ],
+  },
+  {
+    label: 'music',
+    children: [
+      { label: 'audius', external: 'https://audius.co/empresstrash' },
+      { label: 'apple', external: 'https://music.apple.com/us/artist/empress-trash/1849948236' },
+      { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ' },
     ],
   },
   {
