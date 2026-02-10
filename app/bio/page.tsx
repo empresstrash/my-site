@@ -3,11 +3,11 @@
 export default function BioPage() {
   return (
     <div className="bio-page">
-      <h1>Empress Trash / Dreya Jay</h1>
+      <h1>Empress Trash</h1>
 
       <section className="bio-intro">
         <p>
-          Empress Trash (aka Dreya Jay) is a chaotic neutral artist experimenting at the crossroads of generative AI, crypto art, digital sovereignty, trauma alchemy, and unfiltered expression. Rooted in glitch aesthetics and shadow work, her creations challenge hierarchies, blending web3 frontiers with introspective narratives to foster creative freedom and energetic integrity. Not for human consumption, her work invites exploration into avant-garde realms, from AI-trained models to extensive digital art creations and billboard features. Currently residing in Mexico City with her two rescue dogs, Glitch and Xochi, she continues to push boundaries in a life marked by resilience and radical self-acceptance.
+          Empress Trash (aka Dreya Jay) is a multiversatile artist experimenting at the crossroads of generative AI, crypto art, digital sovereignty, trauma alchemy, historical traditions and unfiltered expression. Rooted in glitch aesthetics and shadow work, her creations challenge hierarchies, blending web3 frontiers with introspective narratives to foster creative freedom and energetic integrity. Not for human consumption, her work invites exploration into avant-garde realms, from AI-trained models to extensive digital art creations and billboard features. Currently residing in Mexico City with her two rescue dogs, Glitch and Xochi, she continues to push boundaries in a life marked by resilience and radical self-acceptance.
         </p>
       </section>
 
@@ -29,7 +29,7 @@ export default function BioPage() {
         </p>
 
         <p>
-          Empress Trash's art embraces abstraction, surrealism, glitch aesthetics, and AI, continually seeking new accessible technologies like Midjourney for surreal visions and custom models on platforms like Titles.xyz. Her process-oriented approach leverages radical expressionism and self-acceptance, delving into meditative explorations of subconscious connections between emotional, physical, mental, sexual, and spiritual realms. Digital art is not new to her, with being an OG on DeviantArt as trash-empress (active since ~2003), she shared early digital portraits, line art, coloring pages, graphic weirdness, and sketches/quick draws, rejecting elitism and drawing from diverse influences. Her Instagram (@empress_trash), X (@empresstrash) and TikTok (@empresstrash) showcases the diverse works she creates.
+          Empress Trash's art embraces abstraction, surrealism, glitch aesthetics, and AI, continually seeking new accessible technologies like Midjourney for surreal visions and custom models on platforms like Titles.xyz. Her process-oriented approach leverages radical expressionism and self-acceptance, delving into meditative explorations of subconscious connections between emotional, physical, mental, sexual, and spiritual realms. Digital art is not new to her, with being an OG on DeviantArt as trash-empress (active since ~2003), she shared early digital portraits, line art, coloring pages, graphic weirdness, and sketches/quick draws, rejecting elitism and drawing from diverse influences. Her Instagram (@empress_trash), X (@empresstrash) and TikTok (@empress_trash) showcases the diverse works she creates.
         </p>
 
         <p>
@@ -41,15 +41,15 @@ export default function BioPage() {
         </p>
 
         <p>
-          Today, Empress Trash is focused on training AI models while testing and advocating for ethical training standards and exploring video creation, doing the good ol vibe devving for custom tools and applications, and creating an indie game (TBA), continuing her Bitcoin Artist Ambassadorship with Gamma and making art as always. This new phase represents her transition from deep introspective works to outward expression and solidifying her commitment to pushing technological boundaries while maintaining her chaotic neutral polarity.
+          Today, Empress Trash is focused on training AI models while testing and advocating for ethical training standards and exploring video creation, doing the good ol vibe devving for custom tools and applications, and creating an indie game (TBA) and making art as always. This new phase represents her transition from deep introspective works to outward expression and solidifying her commitment to pushing technological boundaries while maintaining her chaotic neutral polarity.
         </p>
       </section>
 
       <section className="bio-section">
-        <h2>CV: Milestones in Crypto, AI, and Avant-Garde Accomplishments</h2>
+        <h2>Exhibitions + Stuff</h2>
         <p>Grinding daily to equalize market inequalities, her career spans traditional roots to web3 dominance:</p>
         <ul className="cv-list">
-          <li><strong>2025:</strong> Partner Artist Ambassador for Gamma, curating drops + featured on Ordinals Calendar; Deadfellaz holder (#7793); Neon Noir models launch on Titles.xyz with custom AI training (ethical royalties, permissionless collabs); NEONCHAIN summer kickoff drop with betrmint (paid collaboration, token routing innovation); Debut speaking in TIMEPieces spaces on artist series; "Angel of Justice" billboard at NFT NYC Midtown and one of the first Midjourney videos exhibited worldwide at Oculus Center; Barco Utopia Museum exhibition in CDMX</li>
+          <li><strong>2025:</strong> Partner Artist Ambassador for Gamma, curating drops + featured on Ordinals Calendar; Neon Noir models launch on Titles.xyz with custom AI training (ethical royalties, permissionless collabs); NEONCHAIN summer kickoff drop with betrmint (paid collaboration, token routing innovation); Debut speaking in TIMEPieces spaces on artist series; "Angel of Justice" billboard at NFT NYC Midtown and one of the first Midjourney videos exhibited worldwide at Oculus Center; Barco Utopia Museum exhibition in CDMX; Accepted to Sincretismo Digital Art Residency, Mexico City; Work exhibited at BrunchByFidel (presented by ClickCreate), Gates South Beach, Miami; Sincretismo Digital Residency exhibition ("The Comet" immersive audio-reactive installation), CDMX; Short film "Dance of the Skeletons" screened at Las Flores Web3 Film Festival, Canadian Consulate, Mexico City (October); Commissioned drop "Yule Log 2025" with betrmint on bp.fun (December); Group drop "BURN EVERYTHING" organized by mentalnoise_e, piece "Muñeco de Año Viejo: Poverty + Despair" on objkt, 9000 editions (December); Interview on TezosCommons Artz Friday spaces, hosted by YinYangYoeshi (December); Full moon airdrop to holders on Tezos and Base (ongoing); ongoing physical rehab + finished Damsels collection</li>
           <li><strong>2024:</strong> Times Square billboard during Summer Olympics (censorship tribute to George Carlin's 7 words); Belgium billboard takeover (780+ screens via ArtCrush Gallery); Zona Maco digital display with PalmDAO and SuperchiefNFT (Latin America's largest art fair breakthrough); Bitcoin Ordinals and Gamma Artist Ambassador; Extensive curations; AoTM curation "Whispers and Closed Doors" with piece "I Love You, It's Ruining My Life" auctioned (June); The Poetry of The Blockchain extended from 2023 (Flux Collective, SAP HQ Walldorf, Germany); Tzompantli with Opuntia Art Collective (NFTFactory, Paris); Marigolds group drop on Gamma (November)</li>
           <li><strong>2023:</strong> Ozzy Osbourne CryptoBatz collab; Sotheby's Glitch: Beyond Binary auction ("Human Rights//Down Bad"); Superchief co-curation (Glitch show in Rome); Virtual gallery in TIMEPieces; Oshi Gallery Subgenre: Glitch (Melbourne/Nifty Gateway); NFT Factory Paris; Underground Violet Rave (Denver); Let's Get Trashed (Makersplace); Tezos Connect NFT Gallery (NYC); Frogs of Fiat (Fake Gallery, Tribeca); Wwx3 Reprisal (Glass Ceiling Nomad, NYC); Palm DAO x Pussy Riot Feminist Art Show (Lume Studios, NYC); Makersplace x King of Midtown Crypto Gallery (NYC); #tezartconnect AR Exhibition (Oslo); Vault + On Display (Colonna Contemporary, Philadelphia); The Pixel Generation (Unit London x Right Click Save); Hearts + Glitches (Aeon Studio @ Uncommon Gallery, Seoul); NFT Milan; Superchief Bad Glitches Only (NFC Summit, Lisbon); Cyberpunk Vol 5 (Superchief @ NFT Show Europe, Valencia; IHAM Gallery, Paris; Miami; Nox Gallery, Tokyo); ARTTOWN Digital Art Showcase (Reno); NEO Noir Cycle Artist in Residence (Makersplace); Patchwork Glitch Curator/Exhibitor (imNOTART, Chicago); Permissionless Pop Up Gallery (Seoul, Milan, Prague); People of Tezos Here + Now (Virtual); Digital Disobedience (Click Create, Virtual); FU:BAR GLITCH ART FESTIVAL (MaMa Zagreb); Childhood Dreams Fundraiser (Exchange.art); The Golden Age (Mint Gold Dust x SuperChief); Here Be Dragons (WizardCon, Lawrence Fuller Private Home, LA); Tzompantli (Opuntia Art Collective, NFTFactory, Paris); Felix Felix Felix Gallery (Multiple Locations); Involved in DOS Punk DAO (Decentralized Autonomous Organization for glitch/digital art collection and promotion) as artist and benefactor, alongside Jon Cates.</li>
           <li><strong>2021–2022:</strong> Crypto entry with global recognition + exhibitions; This era marked Empress Trash's transformative entry into crypto art, fusing extensive traditional background with procreate, self-taught glitch aesthetics, with starting to use AI to craft rebellious, introspective narratives rejecting hierarchies. Key milestones include the "smolNFT" movement on Hic et Nunc (HEN, Tezos), spotlighting small-scale art and fostering uplifting of artists (featured in VerticalCrypto and WonderMundo, May 2022). Global exhibitions surged, including SXSW (2022), TED Vancouver (April 2022), and features at Sotheby's, Nox Gallery across Tokyo, Seoul, NYC, Paris, Palm Springs, Miami, Rome, LA, Mexico City, and Melbourne.</li>
@@ -59,46 +59,6 @@ export default function BioPage() {
           <li><strong>2016:</strong> Dimond Public Art: Art in the Streets (Oakland); Exhibition (Bothwell Arts Center, Livermore); Exhibition (Jack of All Trades, Oakland); Sweet Release solo (Philz Gilman, Berkeley); Gilman Art Walk (Berkeley).</li>
           <li><strong>2015:</strong> Various Bay Area collaborations and underground curations.</li>
           <li><strong>2013–2014:</strong> Emerging Artist Pavilion (Iowa City Arts Festival); Art Speaks (Riverbank Art Festival); Nature Icons solo (Old Brick Artist Series); Gingham Check BFA solo (SAAH); Honors Group Exhibition (UIowa); Small Works Show (Chait Gallery); Assistant (Ai Weiwei @ Large, Alcatraz).</li>
-        </ul>
-      </section>
-
-      <section className="bio-section">
-        <h2>Press & Features</h2> 
-        <p>Empress Trash has been widely featured in media, podcasts, and publications for her innovative work in glitch and trash art, NFT activism, and community building. Highlights include:</p>
-        <ul className="press-list">
-          <li><strong>NorCal + Shill Podcast (Nov 2023):</strong> Episode dedicated to Empress Trash as an artist, discussing her contributions.</li>
-          <li><strong>Forbes Web3 Travel Guides (Nov 2023):</strong> Featured in Tezos @ South Beach panel during Miami Art Basel, alongside Victoria West, Andressa Furletti, Laurence Fuller, and Patrick Amadon.</li>
-          <li><strong>Particle Perspectives (Jul 2023):</strong> Shared how Artemisia Gentileschi's "Judith Slaying Holofernes" changed her life, validating feminine rage and influencing her focus on the feminine form.</li>
-          <li><strong>MintGoldDust "The Future is Rubbish" (Oct 2023):</strong> Interview on trash art's punk spirit, political critique, and her Mexico City life, emphasizing DIY technology and expression without rules.</li>
-          <li><strong>FOMA 10; Heavy FOMA (2023):</strong> Feature in zine.</li>
-          <li><strong>MakersPlace "How Empress Trash's Career Blew Up in 2023" (Sep 2023):</strong> Detailed her explosive year, including Sotheby's auction, MakersPlace residency with "Neo-Noir Cycle" exploring female archetypes, Korea glitch show, and "Equilibrium" at Superchief/Nox.</li>
-          <li><strong>NFTNow Meta's Threads Strategies (Jul 2023):</strong> Announced free mint for Threads followers, celebrating platform launch.</li>
-          <li><strong>#trashthesec (Jul 2023):</strong> Video feature.</li>
-          <li><strong>Jon Cates Medium DOS DAO Discussions (May 2023):</strong> Multi-part interview on punk roots, Glitch Art/TRASHART, community building, and bridging socio-economic disparities in crypto.</li>
-          <li><strong>Kaloh "Glitch Glitch Glitch Art" (May 2023):</strong> "Move On" from Vintage Glitch series featured in SuperChief x NFTRome exhibition.</li>
-          <li><strong>MakersPlace Pixels & Paint Podcast (May 2023):</strong> Debut episode guest discussing web3 practices.</li>
-          <li><strong>MakersPlace "What is Trash Art?" (Mar 2023):</strong> Featured in list of trash artists.</li>
-          <li><strong>NFTNow Sotheby's Backlash (Apr 2023):</strong> Quotes on market inequities for women/LGBTQ+/BIPOC artists, contributing to protest for representation.</li>
-          <li><strong>Artnet Sotheby's Glitch-ism Pause (Apr 2023):</strong> Hoped for inclusion in revised auction by Patrick Amadon.</li>
-          <li><strong>NFTNow Next Up (Mar 2023):</strong> Spotlight on nomadic life, BFA, Bay Area roots, and Tezos ambassadorship.</li>
-          <li><strong>Giphy Artists to Watch (Jan 2023):</strong> Bio on global exhibitions and freelance animation.</li>
-          <li><strong>NFT Culture Artist Interview (Dec 2022):</strong> Interview on revolutionary potential of NFT art, career path, personal insights.</li>
-          <li><strong>Counterarts "Escaping a Real-Life Hell with Art" (Nov 2022):</strong> "Damsel 3" featured.</li>
-          <li><strong>WonderMundo "Truth Behind smolNFT" (Jun 2022):</strong> Creator of smol magic beans, key in movement's growth and artist connections.</li>
-          <li><strong>VerticalCrypto "Spotlight on Smol Art" (May 2022):</strong> Phenomenon on Hic et Nunc.</li>
-          <li><strong>Teia InWarhol Feature (Apr 2022):</strong> Art feature.</li>
-          <li><strong>ManofMany "What Does Smol Mean?" (Mar 2022):</strong> Association with smolNFT.</li>
-          <li><strong>DOS Punks DAO Tumblr JOMO SUMMER (Aug 2022):</strong> Artist of the Month interview on punk origins, art process, and Dissociative Identity Disorder influencing creation.</li>
-          <li><strong>Deathpunk Cryptoart Zine (2022):</strong> Contribution to zine.</li>
-          <li><strong>Podpage Art as Protest (Jul 2022):</strong> Podcast on protest art and Mexico move.</li>
-          <li><strong>OuterRealm Podcast (Jun 2022):</strong> Episode on independence, childhood, emancipation, Damsels.</li>
-          <li><strong>NFTs & Crypto Art: The Future of Art Collecting? (Jun 2022):</strong> YouTube discussion.</li>
-          <li><strong>RedLion Top LGBTQ NFT Artists (May 2022):</strong> "Damsels" collection destigmatizing sex work.</li>
-          <li><strong>NFTNow Undervalued Thread (Nov 2022):</strong> Damsels featured in weekly column.</li>
-          <li><strong>BlockchainUniVR (Sep 2022):</strong> "Yummy Nft's" post.</li>
-          <li><strong>Joy of NFTs Podcast (Jun 2022):</strong> Interview on journey, NFT entry, Damsel origins.</li>
-          <li><strong>Mutant Musings Digital Art (Jun 2022):</strong> Discussion on traditional/crypto art, hierarchies, trash magic.</li>
-          <li><strong>FOMA MAG Feature (2022):</strong> Feature in zine.</li>
         </ul>
       </section>
 
