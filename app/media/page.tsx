@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo, useState } from 'react';
+
 export default function MediaPage() {
   const mediaItems = [
     { title: 'CC Global Summit (2022)', url: 'https://www.youtube.com/watch?v=dcYwLPeDHYI' },
@@ -39,20 +41,66 @@ export default function MediaPage() {
     { title: 'All-Male Glitch Art Show - Spaces cohosted with Stellabelle (March 24, 2023)', url: 'https://objkt.com/tokens/KT1VwBoE3zk36D32VN1i7dvFL7VxuQuwUvWZ/93' },
   ];
 
+  const groupedByYear = useMemo(() => {
+    const groups: Record<string, { title: string; url: string }[]> = {};
+    mediaItems.forEach((item) => {
+      const match = item.title.match(/\(([^)]*)\)/);
+      const yearMatch = match ? match[1].match(/(\d{4})/) : null;
+      const year = yearMatch ? yearMatch[1] : 'Other';
+      if (!groups[year]) groups[year] = [];
+      groups[year].push(item);
+    });
+    return groups;
+  }, [mediaItems]);
+
+  const sortedYears = useMemo(() => {
+    return Object.keys(groupedByYear).sort((a, b) => {
+      if (a === 'Other') return 1;
+      if (b === 'Other') return -1;
+      return Number(b) - Number(a);
+    });
+  }, [groupedByYear]);
+
+  const [openYears, setOpenYears] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    sortedYears.forEach((year) => {
+      initial[year] = false;
+    });
+    return initial;
+  });
+
   return (
     <div className="media-page">
       <h1>Media & Features</h1>
-      <div className="media-masonry">
-        {mediaItems.map((item, idx) => (
-          <a
-            key={idx}
-            href={item.url}
-            target="_blank"
-            rel="noreferrer"
-            className="media-box"
-          >
-            {item.title}
-          </a>
+      <div className="media-groups">
+        {sortedYears.map((year) => (
+          <div key={year} className="media-group">
+            <button
+              type="button"
+              className={`media-year ${openYears[year] ? 'open' : ''}`}
+              onClick={() =>
+                setOpenYears((prev) => ({ ...prev, [year]: !prev[year] }))
+              }
+            >
+              {year}
+              <span className="media-year-toggle" />
+            </button>
+            {openYears[year] && (
+              <div className="media-masonry">
+                {groupedByYear[year].map((item, idx) => (
+                  <a
+                    key={`${year}-${idx}`}
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="media-box"
+                  >
+                    {item.title}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
@@ -83,12 +131,55 @@ export default function MediaPage() {
           text-align: center;
           color: var(--accent-pink);
         }
+        .media-groups {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .media-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .media-year {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.4);
+          background: transparent;
+          color: var(--color-text);
+          text-transform: lowercase;
+          font-family: inherit;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: border-color 200ms ease, transform 200ms ease;
+        }
+        .media-year:hover {
+          border-color: var(--accent-pink);
+          transform: translateY(-2px);
+        }
+        .media-year-toggle {
+          display: inline-block;
+          width: 0;
+          height: 0;
+          border-top: 6px solid transparent;
+          border-bottom: 6px solid transparent;
+          border-left: 8px solid #fff;
+          transition: transform 200ms ease;
+        }
+        .media-year.open .media-year-toggle {
+          transform: rotate(90deg);
+        }
         .media-masonry {
           column-count: auto;
           column-width: 250px;
-          gap: 1.5rem;
-          column-gap: 1.5rem;
-          margin-top: 2rem;
+          gap: 2rem;
+          column-gap: 2rem;
+          margin-top: 1rem;
+          padding: 1rem 0;
         }
 
         .media-box {
@@ -97,7 +188,7 @@ export default function MediaPage() {
           align-items: center;
           justify-content: center;
           min-height: 120px;
-          padding: 1.5rem;
+          padding: 2rem;
           background: transparent;
           border: 1px solid rgba(255,255,255,0.95);
           text-decoration: none;
@@ -106,7 +197,7 @@ export default function MediaPage() {
           text-align: center;
           transition: transform 300ms ease, box-shadow 250ms ease, border-color 250ms ease;
           border-radius: 16px;
-          margin-bottom: 1.5rem;
+          margin-bottom: 2rem;
           break-inside: avoid;
           word-break: break-word;
           text-transform: lowercase;
@@ -175,6 +266,10 @@ export default function MediaPage() {
           .media-page h1 {
             font-size: 1.8rem;
             margin-bottom: 1.5rem;
+          }
+          .media-year {
+            font-size: 1rem;
+            padding: 0.6rem 0.8rem;
           }
           .media-masonry {
             column-width: 150px;
