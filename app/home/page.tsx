@@ -47,8 +47,14 @@ export default function HomePage() {
           left: 0;
           width: 100%;
           height: calc(100vh - 64px);
-          overflow: auto;
+          overflow: hidden;
           -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .page-container::-webkit-scrollbar {
+          width: 0;
+          height: 0;
         }
       `}</style>
     </div>

@@ -109,6 +109,13 @@ export default function MediaPage() {
           overflow: hidden;
         }
 
+        .media-box:link,
+        .media-box:visited,
+        .media-box:focus {
+          color: #ffffff;
+          text-decoration: none;
+        }
+
         /* holographic rainbow overlay (hidden until hover) */
         .media-box::before {
           content: '';

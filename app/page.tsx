@@ -24,13 +24,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ 
-      overflow: 'auto', 
-      WebkitOverflowScrolling: 'touch',
-      height: 'calc(100vh - 64px)',
-      position: 'relative',
-      width: '100%'
-    }}>
+    <div className="paragraph-container">
       <iframe
         src="https://paragraph.com/@empresstrash"
         style={{ 
@@ -43,6 +37,21 @@ export default function Home() {
         allowFullScreen
         title="Paragraph Blog"
       />
+      <style jsx>{`
+        .paragraph-container {
+          overflow: hidden;
+          -webkit-overflow-scrolling: touch;
+          height: calc(100vh - 64px);
+          position: relative;
+          width: 100%;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .paragraph-container::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+        }
+      `}</style>
     </div>
   );
 }

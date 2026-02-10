@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
 import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 interface MenuItem {
   label: string;
@@ -108,7 +109,7 @@ const menuItems: MenuItem[] = [
     children: [
       { label: 'bio', path: '/bio' },
       { label: 'media', path: '/media' },
-      { label: 'grokipedia', external: 'https://grokipedia.com' },
+      { label: 'grokipedia', external: 'https://grokipedia.com/page/empress-trash' },
     ],
   },
   {
@@ -116,7 +117,6 @@ const menuItems: MenuItem[] = [
     children: [
       { label: 'deca', external: 'https://deca.art/EmpressTrash' },
       { label: 'deviant art', external: 'https://www.deviantart.com/trash-empress' },
-      
       { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash' },
       { label: 'giphy', external: 'https://giphy.com/empresstrash' },
       { label: 'hey', external: 'https://hey.xyz/u/empresstrash' },
@@ -151,7 +151,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
             style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
           >
             {item.label}
-            <span className={`toggle ${isExpanded ? 'open' : ''}`}>▶</span>
+            <span className={`toggle ${isExpanded ? 'open' : ''}`} />
           </button>
           {isExpanded && (
             <ul className="menu-submenu">
@@ -161,15 +161,23 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
             </ul>
           )}
         </>
-      ) : (
+      ) : item.external ? (
         <a
-          href={item.path || '#'}
+          href={item.external}
           onClick={handleClick}
           className={`menu-link ${isActive ? 'active' : ''}`}
           style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
         >
           {item.label}
         </a>
+      ) : (
+        <Link
+          href={item.path || '/'}
+          className={`menu-link ${isActive ? 'active' : ''}`}
+          style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+        >
+          {item.label}
+        </Link>
       )}
     </li>
   );
@@ -182,22 +190,12 @@ export default function ClientMenu(): React.ReactNode {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Home click: close all menus. Refresh: component remounts naturally with {} so menus close.
   useEffect(() => {
-    // load saved expansion state
-    try {
-      const raw = localStorage.getItem('menuExpanded');
-      if (raw) setExpandedMap(JSON.parse(raw));
-    } catch (e) {
-      // ignore
+    if (pathname === '/') {
+      setExpandedMap({});
     }
-  }, []);
-
-  useEffect(() => {
-    // persist
-    try {
-      localStorage.setItem('menuExpanded', JSON.stringify(expandedMap));
-    } catch (e) {}
-  }, [expandedMap]);
+  }, [pathname]);
 
   // detect mobile viewport on client only
   useEffect(() => {
@@ -217,37 +215,6 @@ export default function ClientMenu(): React.ReactNode {
   const toggleExpand = (key: string) => {
     setExpandedMap(prev => ({ ...prev, [key]: !prev[key] }));
   };
-
-  // expand parents for current path only once on initial mount to avoid flicker on navigation
-  const _initRef = useRef(false);
-  useEffect(() => {
-    if (_initRef.current) return;
-    _initRef.current = true;
-
-    function findAncestors(items: MenuItem[], target: string | null, parents: string[] = []): string[] | null {
-      for (const it of items) {
-        if (it.path && it.path === target) return parents;
-        if (it.children) {
-          const res = findAncestors(it.children, target, [...parents, it.label]);
-          if (res) return res;
-        }
-      }
-      return null;
-    }
-
-    const ancestors = findAncestors(menuItems, pathname);
-    if (ancestors) {
-      setExpandedMap(prev => {
-        const copy = { ...prev };
-        let key = '';
-        for (let i = 0; i < ancestors.length; i++) {
-          key = i === 0 ? `${ancestors[i]}` : `${key}/${ancestors[i]}`;
-          copy[key] = true;
-        }
-        return copy;
-      });
-    }
-  }, []);
 
   return (
     <>
