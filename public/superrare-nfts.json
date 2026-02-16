@@ -1,0 +1,473 @@
+{
+  "nfts": [
+    {
+      "id": 1,
+      "title": "Parallelogram",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/6a4a165a73f8e6e9eca6e9f59cd0b35955365d80b8f5b1533e4a780b6c2015b9.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=0357aca4255e69d86dd7f0574f259f31",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/26"
+    },
+    {
+      "id": 2,
+      "title": "We're All On The Edge",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmbJHqneLwfVZc5TDNsEhkoxxjELXYwvp5RbZfFp36phdM/hot-moshed-01-15-20-08-04.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47244"
+    },
+    {
+      "id": 3,
+      "title": "There Sun is Our Sun",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmdNujH1RZ2C2LbctnSEhpT177tNkZAhNsexX4LGxt8LmD/oursunisthei-moshed-01-15-19-54-41.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47243"
+    },
+    {
+      "id": 4,
+      "title": "Oh Despair",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmVMKVWquR2cdsQmKBNCwvnpcERoYPazMvncDiSFDfeqde/ohdespair-moshed-01-11-19-53-20.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47216"
+    },
+    {
+      "id": 5,
+      "title": "Smoke 'Em If You Got 'Em",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmbShd5u6KufEmeLm1oEF95QpCwDLPGsX4C178uJMaT6jj/smoke.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47142"
+    },
+    {
+      "id": 6,
+      "title": "Portcullis",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmW1y8BzTA2Xjn6RFdkVK1tAdqecUEyQUR9BswU1db9ieH/portals.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47049"
+    },
+    {
+      "id": 7,
+      "title": "GFY",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/7"
+    },
+    {
+      "id": 8,
+      "title": "Starshine",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/25"
+    },
+    {
+      "id": 9,
+      "title": "The Art Critic",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/6"
+    },
+    {
+      "id": 10,
+      "title": "Elitist Scum",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/5"
+    },
+    {
+      "id": 11,
+      "title": "The Fall of Moloch",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/b05cb86312c10568caaaf69dd403c105bed51b1ea1f52f40d16132de7333f60a.mp4?ixlib=js-3.8.0&auto=format&quality=100&dpr=2&cs=origin&s=328015e03190dfe6dfa1e672bddce203",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/8"
+    },
+    {
+      "id": 12,
+      "title": "don't @ me",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/33"
+    },
+    {
+      "id": 13,
+      "title": "shadowban (silence is golden)",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/6"
+    },
+    {
+      "id": 14,
+      "title": "Spinal Tap",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/760aa657064e7a12ac0e49a7ef453d9c43b4884c43ec3cb8757f81a2899a72d5.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=2ffdd2518c9ce0ceca32142c87641fc9",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/7"
+    },
+    {
+      "id": 15,
+      "title": "Sovereign",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/4"
+    },
+    {
+      "id": 16,
+      "title": "Unsinkable",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/3"
+    },
+    {
+      "id": 17,
+      "title": "Hallowed",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/2"
+    },
+    {
+      "id": 18,
+      "title": "Tradition",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/1"
+    },
+    {
+      "id": 19,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/178"
+    },
+    {
+      "id": 20,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/454"
+    },
+    {
+      "id": 21,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/455"
+    },
+    {
+      "id": 22,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/456"
+    },
+    {
+      "id": 23,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/457"
+    },
+    {
+      "id": 24,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/102"
+    },
+    {
+      "id": 25,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/101"
+    },
+    {
+      "id": 26,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/100"
+    },
+    {
+      "id": 27,
+      "title": "Untitled",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xd6243f38a7a1cF12BfD348ac14d50dF5366292e4/1"
+    },
+    {
+      "id": 28,
+      "title": "Offering",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/642fb3c9a5e2bcbccda0ae6ea61523b765d57bdb798161527f4e82c68f0e4221.mp4?ixlib=js-3.8.0&auto=format&quality=100&dpr=2&cs=origin&s=9e8d19c00a5c3f8c437f10db655d14d7",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/52951"
+    },
+    {
+      "id": 29,
+      "title": "Sealed",
+      "mediaUrl": "blob:https://superrare.com/3feafb4d-221f-444f-adf1-d1e87025ec8a",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/53027"
+    },
+    {
+      "id": 30,
+      "title": "Comet",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/29d16efb1e5fe16a0fa077522f1f0790a5763a5bc47090392eba4f1e1fd6f6ab.mp4?ixlib=js-3.8.0&auto=format&quality=100&dpr=2&cs=origin&s=9b7064c81d6ffac258ffb2cb491fb58a",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x3caabFCad9c7Bb04f62A1D0703FB202CB31D9Dd4/5"
+    },
+    {
+      "id": 31,
+      "title": "ROBNESS x Guggenheim",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/12"
+    },
+    {
+      "id": 32,
+      "title": "Zoltar",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/11"
+    },
+    {
+      "id": 33,
+      "title": "Voidwalkers",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/10"
+    },
+    {
+      "id": 34,
+      "title": "Make a Wish",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/1"
+    },
+    {
+      "id": 35,
+      "title": "How Do You Feel Without #10/10",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/12"
+    },
+    {
+      "id": 36,
+      "title": "How Do You Feel Without #9/10",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/11"
+    },
+    {
+      "id": 37,
+      "title": "How Do You Feel Without #8/10",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/10"
+    },
+    {
+      "id": 38,
+      "title": "Human Rights//Down Bad",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/1"
+    },
+    {
+      "id": 39,
+      "title": "Delirium",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmZXrgwNjZMgHo5bxfPTFFJ6gxLwzdQazepX6JeCxryPW9/emp_t_and_more_-moshed-01-28-04-04-41.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47316"
+    },
+    {
+      "id": 40,
+      "title": "Tapped In",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmeNypp1QyQkGKV5cRx5DYz3ADFJ6zkpkcDURpMYqKePVj/victorian-moshed-01-30-16-46-52.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47336"
+    },
+    {
+      "id": 41,
+      "title": "Rapture",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/27"
+    },
+    {
+      "id": 42,
+      "title": "Study BOME",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmSwcHr6kXLt9jNNBpu5wvqXFNgwnfLNj2uDyVbwDFcrQe/study-bome.gif",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47598"
+    },
+    {
+      "id": 43,
+      "title": "Celestial Cartography",
+      "mediaUrl": "blob:https://superrare.com/5e64aac4-4a06-43df-bf2c-5ef896cb89f1",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/47902"
+    },
+    {
+      "id": 44,
+      "title": "Still One Shilling",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/8"
+    },
+    {
+      "id": 45,
+      "title": "Target across from Hilton Times Square",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/9"
+    },
+    {
+      "id": 46,
+      "title": "Trash Only",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/13"
+    },
+    {
+      "id": 47,
+      "title": "The Fed Artist",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0xdF15E9Edbe4648AC2E2941E07Dc4D684d55Ac250/14"
+    },
+    {
+      "id": 48,
+      "title": "I Love You, It's Ruining My Life.",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/28"
+    },
+    {
+      "id": 49,
+      "title": "Quicksilver",
+      "mediaUrl": "https://stream.mux.com/f99qJROo91w02QcJXUIzp02XBIf005N1C1fBblAiHvnb01E/medium.mp4",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/49367"
+    },
+    {
+      "id": 50,
+      "title": "It's Joever",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/f7d84683e57f9929ae17fea1e1b0691aad23e779a5de21b97abaf34a8b66e896.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=c09d62fbdbedfef2402f218ebe0fd84f",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/49663"
+    },
+    {
+      "id": 51,
+      "title": "King of Trash",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/d2bf86644726326f60082bc1da57b7b820cff7ded384b1a245076c35b2a3b911.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=46add27da520c374dae0adf492fd645d",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/49664"
+    },
+    {
+      "id": 52,
+      "title": "Your Money or Your Life",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/9be3f8f18fcce1de1d9ee0761f2c189af131b9db4b785c3e78b6466ed84b1473.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=ea153e003ba68b119f8bf2413200fec1",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/49665"
+    },
+    {
+      "id": 53,
+      "title": "The Prosecutor",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/69882da95d859a59e7dc7dc3fd51c5a87bcc6c819819e1ea43c3593911bbf037.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=da53b83a591261683171ed0e7e01365a",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/49666"
+    },
+    {
+      "id": 54,
+      "title": "We Were Promised a Future Full of 3 Boobs",
+      "mediaUrl": "https://stream.mux.com/f99qJROo91w02QcJXUIzp02XBIf005N1C1fBblAiHvnb01E/medium.mp4",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/49971"
+    },
+    {
+      "id": 55,
+      "title": "The Time She Came Down to Earth",
+      "mediaUrl": "https://stream.mux.com/f99qJROo91w02QcJXUIzp02XBIf005N1C1fBblAiHvnb01E/medium.mp4",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/50010"
+    },
+    {
+      "id": 56,
+      "title": "The Baptism",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/29"
+    },
+    {
+      "id": 57,
+      "title": "Isle of the Dead (Empress's Edition) Feat. Narcissus",
+      "mediaUrl": "https://superrare.com/assets/logo.svg",
+      "mediaType": "image",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/30"
+    },
+    {
+      "id": 58,
+      "title": "Landscape for Aliens 2.2",
+      "mediaUrl": "blob:https://superrare.com/584a5ea2-3d42-4046-a139-74f5adbad309",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/31"
+    },
+    {
+      "id": 59,
+      "title": "Good Vibes Only 2.0",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/9180bb27211c147444763c6a786a8ccdc3d6874e7c20729dd3fe82f2eba64d7d.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=447c7e58856232c589169caba45b3875",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1E3572397f49947e634C9277bd4f5aC9f844A8D4/12"
+    },
+    {
+      "id": 60,
+      "title": "The Lone Ranger",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/43c256358348133a4bfdb07ea88b52e227ab260564d2afcdf426afa72d1c9e6f.mp4?ixlib=js-3.8.0&auto=format&quality=100&dpr=2&cs=origin&s=6832a2ce88144c68a1111e830ce18809",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1E3572397f49947e634C9277bd4f5aC9f844A8D4/11"
+    },
+    {
+      "id": 61,
+      "title": "MIdsommar",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmUifdSg9N5VkQd1xJWS5ZfQLGXFiKtnexhJQxkSSMJHr7/empresstrash_ab-moshed-06-26-05-15-00.mp4",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1E3572397f49947e634C9277bd4f5aC9f844A8D4/10"
+    },
+    {
+      "id": 62,
+      "title": "Weight Of",
+      "mediaUrl": "https://ipfs.filebase.io/ipfs/QmZUKA568NDeN4NASFmuHBQiyBGDrFBTtjyuEAr2iMZWGm/weightoflarge.mp4",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1E3572397f49947e634C9277bd4f5aC9f844A8D4/1"
+    },
+    {
+      "id": 63,
+      "title": "digital slop",
+      "mediaUrl": "https://stream.mux.com/f99qJROo91w02QcJXUIzp02XBIf005N1C1fBblAiHvnb01E/medium.mp4",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/51965"
+    },
+    {
+      "id": 64,
+      "title": "The Painted Lady",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/bab07356c6686bdb37272e5cc2dc7012aa748a2544bdf1e33f0e7a973a8f64ed.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=998a434a2e223d8e86cf50afde8ba666",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0x1259BA696527156C3B1cbdFC74243edBD57F1a82/32"
+    },
+    {
+      "id": 65,
+      "title": "kallisti",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/3177572d328735a8036d01810af37347a39df8a9c7b2e595f0a37ce1e353e92a.gif?ixlib=js-3.8.0&auto=format&quality=100&cs=origin&fm=mp4&w=1112&fit=clip&s=ef3e78d54fe9c9c0093908a956c82cdb",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/52048"
+    },
+    {
+      "id": 66,
+      "title": "Cleansing",
+      "mediaUrl": "blob:https://superrare.com/53a9b44c-0b61-457b-a1fd-05ae3091e8fc",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/52603"
+    },
+    {
+      "id": 67,
+      "title": "Invocation",
+      "mediaUrl": "https://superrare-artworks.imgix.net/asset/e3559fb13cdef7db56df34fc256ec782360b8f95a32a76c4b992b9714845d3e8.mp4?ixlib=js-3.8.0&auto=format&quality=100&dpr=2&cs=origin&s=ac2f2120d8a5cbafeea69c02c3d87cb3",
+      "mediaType": "video",
+      "url": "https://superrare.com/artwork/eth/0xb932a70A57673d89f4acfFBE830E8ed7f75Fb9e0/52779"
+    }
+  ]
+}

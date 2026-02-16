@@ -17,13 +17,20 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { label: 'home', path: '/' },
   {
-    label: 'support + commission',
+    label: 'Commissions & Subs',
     children: [
-      { label: '18+ patreon', external: 'https://www.patreon.com/EmpressTrash' },
-      { label: 'fiverr', external: 'https://www.fiverr.com/empresstrash/create-you-an-ai-portrait-you-will-love' },
+      {
+        label: '18+',
+        children: [
+          { label: 'fansly', external: 'https://fansly.com/empresstrash' },
+          { label: 'patreon', external: 'https://www.patreon.com/EmpressTrash' },
+        ],
+      },
+      { label: 'portrait commission', external: 'https://www.fiverr.com/empresstrash/create-you-an-ai-portrait-you-will-love' },
       { label: 'zora creator coin', external: 'https://zora.co/@empresstrash' },
     ],
   },
+  // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
     label: 'crypto art',
     children: [
@@ -81,6 +88,7 @@ const menuItems: MenuItem[] = [
       {
         label: 'builds',
         children: [
+          { label: 'substrata', external: 'https://substrata.info/parcel/1447' },
           { label: 'neocities', external: 'https://empresstrash.neocities.org/' },
           { label: 'nifty island', external: 'https://www.niftyisland.com/profile/empresstrash' },
           { label: 'oncyber', external: 'https://oncyber.io/@empresstrash' },
