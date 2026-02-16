@@ -22,7 +22,7 @@ const menuItems: MenuItem[] = [
       {
         label: '18+',
         children: [
-          { label: 'fansly', external: 'https://fansly.com/empresstrash' },
+          { label: 'fansly', external: 'https://fansly.com/empresstrash?=rempt' },
           { label: 'patreon', external: 'https://www.patreon.com/EmpressTrash' },
         ],
       },
