@@ -207,6 +207,22 @@ body {
   opacity: 0.02;
 }
 
+/* Thin divider after specific expanded submenus */
+.menu-item.expanded:has(> button.divider-after) > .menu-submenu {
+  border-bottom: none;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  position: relative;
+}
+.menu-item.expanded:has(> button.divider-after) > .menu-submenu::after {
+  content: '';
+  display: block;
+  width: 88%;
+  height: 1px;
+  background: rgba(255, 0, 127, 0.55);
+  margin: 0 auto;
+}
+
 /* ── Universal link style ─────────────────────────────────────────────────────
    ALL anchor links in any submenu at any depth get this style.
    Placed last so it wins over every level-specific rule above.

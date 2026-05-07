@@ -84,7 +84,7 @@ const menuItems: MenuItem[] = [
           },
           {
             label: 'substrata',
-            className: 'submenu-header',
+            className: 'submenu-header divider-after',
             children: [
               { label: 'cusp of rebirth v1 (2026)', external: 'https://substrata.info/world/empresstrash/Cusp+of+Rebirth+V1' },
               { label: 'full moon airdrops', external: 'https://substrata.info/world/empresstrash/fullmoon' },
