@@ -154,7 +154,6 @@ const menuItems: MenuItem[] = [
         children: [
           { label: 'deca', external: 'https://deca.art/EmpressTrash' },
           { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash' },
-          { label: 'hey', external: 'https://hey.xyz/u/empresstrash' },
           { label: 'paragraph', external: 'https://paragraph.com/@empresstrash' },
           { label: 'zeroone', external: 'https://zeroone.art/profile/empresstrash' },
           { label: 'zora', external: 'https://zora.co/@empresstrash' },
