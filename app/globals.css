@@ -2,15 +2,9 @@
 
 :root {
   --font-family: 'IBM Plex Mono', monospace;
-  --font-family-header: 'IBM Plex Mono', monospace;
-  --font-family-content: 'IBM Plex Mono', monospace;
   --color-bg: #000000;
   --color-text: #ffffff;
   --accent-pink: #ff007f;
-  --color-hover-bg: #222222;
-  --color-hover-text: #ffffff;
-  --color-border: #333333;
-  --color-shadow: rgba(255, 255, 255, 0.05);
 }
 
 /* Rainbow sheen + pink glitch used by media and side-menu */
@@ -40,16 +34,23 @@ html, body {
 
 body {
   font-family: var(--font-family);
-  background: var(--color-bg) none repeat scroll 0 0;
+  background: var(--color-bg);
   color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   position: relative;
   z-index: 2;
   color: var(--color-text);
   text-align: center;
-  padding: 12px;
+  padding: 12px 0;
+  margin-left: 280px;
 }
 
 /* Header */
@@ -64,50 +65,6 @@ body {
   color: var(--color-text);
 }
 
-/* Social Icons */
-.social-icons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.social-icons a {
-  color: var(--color-text);
-  font-size: 1.2rem;
-}
-
-/* Logo */
-.logo-text {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--color-text);
-}
-
-/* Right Icons */
-.right-icons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-text);
-}
-
-/* Nav Bar */
-.nav-bar {
-  background: var(--color-bg);
-  padding: 0.5rem 1rem;
-  text-align: center;
-}
-
-.nav-links a {
-  color: var(--color-text);
-  margin: 0 0.5rem;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.nav-links a:hover, .nav-links a:focus {
-  color: var(--accent-pink);
-}
-
 /* Side menu */
 .header-left { display:flex; align-items:center; gap:0.5rem; }
 
@@ -117,7 +74,7 @@ body {
   top: 0;
   height: 100%;
   width: 280px;
-  background: transparent;
+  background: #181818;
   color: var(--color-text);
   transform: none;
   transition: none;
@@ -144,7 +101,7 @@ body {
   position: relative;
   padding: 0.6rem 0.75rem;
   margin-bottom: 0.5rem;
-  background: transparent;
+  background: #0a0a0a;
   border: 1px solid rgba(255,255,255,0.95);
   color: #ffffff;
   text-decoration: none;
@@ -157,9 +114,11 @@ body {
 }
 .side-list > .menu-item > .menu-button,
 .side-list > .menu-item > .menu-link {
-  /* extra left padding for top-level menu items */
+  /* Level-0: heaviest border, boldest font */
   padding-left: 1.25rem;
   padding-right: 0.75rem;
+  font-weight: 600;
+  border: 1.5px solid rgba(255,255,255,0.95);
 }
 .menu-item > .menu-button::before,
 .menu-item > .menu-link::before {
@@ -197,7 +156,7 @@ body {
 .menu-submenu .menu-item > .menu-link {
   padding: 0.4rem 0.45rem;
   border-radius: 10px;
-  border: 1px solid rgba(255,182,193,0.16); /* light grey-pink */
+  border: 1px solid rgba(255,182,193,0.16);
   font-size: 0.9rem;
   margin-left: 0.5rem;
   margin-bottom: 0.5rem;
@@ -208,11 +167,15 @@ body {
   opacity: 0.04;
 }
 
-/* Deeper nested submenu levels: make them visually smaller/different */
+/* Level-1 expandable HEADERS (buttons only): heavier border, medium-bold font */
+.menu-submenu > .menu-item > button.menu-button {
+  border: 1px solid rgba(255,182,193,0.42);
+  font-weight: 500;
+}
+
+/* Deeper nested submenu levels (level-2 buttons/headers) */
 .level-2 > .menu-button,
-.level-2 > .menu-link,
-.menu-submenu .menu-submenu .menu-item > .menu-button,
-.menu-submenu .menu-submenu .menu-item > .menu-link {
+.menu-submenu .menu-submenu .menu-item > .menu-button {
   padding-top: 0.32rem;
   padding-bottom: 0.32rem;
   padding-left: 0.28rem;
@@ -226,29 +189,56 @@ body {
   text-align: right;
 }
 
-.level-3 > .menu-button,
-.level-3 > .menu-link,
-.menu-submenu .menu-submenu .menu-submenu .menu-item > .menu-button,
-.menu-submenu .menu-submenu .menu-submenu .menu-item > .menu-link {
-  padding-top: 0.24rem;
-  padding-bottom: 0.24rem;
-  padding-left: 0.22rem;
-  padding-right: 0.68rem;
-  border-radius: 6px;
-  border: 1px dashed rgba(255,182,193,0.08);
-  font-size: 0.78rem;
-  margin-left: 1rem;
-  color: rgba(255,255,255,0.9);
-  background: rgba(255,255,255,0.02);
-  max-width: calc(100% - 1rem);
-  text-align: right;
+/* Level-2 expandable headers (decentraland/substrata): lighter font, left-aligned */
+.menu-submenu .menu-submenu > .menu-item > button.menu-button {
+  font-weight: 300;
+  text-align: left;
+  border: 1px solid rgba(255,182,193,0.18);
+}
+
+/* submenu-header overrides for left alignment */
+.level-2 > .menu-button.submenu-header,
+.menu-submenu .menu-submenu .menu-item > .menu-button.submenu-header {
+  text-align: left;
 }
 
 .level-2 > .menu-button::before,
-.level-2 > .menu-link::before,
-.level-3 > .menu-button::before,
-.level-3 > .menu-link::before {
+.level-3 > .menu-button::before {
   opacity: 0.02;
+}
+
+/* ── Universal link style ─────────────────────────────────────────────────────
+   ALL anchor links in any submenu at any depth get this style.
+   Placed last so it wins over every level-specific rule above.
+   Specificity: 0,3,1 — beats all level-N selectors.
+───────────────────────────────────────────────────────────────────────────── */
+.menu-submenu .menu-item > a.menu-link {
+  display: block;
+  padding: 0.28rem 0.68rem 0.28rem 0.22rem;
+  border-radius: 6px;
+  border: 1px dashed rgba(255,182,193,0.22) !important;
+  font-size: 0.83rem;
+  margin-left: 0.75rem;
+  margin-bottom: 0.35rem;
+  color: rgba(255,255,255,0.88);
+  background: #0a0a0a;
+  max-width: calc(100% - 0.8rem);
+  text-align: right;
+  font-weight: 300;
+}
+
+/* Expanded menu items show pink text, collapsed show white */
+.menu-item.expanded > .menu-button {
+  color: var(--accent-pink);
+}
+
+.menu-item.expanded > .menu-link {
+  color: var(--accent-pink);
+}
+
+/* Ensure submenu-header items also go pink when expanded */
+.menu-item.expanded > .menu-button.submenu-header {
+  color: var(--accent-pink);
 }
 
 .menu-item { list-style:none; }
@@ -274,7 +264,7 @@ body {
 .support-item { padding-left:0.5rem; }
 
 .side-socials { display:flex; gap:0.5rem; margin-top:1rem; }
-.side-socials a, .social-icons a { color: var(--accent-pink); font-size:1.2rem; transition:color 200ms; }
+.side-socials a { color: var(--accent-pink); font-size:1.2rem; transition:color 200ms; }
 .side-socials a:hover { color:#ff4da6; }
 
 .side-list a:hover, .side-list a:focus { color: var(--accent-pink); }
@@ -283,60 +273,12 @@ body {
 .header-with-side { margin-left: 280px; display:flex; align-items:center; justify-content:center; padding:0.5rem 1rem; }
 .centered-logo img { display:block; margin:0 auto; width:140px; height:auto; }
 
-/* Shift main content to avoid overlap */
-.tagline-bar, .bottom-bar, .content, .nav-bar {
-  margin-left: 280px;
-}
-
-
-
-/* Tagline */
-.tagline-bar {
-  background: transparent;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  color: var(--color-text);
-  font-size: 1rem;
-  margin: 1rem auto;
-  max-width: 90%;
-}
-
-/* Bottom Bar */
-.bottom-bar {
-  background: transparent;
-  padding: 0.25rem 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0.5rem auto;
-  max-width: 90%;
-}
-
-
-
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .side-menu {
-    width: 240px;
-    padding: 0.75rem;
-  }
-  
-  .header-with-side, .tagline-bar, .bottom-bar, .content, .nav-bar {
-    margin-left: 240px;
-  }
-  
-  .logo-text {
-    font-size: 1.5rem;
-  }
-  
-  .social-icons a {
-    font-size: 1rem;
-  }
-  
   .side-list > li {
     padding: 0.5rem 0;
   }
-  
+
   .menu-button, .menu-link {
     padding: 0.5rem 0;
     font-size: 0.9rem;
@@ -344,31 +286,18 @@ body {
 }
 
 @media (max-width: 480px) {
-  .side-menu {
-    width: 200px;
-    padding: 0.5rem;
-  }
-  
-  .header-with-side, .tagline-bar, .bottom-bar, .content, .nav-bar {
-    margin-left: 200px;
-  }
-  
-  .logo-text {
-    font-size: 1.2rem;
-  }
-  
   .side-socials {
     gap: 0.25rem;
   }
-  
-  .side-socials a, .social-icons a {
+
+  .side-socials a {
     font-size: 1rem;
   }
-  
+
   .side-list > li {
     padding: 0.4rem 0;
   }
-  
+
   .menu-button, .menu-link {
     padding: 0.4rem 0;
     font-size: 0.8rem;
@@ -386,20 +315,20 @@ body {
     max-width: 360px;
     transform: translateX(-110%);
     transition: transform 260ms ease;
-    background: rgba(0,0,0,0.85);
-    padding: 1rem;
+    background: #181818;
+    padding: 3.5rem 1rem 1rem;
     z-index: 3000;
     box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
   .side-menu.open {
+    transform: translateX(0);
+  }
 
   .side-menu::-webkit-scrollbar {
     width: 0;
     height: 0;
-  }
-    transform: translateX(0);
   }
 
   /* header shifts to full width on mobile and shows toggle */
@@ -413,57 +342,54 @@ body {
   }
 
   .mobile-menu-button {
-        display: inline-block; /* shown on small screens */
+    display: inline-block;
     background: transparent;
     border: 1px solid rgba(255,255,255,0.12);
     color: var(--color-text);
     padding: 0.4rem 0.6rem;
-    margin-right: 0.75rem;
     border-radius: 8px;
     font-size: 1.15rem;
-    position: absolute;
+    position: fixed;
     left: 0.6rem;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0.5rem;
     z-index: 3100;
   }
 
-  .content, .tagline-bar, .bottom-bar, .nav-bar {
+  .content {
     margin-left: 0;
   }
 }
 
-  /* backdrop used when mobile menu is open */
-  .menu-backdrop {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.45);
-    z-index: 2500;
-  }
+/* backdrop used when mobile menu is open */
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  z-index: 2500;
+}
 
-  /* Button that matches menu/link styling for external open links */
-  .embed-open-button {
-    display: inline-block;
-    padding: 0.6rem 0.9rem;
-    background: transparent;
-    color: var(--color-text);
-    border: 1px solid rgba(255,255,255,0.95);
-    border-radius: 12px;
-    text-decoration: none;
-    font-family: inherit;
-    transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
-  }
-  .embed-open-button:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255,255,255,0.7);
-  }
-  .embed-open-button:active {
-    background: rgba(255,0,127,0.12);
-    box-shadow: 0 6px 20px rgba(255,0,127,0.28), 0 0 30px rgba(255,0,127,0.12) inset;
-    animation: pinkGlitch 280ms linear;
-    transform: translateY(0);
-  }
-
+/* Button that matches menu/link styling for external open links */
+.embed-open-button {
+  display: inline-block;
+  padding: 0.6rem 0.9rem;
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid rgba(255,255,255,0.95);
+  border-radius: 12px;
+  text-decoration: none;
+  font-family: inherit;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+.embed-open-button:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,0.7);
+}
+.embed-open-button:active {
+  background: rgba(255,0,127,0.12);
+  box-shadow: 0 6px 20px rgba(255,0,127,0.28), 0 0 30px rgba(255,0,127,0.12) inset;
+  animation: pinkGlitch 280ms linear;
+  transform: translateY(0);
+}
 

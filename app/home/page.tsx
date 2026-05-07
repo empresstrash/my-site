@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
+  const paragraphUrl = 'https://paragraph.com/@empresstrash';
 
   useEffect(() => {
     function update() {
@@ -14,11 +15,46 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', update);
   }, []);
 
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverscroll = document.body.style.overscrollBehavior;
+    const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overscrollBehavior = 'none';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overscrollBehavior = previousBodyOverscroll;
+      document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+    };
+  }, []);
+
   if (isMobile) {
     return (
-      <div style={{ padding: 20 }}>
-        <p style={{ color: 'var(--color-text)', marginBottom: 12 }}>my blog on mobile works better if open in new tab</p>
-        <a className="embed-open-button" href="https://paragraph.com/@empresstrash" target="_blank" rel="noopener noreferrer">Open paragraph.com</a>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', overflow: 'hidden' }}>
+        <a
+          className="embed-open-button"
+          href={paragraphUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'block', textAlign: 'center', padding: '0.35rem 0.75rem', fontSize: '0.92rem', marginBottom: '0.5rem', flexShrink: 0 }}
+        >
+          View blog in new tab
+        </a>
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+          <iframe
+            src={paragraphUrl}
+            title="paragraph.com/@empresstrash mobile"
+            style={{ position: 'absolute', top: 0, left: 0, width: 'calc(100% + 20px)', height: '100%', border: 'none' }}
+            loading="lazy"
+            allowFullScreen
+          />
+        </div>
       </div>
     );
   }
@@ -26,13 +62,10 @@ export default function HomePage() {
   return (
     <div className="page-container">
       <iframe
-        src="https://paragraph.com/@empresstrash"
-        frameBorder="0"
+        src={paragraphUrl}
         title="paragraph.com/@empresstrash"
         style={{
-          position: 'relative',
           width: '100%',
-          minHeight: '100%',
           height: '100%',
           border: 'none',
           display: 'block'
@@ -42,19 +75,9 @@ export default function HomePage() {
       />
       <style jsx>{`
         .page-container {
-          position: relative;
-          top: 0;
-          left: 0;
           width: 100%;
-          height: calc(100vh - 64px);
+          height: 100%;
           overflow: hidden;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .page-container::-webkit-scrollbar {
-          width: 0;
-          height: 0;
         }
       `}</style>
     </div>

@@ -12,24 +12,11 @@ interface MenuItem {
   path?: string;
   external?: string;
   children?: MenuItem[];
+  className?: string;
 }
 
 const menuItems: MenuItem[] = [
   { label: 'home', path: '/' },
-  {
-    label: 'Commissions & Subs',
-    children: [
-      {
-        label: '18+',
-        children: [
-          { label: 'fansly', external: 'https://fansly.com/empresstrash?=rempt' },
-          { label: 'patreon', external: 'https://www.patreon.com/EmpressTrash' },
-        ],
-      },
-      { label: 'portrait commission', external: 'https://www.fiverr.com/empresstrash/create-you-an-ai-portrait-you-will-love' },
-      { label: 'zora creator coin', external: 'https://zora.co/@empresstrash' },
-    ],
-  },
   // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
     label: 'crypto art',
@@ -44,18 +31,30 @@ const menuItems: MenuItem[] = [
         ],
       },
       {
+        label: 'bitcoin art',
+        children: [
+          { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
+        ],
+      },
+      {
         label: 'ethereum art',
         children: [
           { label: 'superrare', external: 'https://superrare.com/empresstrash' },
-          { label: 'networked', external: 'https://networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
-          { label: 'foundation', external: 'https://foundation.app/@empresstrash' },
+          { label: 'networked', external: 'https://mint.networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
           { label: 'highlight', external: 'https://highlight.xyz/user/@empresstrash.eth' },
           { label: 'titles', external: 'https://titles.xyz/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
-          { label: 'zora', external: 'https://zora.co/@empresstrash' },
           { label: 'manifold', external: 'https://manifold.xyz/@empresstrash' },
-          { label: 'opensea', external: 'https://opensea.io/EmpressTrash' },
+          { label: 'opensea', external: 'https://opensea.io/EmpressTrash/galleries' },
           { label: 'blueprint', external: 'https://bp.fun/creator/empress-trash?tab=media' },
           { label: 'mint gold dust', external: 'https://www.mintgolddust.com/profile/0x8469B7b08D30C63fEA3a248a198dE9D634B63d70/' },
+        ],
+      },
+      {
+        label: 'solana art',
+        children: [
+          { label: 'exchange', external: 'https://exchange.art/empress-trash' },
+          { label: 'mallow', external: 'https://mallow.art/u/empresstrash?tab=artworks' },
+          { label: 'drip haus', external: 'https://drip.haus/empresstrash' },
         ],
       },
       {
@@ -66,29 +65,34 @@ const menuItems: MenuItem[] = [
           { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
         ],
       },
-      {
-        label: 'bitcoin art',
-        children: [
-          { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
-        ],
-      },
     ],
   },
   {
-    label: 'metaverses',
+    label: 'virtual realms',
     children: [
-      {
-        label: 'livestream',
-        children: [
-          { label: 'x', external: 'https://x.com/EmpressTrash' },
-          { label: 'twitch', external: 'https://www.twitch.tv/empresstrash' },
-          { label: 'streamlabs', external: 'https://dreamyweirdodanceclub.live/' },
-        ],
-      },
       {
         label: 'builds',
         children: [
-          { label: 'substrata', external: 'https://substrata.info/parcel/1447' },
+          {
+            label: 'decentraland',
+            className: 'submenu-header',
+            children: [
+              { label: 'atelier', external: 'https://decentraland.org/jump/?position=126%2C104' },
+              { label: 'house', external: 'https://decentraland.org/jump/?realm=empresstrash.dcl.eth' },
+              { label: 'archives', external: 'https://decentraland.org/jump/?position=-116%2C108' },
+            ],
+          },
+          {
+            label: 'substrata',
+            className: 'submenu-header',
+            children: [
+              { label: 'cusp of rebirth v1 (2026)', external: 'https://substrata.info/world/empresstrash/Cusp+of+Rebirth+V1' },
+              { label: 'full moon airdrops', external: 'https://substrata.info/world/empresstrash/fullmoon' },
+              { label: 'main gallery', external: 'https://substrata.info/world/empresstrash/empresstrash' },
+              { label: 'ponder collective group drop', external: 'https://substrata.info/world/empresstrash/Ponder+Collective+Group+Drop' },
+              { label: 'visible violets v2 group drop', external: 'https://substrata.info/world/empresstrash/Visible+Violets+V2' },
+            ],
+          },
           { label: 'neocities', external: 'https://empresstrash.neocities.org/' },
           { label: 'nifty island', external: 'https://www.niftyisland.com/profile/empresstrash' },
           { label: 'oncyber', external: 'https://oncyber.io/@empresstrash' },
@@ -123,13 +127,39 @@ const menuItems: MenuItem[] = [
   {
     label: 'connect',
     children: [
-      { label: 'deca', external: 'https://deca.art/EmpressTrash' },
-      { label: 'deviant art', external: 'https://www.deviantart.com/trash-empress' },
-      { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash' },
-      { label: 'giphy', external: 'https://giphy.com/empresstrash' },
-      { label: 'hey', external: 'https://hey.xyz/u/empresstrash' },
-      { label: 'paragraph', external: 'https://paragraph.com/@empresstrash' },
-      { label: 'zeroone', external: 'https://zeroone.art/profile/empresstrash' },
+      {
+        label: '18+',
+        children: [
+          { label: 'fansly', external: 'https://fansly.com/empresstrash?=rempt' },
+          { label: 'patreon', external: 'https://www.patreon.com/EmpressTrash' },
+        ],
+      },
+      {
+        label: 'livestream',
+        children: [
+          { label: 'x', external: 'https://x.com/EmpressTrash' },
+          { label: 'twitch', external: 'https://www.twitch.tv/empresstrash' },
+          { label: 'youtube', external: 'https://www.youtube.com/@empresstrash' },
+        ],
+      },
+      {
+        label: 'web2',
+        children: [
+          { label: 'deviant art', external: 'https://www.deviantart.com/trash-empress' },
+          { label: 'giphy', external: 'https://giphy.com/empresstrash' },
+        ],
+      },
+      {
+        label: 'web3',
+        children: [
+          { label: 'deca', external: 'https://deca.art/EmpressTrash' },
+          { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash' },
+          { label: 'hey', external: 'https://hey.xyz/u/empresstrash' },
+          { label: 'paragraph', external: 'https://paragraph.com/@empresstrash' },
+          { label: 'zeroone', external: 'https://zeroone.art/profile/empresstrash' },
+          { label: 'zora', external: 'https://zora.co/@empresstrash' },
+        ],
+      },
     ],
   },
 ];
@@ -154,7 +184,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
       {item.children ? (
         <>
           <button
-            className="menu-button"
+            className={`menu-button ${item.className || ''}`}
             onClick={handleClick}
             style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
           >
@@ -173,7 +203,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
         <a
           href={item.external}
           onClick={handleClick}
-          className={`menu-link ${isActive ? 'active' : ''}`}
+          className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
         >
           {item.label}
@@ -181,7 +211,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
       ) : (
         <Link
           href={item.path || '/'}
-          className={`menu-link ${isActive ? 'active' : ''}`}
+          className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
         >
           {item.label}
@@ -221,7 +251,22 @@ export default function ClientMenu(): React.ReactNode {
   }, [pathname]);
 
   const toggleExpand = (key: string) => {
-    setExpandedMap(prev => ({ ...prev, [key]: !prev[key] }));
+    setExpandedMap(prev => {
+      const isCurrentlyOpen = !!prev[key];
+      if (isCurrentlyOpen) {
+        // Closing: remove this key and all descendant keys
+        const next: Record<string, boolean> = {};
+        for (const k of Object.keys(prev)) {
+          if (k !== key && !k.startsWith(key + '/')) {
+            next[k] = prev[k];
+          }
+        }
+        return next;
+      } else {
+        // Opening: just add this key
+        return { ...prev, [key]: true };
+      }
+    });
   };
 
   return (
