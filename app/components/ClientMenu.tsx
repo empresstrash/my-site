@@ -109,14 +109,6 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
-    label: 'music',
-    children: [
-      { label: 'audius', external: 'https://audius.co/empresstrash' },
-      { label: 'apple', external: 'https://music.apple.com/us/artist/empress-trash/1849948236' },
-      { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ' },
-    ],
-  },
-  {
     label: 'about empress trash',
     children: [
       { label: 'bio', path: '/bio' },
@@ -137,9 +129,17 @@ const menuItems: MenuItem[] = [
       {
         label: 'livestream',
         children: [
-          { label: 'x', external: 'https://x.com/EmpressTrash' },
           { label: 'twitch', external: 'https://www.twitch.tv/empresstrash' },
+          { label: 'x', external: 'https://x.com/EmpressTrash' },
           { label: 'youtube', external: 'https://www.youtube.com/@empresstrash' },
+        ],
+      },
+      {
+        label: 'music',
+        children: [
+          { label: 'apple', external: 'https://music.apple.com/us/artist/empress-trash/1849948236' },
+          { label: 'audius', external: 'https://audius.co/empresstrash' },
+          { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ' },
         ],
       },
       {
