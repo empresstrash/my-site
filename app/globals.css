@@ -7,6 +7,44 @@
   --accent-pink: #ff007f;
 }
 
+@keyframes gbmGlowPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 105, 180, 0.3), 0 0 14px rgba(255, 0, 128, 0.1); }
+  50%       { box-shadow: 0 0 14px rgba(255, 105, 180, 0.65), 0 0 28px rgba(255, 0, 128, 0.25); }
+}
+
+/* Marquee scroll for gbm-auction button */
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.menu-link.gbm-auction {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 105, 180, 0.6) !important;
+  animation: gbmGlowPulse 3s ease-in-out infinite;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.menu-link.gbm-auction:hover {
+  box-shadow: 0 0 14px rgba(255, 105, 180, 0.55), 0 0 30px rgba(255, 0, 128, 0.2);
+  animation: none;
+}
+
+.menu-link.gbm-auction .marquee-wrap {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.menu-link.gbm-auction .marquee-text {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marqueeScroll 22s linear infinite;
+}
+
 /* Rainbow sheen + pink glitch used by media and side-menu */
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }

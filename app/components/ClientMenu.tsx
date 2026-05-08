@@ -13,6 +13,7 @@ interface MenuItem {
   external?: string;
   children?: MenuItem[];
   className?: string;
+  marquee?: boolean;
 }
 
 const menuItems: MenuItem[] = [
@@ -21,6 +22,7 @@ const menuItems: MenuItem[] = [
   {
     label: 'crypto art',
     children: [
+      { label: '*new* gbm auction *new*: In a GBM Auction, bidders earn rewards when they get outbid on auctions run on my storefront.', external: 'https://empresstrash.gbm.auction/', marquee: true, className: 'gbm-auction' },
       {
         label: 'damsels',
         children: [
@@ -163,6 +165,13 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+function renderMarqueeLabel(label: string): React.ReactNode {
+  const parts = label.split(/(\*new\*)/gi);
+  return parts.map((part, i) =>
+    /^\*new\*$/i.test(part) ? <strong key={i}>{part}</strong> : part
+  );
+}
+
 function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpand }: { item: MenuItem; level?: number; pathname: string; keyPath: string; expandedMap: Record<string, boolean>; toggleExpand: (key: string) => void; }): React.ReactNode {
   const isExpanded = !!expandedMap[keyPath];
   const isActive = item.path && pathname === item.path;
@@ -205,7 +214,14 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
         >
-          {item.label}
+          {item.marquee ? (
+            <span className="marquee-wrap">
+              <span className="marquee-text">
+                <span>{renderMarqueeLabel(item.label)}</span>
+                <span aria-hidden="true">&nbsp;&nbsp;&nbsp;&nbsp;{renderMarqueeLabel(item.label)}</span>
+              </span>
+            </span>
+          ) : item.label}
         </a>
       ) : (
         <Link
