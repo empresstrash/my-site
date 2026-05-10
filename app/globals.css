@@ -45,6 +45,30 @@
   animation: marqueeScroll 22s linear infinite;
 }
 
+.menu-link.emporium-feature {
+  border: 1px solid rgba(255, 105, 180, 0.6) !important;
+  animation: gbmGlowPulse 3s ease-in-out infinite;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.menu-link.emporium-feature:hover {
+  box-shadow: 0 0 14px rgba(255, 105, 180, 0.55), 0 0 30px rgba(255, 0, 128, 0.2);
+  animation: none;
+}
+
+.menu-link.emporium-feature .marquee-wrap {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.menu-link.emporium-feature .marquee-text {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marqueeScroll 30s linear infinite;
+}
+
 /* Rainbow sheen + pink glitch used by media and side-menu */
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }

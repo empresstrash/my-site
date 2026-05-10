@@ -18,6 +18,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { label: 'home', path: '/' },
+  { label: 'emporium: shop the new merch // xoxo', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: true },
   // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
     label: 'crypto art',
@@ -172,6 +173,28 @@ function renderMarqueeLabel(label: string): React.ReactNode {
   );
 }
 
+function renderMenuLabel(item: MenuItem): React.ReactNode {
+  if (item.className === 'emporium-feature') {
+    const match = item.label.match(/xoxo/i);
+    if (!match || match.index === undefined) {
+      return item.label;
+    }
+
+    const start = match.index;
+    const end = start + match[0].length;
+
+    return (
+      <>
+        {item.label.slice(0, start)}
+        <em>{item.label.slice(start, end)}</em>
+        {item.label.slice(end)}
+      </>
+    );
+  }
+
+  return renderMarqueeLabel(item.label);
+}
+
 function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpand }: { item: MenuItem; level?: number; pathname: string; keyPath: string; expandedMap: Record<string, boolean>; toggleExpand: (key: string) => void; }): React.ReactNode {
   const isExpanded = !!expandedMap[keyPath];
   const isActive = item.path && pathname === item.path;
@@ -217,8 +240,8 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           {item.marquee ? (
             <span className="marquee-wrap">
               <span className="marquee-text">
-                <span>{renderMarqueeLabel(item.label)}</span>
-                <span aria-hidden="true">&nbsp;&nbsp;&nbsp;&nbsp;{renderMarqueeLabel(item.label)}</span>
+                <span>{renderMenuLabel(item)}</span>
+                <span aria-hidden="true">&nbsp;&nbsp;&nbsp;&nbsp;{renderMenuLabel(item)}</span>
               </span>
             </span>
           ) : item.label}
