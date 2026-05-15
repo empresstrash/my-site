@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import React, { useState, useEffect } from 'react';
 import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
-import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord } from 'react-icons/fa';
+import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord, FaDeviantart, FaSpotify, FaTwitch } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
@@ -14,34 +14,42 @@ interface MenuItem {
   children?: MenuItem[];
   className?: string;
   marquee?: boolean;
+  icon?: ReactNode;
+  ariaLabel?: string;
 }
 
 const menuItems: MenuItem[] = [
   { label: 'home', path: '/' },
-  { label: 'emporium: shop the new merch // xoxo', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: true },
+  { label: 'emporium: merch shop', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: false },
   // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
     label: 'crypto art',
     children: [
-      { label: '*new* gbm auction *new*: In a GBM Auction, bidders earn rewards when they get outbid on auctions run on my storefront.', external: 'https://empresstrash.gbm.auction/', marquee: true, className: 'gbm-auction' },
       {
         label: 'damsels',
+        className: 'damsels-18-label',
         children: [
           { label: 'eth collection', external: 'https://opensea.io/collection/damsels' },
           { label: 'tez collection', external: 'https://objkt.com/@empresstrash' },
           { label: 'legacy page', external: 'https://empresstrash.neocities.org/damsels' },
-          { label: 'oncyber gallery', external: 'https://oncyber.io/line412' },
         ],
       },
       {
         label: 'bitcoin art',
         children: [
           { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
+          {
+            label: 'lunalauncher',
+            children: [
+              { label: 'lotus blooms', external: 'https://lunalauncher.io/mint/empress-trash-lotus-blooms' },
+            ],
+          },
         ],
       },
       {
         label: 'ethereum art',
         children: [
+          { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
           { label: 'superrare', external: 'https://superrare.com/empresstrash' },
           { label: 'networked', external: 'https://mint.networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
           { label: 'highlight', external: 'https://highlight.xyz/user/@empresstrash.eth' },
@@ -124,44 +132,30 @@ const menuItems: MenuItem[] = [
     children: [
       {
         label: '18+',
+        className: 'connect-18-header',
         children: [
           { label: 'fansly', external: 'https://fansly.com/empresstrash?=rempt' },
           { label: 'patreon', external: 'https://www.patreon.com/EmpressTrash' },
         ],
       },
-      {
-        label: 'livestream',
-        children: [
-          { label: 'twitch', external: 'https://www.twitch.tv/empresstrash' },
-          { label: 'x', external: 'https://x.com/EmpressTrash' },
-          { label: 'youtube', external: 'https://www.youtube.com/@empresstrash' },
-        ],
-      },
-      {
-        label: 'music',
-        children: [
-          { label: 'apple', external: 'https://music.apple.com/us/artist/empress-trash/1849948236' },
-          { label: 'audius', external: 'https://audius.co/empresstrash' },
-          { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ' },
-        ],
-      },
-      {
-        label: 'web2',
-        children: [
-          { label: 'deviant art', external: 'https://www.deviantart.com/trash-empress' },
-          { label: 'giphy', external: 'https://giphy.com/empresstrash' },
-        ],
-      },
-      {
-        label: 'web3',
-        children: [
-          { label: 'deca', external: 'https://deca.art/EmpressTrash' },
-          { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash' },
-          { label: 'paragraph', external: 'https://paragraph.com/@empresstrash' },
-          { label: 'zeroone', external: 'https://zeroone.art/profile/empresstrash' },
-          { label: 'zora', external: 'https://zora.co/@empresstrash' },
-        ],
-      },
+      { label: 'email', external: 'mailto:empresstrash@gmail.com', icon: <FaEnvelope />, ariaLabel: 'Email', className: 'icon-only-link' },
+      { label: 'x', external: 'https://x.com/EmpressTrash', icon: <FaXTwitter />, ariaLabel: 'X', className: 'icon-only-link' },
+      { label: 'instagram', external: 'https://www.instagram.com/empress_trash/', icon: <FaInstagram />, ariaLabel: 'Instagram', className: 'icon-only-link' },
+      { label: 'tiktok', external: 'https://www.tiktok.com/@empresstrash', icon: <FaTiktok />, ariaLabel: 'TikTok', className: 'icon-only-link' },
+      { label: 'tumblr', external: 'https://www.tumblr.com/empresstrash-art', icon: <FaTumblr />, ariaLabel: 'Tumblr', className: 'icon-only-link' },
+      { label: 'twitch', external: 'https://www.twitch.tv/empresstrash', icon: <FaTwitch />, ariaLabel: 'Twitch', className: 'icon-only-link' },
+      { label: 'youtube', external: 'https://www.youtube.com/@empresstrash', icon: <FaYoutube />, ariaLabel: 'YouTube', className: 'icon-only-link' },
+      { label: 'discord', external: 'https://discord.com/invite/NxssyY4dZU', icon: <FaDiscord />, ariaLabel: 'Discord', className: 'icon-only-link' },
+      { label: 'deviantart', external: 'https://www.deviantart.com/trash-empress', icon: <FaDeviantart />, ariaLabel: 'DeviantArt', className: 'icon-only-link' },
+      { label: 'giphy', external: 'https://giphy.com/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=giphy.com&sz=64" alt="" />, ariaLabel: 'Giphy', className: 'icon-only-link' },
+      { label: 'apple music', external: 'https://music.apple.com/us/artist/empress-trash/1849948236', icon: <img src="https://www.google.com/s2/favicons?domain=music.apple.com&sz=64" alt="" />, ariaLabel: 'Apple Music', className: 'icon-only-link' },
+      { label: 'audius', external: 'https://audius.co/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=audius.co&sz=64" alt="" />, ariaLabel: 'Audius', className: 'icon-only-link' },
+      { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ', icon: <FaSpotify />, ariaLabel: 'Spotify', className: 'icon-only-link' },
+      { label: 'deca', external: 'https://deca.art/EmpressTrash', icon: <img src="https://www.google.com/s2/favicons?domain=deca.art&sz=64" alt="" />, ariaLabel: 'Deca', className: 'icon-only-link deca-icon' },
+      { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=farcaster.xyz&sz=64" alt="" />, ariaLabel: 'Farcaster', className: 'icon-only-link' },
+      { label: 'paragraph', external: 'https://paragraph.com/@empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=paragraph.com&sz=64" alt="" />, ariaLabel: 'Paragraph', className: 'icon-only-link' },
+      { label: 'zeroone', external: 'https://zeroone.art/profile/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=zeroone.art&sz=64" alt="" />, ariaLabel: 'Zeroone', className: 'icon-only-link' },
+      { label: 'zora', external: 'https://zora.co/@empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=zora.co&sz=64" alt="" />, ariaLabel: 'Zora', className: 'icon-only-link' },
     ],
   },
 ];
@@ -174,22 +168,29 @@ function renderMarqueeLabel(label: string): React.ReactNode {
 }
 
 function renderMenuLabel(item: MenuItem): React.ReactNode {
-  if (item.className === 'emporium-feature') {
-    const match = item.label.match(/xoxo/i);
-    if (!match || match.index === undefined) {
-      return item.label;
-    }
+  if (item.icon) {
+    return (
+      <span className="menu-icon-label" aria-hidden="true">
+        <span className="menu-icon-core">{item.icon}</span>
+        <span className="icon-particle-layer">
+          {Array.from({ length: 12 }).map((_, idx) => (
+            <span key={idx} className={`icon-particle p-${idx + 1}`} />
+          ))}
+        </span>
+      </span>
+    );
+  }
 
-    const start = match.index;
-    const end = start + match[0].length;
-
+  if (item.className?.includes('damsels-18-label')) {
     return (
       <>
-        {item.label.slice(0, start)}
-        <em>{item.label.slice(start, end)}</em>
-        {item.label.slice(end)}
+        damsels <em className="inline-18-tag">18+</em>
       </>
     );
+  }
+
+  if (item.className === 'emporium-feature') {
+    return item.label;
   }
 
   return renderMarqueeLabel(item.label);
@@ -198,6 +199,13 @@ function renderMenuLabel(item: MenuItem): React.ReactNode {
 function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpand }: { item: MenuItem; level?: number; pathname: string; keyPath: string; expandedMap: Record<string, boolean>; toggleExpand: (key: string) => void; }): React.ReactNode {
   const isExpanded = !!expandedMap[keyPath];
   const isActive = item.path && pathname === item.path;
+  const itemClasses = [
+    'menu-item',
+    isExpanded ? 'expanded' : '',
+    isActive ? 'active' : '',
+    `level-${level}`,
+    item.className?.includes('icon-only-link') ? 'icon-grid-item' : '',
+  ].filter(Boolean).join(' ');
 
   const handleClick = (e: React.MouseEvent) => {
     if (item.external) {
@@ -211,15 +219,16 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
   };
 
   return (
-    <li className={`menu-item ${isExpanded ? 'expanded' : ''} ${isActive ? 'active' : ''} level-${level}`}>
+    <li className={itemClasses}>
       {item.children ? (
         <>
           <button
             className={`menu-button ${item.className || ''}`}
             onClick={handleClick}
             style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+            aria-label={item.ariaLabel || item.label}
           >
-            {item.label}
+            {renderMenuLabel(item)}
             <span className={`toggle ${isExpanded ? 'open' : ''}`} />
           </button>
           {isExpanded && (
@@ -236,23 +245,19 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           onClick={handleClick}
           className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+          aria-label={item.ariaLabel || item.label}
+          title={item.ariaLabel || item.label}
         >
-          {item.marquee ? (
-            <span className="marquee-wrap">
-              <span className="marquee-text">
-                <span>{renderMenuLabel(item)}</span>
-                <span aria-hidden="true">&nbsp;&nbsp;&nbsp;&nbsp;{renderMenuLabel(item)}</span>
-              </span>
-            </span>
-          ) : item.label}
+          {renderMenuLabel(item)}
         </a>
       ) : (
         <Link
           href={item.path || '/'}
           className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+          aria-label={item.ariaLabel || item.label}
         >
-          {item.label}
+          {renderMenuLabel(item)}
         </Link>
       )}
     </li>
@@ -313,20 +318,20 @@ export default function ClientMenu(): React.ReactNode {
         <div className="menu-backdrop" onClick={() => setMobileOpen(false)} />
       )}
       <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={isMobile && !mobileOpen}>
+        <div className="side-menu-title" aria-label="empress trash">
+          <div className="title-particle-layer" aria-hidden="true">
+            {Array.from({length: 16}, (_, i) => (
+              <span key={i} className={`title-particle tp-${i + 1}`} />
+            ))}
+          </div>
+          <span>empress trash</span>
+          <small className="side-menu-subtitle">multiversatile artist</small>
+        </div>
         <ul className="side-list">
           {menuItems.map((item, idx) => (
             <MenuItem key={idx} item={item} pathname={pathname} keyPath={item.label} expandedMap={expandedMap} toggleExpand={toggleExpand} />
           ))}
         </ul>
-        <div className="side-socials">
-          <a href="https://x.com/EmpressTrash" target="_blank" rel="noreferrer" title="X"><FaXTwitter /></a>
-          <a href="https://www.instagram.com/empress_trash/" target="_blank" rel="noreferrer" title="Instagram"><FaInstagram /></a>
-          <a href="https://www.tiktok.com/@empresstrash" target="_blank" rel="noreferrer" title="TikTok"><FaTiktok /></a>
-          <a href="https://www.tumblr.com/empresstrash-art" target="_blank" rel="noreferrer" title="Tumblr"><FaTumblr /></a>
-          <a href="https://www.youtube.com/@empresstrash" target="_blank" rel="noreferrer" title="YouTube"><FaYoutube /></a>
-          <a href="https://discord.com/invite/NxssyY4dZU" target="_blank" rel="noreferrer" title="Discord"><FaDiscord /></a>
-          <a href="mailto:empresstrash@gmail.com" title="Email"><FaEnvelope /></a>
-        </div>
       </aside>
 
       <header className="header header-with-side">
