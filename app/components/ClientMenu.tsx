@@ -150,6 +150,7 @@ const menuItems: MenuItem[] = [
       { label: 'giphy', external: 'https://giphy.com/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=giphy.com&sz=64" alt="" />, ariaLabel: 'Giphy', className: 'icon-only-link' },
       { label: 'apple music', external: 'https://music.apple.com/us/artist/empress-trash/1849948236', icon: <img src="https://www.google.com/s2/favicons?domain=music.apple.com&sz=64" alt="" />, ariaLabel: 'Apple Music', className: 'icon-only-link' },
       { label: 'audius', external: 'https://audius.co/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=audius.co&sz=64" alt="" />, ariaLabel: 'Audius', className: 'icon-only-link' },
+      { label: 'suno', external: 'https://suno.com/@empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=suno.com&sz=64" alt="" />, ariaLabel: 'Suno', className: 'icon-only-link' },
       { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ', icon: <FaSpotify />, ariaLabel: 'Spotify', className: 'icon-only-link' },
       { label: 'deca', external: 'https://deca.art/EmpressTrash', icon: <img src="https://www.google.com/s2/favicons?domain=deca.art&sz=64" alt="" />, ariaLabel: 'Deca', className: 'icon-only-link deca-icon' },
       { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=farcaster.xyz&sz=64" alt="" />, ariaLabel: 'Farcaster', className: 'icon-only-link' },
