@@ -115,6 +115,7 @@ const menuItems: MenuItem[] = [
         label: 'games',
         children: [
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
+          { label: 'glitchpop', external: 'https://mint.networked.art/0x8469b7b08d30c63fea3a248a198de9d634b63d70/0xad3d1283eda06d5c8e130e6f7c3e17c57dadbb4d/37' },
         ],
       },
     ],
