@@ -19,7 +19,6 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { label: 'home', path: '/' },
   { label: 'emporium: merch shop', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: false },
   // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
@@ -319,7 +318,7 @@ export default function ClientMenu(): React.ReactNode {
         <div className="menu-backdrop" onClick={() => setMobileOpen(false)} />
       )}
       <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={isMobile && !mobileOpen}>
-        <div className="side-menu-title" aria-label="empress trash">
+        <Link href="/" className="side-menu-title" aria-label="go home">
           <div className="title-particle-layer" aria-hidden="true">
             {Array.from({length: 16}, (_, i) => (
               <span key={i} className={`title-particle tp-${i + 1}`} />
@@ -327,7 +326,7 @@ export default function ClientMenu(): React.ReactNode {
           </div>
           <span>empress trash</span>
           <small className="side-menu-subtitle">multiversatile artist</small>
-        </div>
+        </Link>
         <ul className="side-list">
           {menuItems.map((item, idx) => (
             <MenuItem key={idx} item={item} pathname={pathname} keyPath={item.label} expandedMap={expandedMap} toggleExpand={toggleExpand} />
