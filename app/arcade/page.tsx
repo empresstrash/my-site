@@ -55,8 +55,7 @@ export default function ArcadePage() {
         if (!res.ok) throw new Error(data.error || 'Failed to load arcade');
         if (!cancelled) {
           setGames(Array.isArray(data.games) ? data.games : []);
-          const glowIdx = (data.games as ArcadeGame[]).findIndex((g) => g.id === '37');
-          setIndex(glowIdx >= 0 ? glowIdx : 0);
+          setIndex(0);
         }
       } catch (e) {
         if (!cancelled) {
