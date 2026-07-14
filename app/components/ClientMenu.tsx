@@ -372,7 +372,7 @@ export default function ClientMenu(): React.ReactNode {
               ))}
             </div>
             <span>empress trash</span>
-            <small className="side-menu-subtitle">hybrid artist x builder x curator</small>
+            <small className="side-menu-subtitle">artist/builder/curator</small>
           </Link>
           <div className="menu-title-spacer" aria-hidden="true" />
           <ul className="side-list">
@@ -394,6 +394,12 @@ export default function ClientMenu(): React.ReactNode {
       </aside>
 
       <header className="header header-with-side">
+        <div className="header-aurora" aria-hidden="true">
+          <span className="aurora-band aurora-band-1" />
+          <span className="aurora-band aurora-band-2" />
+          <span className="aurora-band aurora-band-3" />
+          <span className="aurora-band aurora-band-4" />
+        </div>
         <GlassSparkles count={36} />
         {isMobile && (
           <button
