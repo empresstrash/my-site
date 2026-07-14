@@ -3,6 +3,8 @@
 :root {
   --font-family: 'Courier Prime', 'Courier New', Courier, monospace;
   --font-display: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
+  /* Menu sans from next/font (--font-barlow on <html>); no system-ui fallback that hides the swap */
+  --font-menu: var(--font-barlow), 'Barlow', sans-serif;
   --color-bg: #000000;
   --color-text: #ffffff;
   --accent-pink: #ff3d6e;
@@ -255,10 +257,10 @@
       rgba(18, 10, 26, 0.94) 100%
     ) !important;
   font-weight: 400;
-  text-align: center !important;
-  font-size: 1.06rem !important;
+  text-align: right !important;
+  font-size: 0.92rem !important;
   letter-spacing: 0.04em;
-  text-transform: uppercase !important;
+  text-transform: lowercase !important;
   padding-top: 0.95rem !important;
   padding-bottom: 0.95rem !important;
   text-shadow: 0 1px 0 rgba(0,0,0,0.98), 0 2px 6px rgba(0,0,0,0.98), 0 0 14px rgba(0,0,0,0.76);
@@ -284,10 +286,10 @@
       rgba(26, 8, 14, 0.94) 100%
     ) !important;
   font-weight: 400;
-  text-align: center !important;
-  font-size: 1.06rem !important;
+  text-align: right !important;
+  font-size: 0.92rem !important;
   letter-spacing: 0.04em;
-  text-transform: uppercase !important;
+  text-transform: lowercase !important;
   padding-top: 0.95rem !important;
   padding-bottom: 0.95rem !important;
   text-shadow: 0 1px 0 rgba(0,0,0,0.98), 0 2px 6px rgba(0,0,0,0.98), 0 0 14px rgba(0,0,0,0.76);
@@ -565,7 +567,7 @@ body {
   backdrop-filter: none;
   box-shadow: none;
   overflow: hidden;
-  text-transform: uppercase;
+  text-transform: lowercase;
   line-height: 1;
   cursor: pointer;
   user-select: none;
@@ -622,7 +624,7 @@ body {
 .side-menu-subtitle {
   position: relative;
   z-index: 3;
-  font-family: var(--font-family);
+  font-family: var(--font-menu);
   font-weight: 400;
   font-size: 0.78rem;
   color: rgba(230, 222, 255, 0.95);
@@ -658,6 +660,10 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   color: var(--color-text);
+  font-family: var(--font-menu) !important;
+  letter-spacing: 0.015em;
+  text-transform: lowercase;
+  font-weight: 400;
   transform: none;
   transition: none;
   z-index: 2000;
@@ -703,8 +709,8 @@ body {
     inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.55), inset 1px 0 0 rgba(255,255,255,0.04), inset -1px 0 0 rgba(0,0,0,0.3);
   overflow: hidden;
   text-align: left;
-  font-family: inherit;
-  text-transform: uppercase;
+  font-family: var(--font-menu) !important;
+  text-transform: lowercase;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.98), 0 2px 6px rgba(0, 0, 0, 0.98), 0 0 14px rgba(0, 0, 0, 0.76);
   transition: background 220ms ease, color 220ms ease, box-shadow 220ms ease;
   backdrop-filter: blur(10px) saturate(1.25) brightness(0.95);
@@ -723,10 +729,19 @@ body {
   padding: 0.82rem 1rem;
   padding-left: 1.15rem;
   padding-right: 0.85rem;
+  /* Top-level: typewriter; nested stays DM/Barlow sans */
+  font-family: var(--font-family) !important;
   font-weight: 400;
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   letter-spacing: 0.03em;
   backdrop-filter: none;
+}
+
+/* Feature CTAs sit at top level — match typewriter + size */
+.side-list > .menu-item > .menu-link.patreon-feature,
+.side-list > .menu-item > .menu-link.emporium-feature {
+  font-family: var(--font-family) !important;
+  font-size: 0.92rem !important;
 }
 
 /*
@@ -1336,22 +1351,34 @@ body {
   vertical-align: top;
 }
 
-/* Expanded menu items show pink text, collapsed show white */
-.menu-item.expanded > .menu-button {
-  color: var(--accent-pink);
-}
-
-.menu-item.expanded > .menu-link {
-  color: var(--accent-pink);
-}
-
-/* Ensure submenu-header items also go pink when expanded */
-.menu-item.expanded > .menu-button.submenu-header {
-  color: var(--accent-pink);
+/*
+ * Expanded parents stay salmon/pink so open sections are obvious.
+ * Nested rules (e.g. .menu-submenu .menu-submenu .menu-item > .menu-button)
+ * set white with higher specificity — match/exceed that here.
+ */
+.menu-item.expanded > .menu-button,
+.menu-item.expanded > .menu-link,
+.menu-item.expanded > .menu-button.submenu-header,
+.side-menu .menu-item.expanded > .menu-button,
+.side-menu .menu-item.expanded > .menu-link,
+.menu-submenu .menu-item.expanded > .menu-button,
+.menu-submenu .menu-item.expanded > .menu-link,
+.menu-submenu .menu-submenu .menu-item.expanded > .menu-button,
+.menu-submenu .menu-submenu .menu-item.expanded > .menu-link,
+.menu-submenu .menu-submenu .menu-submenu .menu-item.expanded > .menu-button,
+.level-1.menu-item.expanded > .menu-button,
+.level-2.menu-item.expanded > .menu-button,
+.level-3.menu-item.expanded > .menu-button {
+  color: var(--accent-pink) !important;
 }
 
 .menu-item { list-style:none; }
-.menu-button { background:transparent; border:none; color:var(--color-text); cursor:pointer; text-align:left; width:100%; padding:0.6rem 0; font-family:inherit; font-size:inherit; }
+.side-menu .menu-button,
+.side-menu .menu-link,
+.side-menu .side-menu-subtitle {
+  font-family: var(--font-menu) !important;
+}
+.menu-button { background:transparent; border:none; color:var(--color-text); cursor:pointer; text-align:left; width:100%; padding:0.6rem 0; font-size:inherit; }
 .menu-item > .menu-button:hover,
 .menu-item > .menu-link:hover,
 .menu-submenu .menu-item > .menu-button:hover,
@@ -1702,7 +1729,7 @@ body.arcade-page-active .content > * {
   /* Feature CTAs + top-level rows stay tappable */
   .menu-link.patreon-feature,
   .menu-link.emporium-feature {
-    font-size: 1rem !important;
+    font-size: 0.88rem !important;
     padding-top: 0.9rem !important;
     padding-bottom: 0.9rem !important;
   }
@@ -1710,7 +1737,7 @@ body.arcade-page-active .content > * {
   .side-list > .menu-item > .menu-button,
   .side-list > .menu-item > .menu-link {
     padding: 0.78rem 0.85rem;
-    font-size: 0.95rem;
+    font-size: 0.84rem;
   }
 
   /* header full width — shorter bar, keep logo buffer */
@@ -1794,7 +1821,7 @@ body.arcade-page-active .content > * {
 
   .menu-link.patreon-feature,
   .menu-link.emporium-feature {
-    font-size: 0.95rem !important;
+    font-size: 0.84rem !important;
   }
 }
 
