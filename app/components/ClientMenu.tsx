@@ -372,7 +372,7 @@ export default function ClientMenu(): React.ReactNode {
               ))}
             </div>
             <span>empress trash</span>
-            <small className="side-menu-subtitle">hybrid artist</small>
+            <small className="side-menu-subtitle">hybrid artist x builder x curator</small>
           </Link>
           <div className="menu-title-spacer" aria-hidden="true" />
           <ul className="side-list">
