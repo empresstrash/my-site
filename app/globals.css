@@ -126,6 +126,33 @@
   position: relative;
 }
 
+.menu-link.patreon-feature {
+  border: 1.5px solid rgba(var(--outline-teal-top-rgb), 0.95) !important;
+  color: #fff !important;
+  background: rgba(24, 10, 18, 0.72) !important;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.98), 0 2px 6px rgba(0,0,0,0.98), 0 0 14px rgba(0,0,0,0.76);
+}
+
+.menu-link.patreon-feature:hover {
+  border-color: rgba(var(--outline-teal-top-rgb), 0.8) !important;
+  color: var(--accent-pink) !important;
+  background: rgba(36, 16, 28, 0.78) !important;
+}
+
+/* Damsels → About leaf links: equal width, right-justified, slightly shorter than "about" */
+.menu-submenu .menu-item > a.menu-link.damsels-about-link {
+  display: block;
+  width: 86%;
+  max-width: 86%;
+  margin-left: auto;
+  margin-right: 0;
+  white-space: nowrap;
+  text-align: right;
+  padding: 0.28rem 0.6rem;
+  box-sizing: border-box;
+}
+
 .menu-link.emporium-feature::before {
   content: '';
   position: absolute;

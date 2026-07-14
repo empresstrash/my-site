@@ -1,10 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+
+/**
+ * Paragraph serves some posts (e.g. damsels-part-deux) as text/markdown by default,
+ * which makes iframes show raw markdown. ?format=html forces the real Next.js page
+ * so every article embeds with the same native Paragraph UI.
+ */
+function toParagraphEmbedUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set('format', 'html');
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
-  const paragraphUrl = 'https://paragraph.com/@empresstrash';
+  const searchParams = useSearchParams();
+  const paragraphUrl = useMemo(() => {
+    const defaultUrl = 'https://paragraph.com/@empresstrash';
+    const requestedUrl = searchParams.get('paragraph');
+
+    if (!requestedUrl) {
+      return defaultUrl;
+    }
+
+    try {
+      const parsedUrl = new URL(requestedUrl);
+      const validOrigin = parsedUrl.origin === 'https://paragraph.com';
+      const validPath = parsedUrl.pathname.toLowerCase().startsWith('/@empresstrash');
+
+      if (validOrigin && validPath) {
+        return parsedUrl.toString();
+      }
+    } catch {
+      return defaultUrl;
+    }
+
+    return defaultUrl;
+  }, [searchParams]);
+
+  const embedSrc = useMemo(() => toParagraphEmbedUrl(paragraphUrl), [paragraphUrl]);
 
   useEffect(() => {
     function update() {
@@ -48,7 +88,7 @@ export default function Home() {
         </a>
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
           <iframe
-            src={paragraphUrl}
+            src={embedSrc}
             style={{ position: 'absolute', top: 0, left: 0, width: 'calc(100% + 20px)', height: '100%', border: 'none' }}
             loading="lazy"
             allowFullScreen
@@ -62,12 +102,12 @@ export default function Home() {
   return (
     <div className="paragraph-container">
       <iframe
-        src={paragraphUrl}
-        style={{ 
-          width: '100%', 
-          height: '100%', 
+        src={embedSrc}
+        style={{
+          width: '100%',
+          height: '100%',
           border: 'none',
-          display: 'block'
+          display: 'block',
         }}
         loading="lazy"
         allowFullScreen

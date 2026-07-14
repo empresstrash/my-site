@@ -18,7 +18,15 @@ interface MenuItem {
   ariaLabel?: string;
 }
 
+const PARAGRAPH_BIRTH_OF_DAMSELS_URL = 'https://paragraph.com/@empresstrash/the-birth-of-damsels-1';
+const PARAGRAPH_DAMSELS_PART_DEUX_URL = 'https://paragraph.com/@empresstrash/damsels-part-deux';
+
+function paragraphEmbedPath(url: string): string {
+  return `/?paragraph=${encodeURIComponent(url)}`;
+}
+
 const menuItems: MenuItem[] = [
+  { label: 'patreon 18+', external: 'https://www.patreon.com/EmpressTrash', className: 'patreon-feature', marquee: false },
   { label: 'emporium: merch shop', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: false },
   // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
@@ -28,6 +36,13 @@ const menuItems: MenuItem[] = [
         label: 'damsels',
         className: 'damsels-18-label',
         children: [
+          {
+            label: 'about',
+            children: [
+              { label: 'birth of damsels', path: paragraphEmbedPath(PARAGRAPH_BIRTH_OF_DAMSELS_URL), className: 'damsels-about-link' },
+              { label: 'damsels part deux', path: paragraphEmbedPath(PARAGRAPH_DAMSELS_PART_DEUX_URL), className: 'damsels-about-link' },
+            ],
+          },
           { label: 'eth collection', external: 'https://opensea.io/collection/damsels' },
           { label: 'tez collection', external: 'https://objkt.com/@empresstrash' },
           { label: 'legacy page', external: 'https://empresstrash.neocities.org/damsels' },
@@ -62,7 +77,6 @@ const menuItems: MenuItem[] = [
       {
         label: 'solana art',
         children: [
-          { label: 'exchange', external: 'https://exchange.art/empress-trash' },
           { label: 'mallow', external: 'https://mallow.art/u/empresstrash?tab=artworks' },
           { label: 'drip haus', external: 'https://drip.haus/empresstrash' },
         ],
@@ -130,14 +144,6 @@ const menuItems: MenuItem[] = [
   {
     label: 'connect',
     children: [
-      {
-        label: '18+',
-        className: 'connect-18-header',
-        children: [
-          { label: 'fansly', external: 'https://fansly.com/empresstrash?=rempt' },
-          { label: 'patreon', external: 'https://www.patreon.com/EmpressTrash' },
-        ],
-      },
       { label: 'email', external: 'mailto:empresstrash@gmail.com', icon: <FaEnvelope />, ariaLabel: 'Email', className: 'icon-only-link' },
       { label: 'x', external: 'https://x.com/EmpressTrash', icon: <FaXTwitter />, ariaLabel: 'X', className: 'icon-only-link' },
       { label: 'instagram', external: 'https://www.instagram.com/empress_trash/', icon: <FaInstagram />, ariaLabel: 'Instagram', className: 'icon-only-link' },
