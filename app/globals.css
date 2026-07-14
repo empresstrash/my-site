@@ -237,16 +237,24 @@
 
 .menu-link.patreon-feature {
   color: #fff !important;
-  /* night purple sandwich — chroma at edges, clear dip in middle */
-  background: linear-gradient(
-    180deg,
-    rgba(48, 16, 78, 0.94) 0%,
-    rgba(28, 10, 48, 0.58) 28%,
-    rgba(10, 4, 22, 0.22) 50%,
-    rgba(28, 10, 48, 0.58) 72%,
-    rgba(48, 16, 78, 0.94) 100%
-  ) !important;
-  font-weight: 700;
+  /* near-black purple tint — same opacities */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(18, 10, 26, 0.82) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(18, 10, 26, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(18, 10, 26, 0.94) 0%,
+      rgba(12, 6, 18, 0.58) 28%,
+      rgba(6, 3, 10, 0.22) 50%,
+      rgba(12, 6, 18, 0.58) 72%,
+      rgba(18, 10, 26, 0.94) 100%
+    ) !important;
+  font-weight: 400;
   text-align: center !important;
   font-size: 1.06rem !important;
   letter-spacing: 0.04em;
@@ -258,16 +266,24 @@
 
 .menu-link.emporium-feature {
   color: #fff !important;
-  /* night pink sandwich */
-  background: linear-gradient(
-    180deg,
-    rgba(78, 12, 42, 0.94) 0%,
-    rgba(52, 8, 30, 0.58) 28%,
-    rgba(22, 4, 14, 0.22) 50%,
-    rgba(52, 8, 30, 0.58) 72%,
-    rgba(78, 12, 42, 0.94) 100%
-  ) !important;
-  font-weight: 700;
+  /* near-black pink tint — same opacities */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(26, 8, 14, 0.82) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(26, 8, 14, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(26, 8, 14, 0.94) 0%,
+      rgba(18, 5, 10, 0.58) 28%,
+      rgba(10, 3, 6, 0.22) 50%,
+      rgba(18, 5, 10, 0.58) 72%,
+      rgba(26, 8, 14, 0.94) 100%
+    ) !important;
+  font-weight: 400;
   text-align: center !important;
   font-size: 1.06rem !important;
   letter-spacing: 0.04em;
@@ -282,26 +298,42 @@
 
 .menu-link.patreon-feature:hover {
   color: #d4b8ff !important;
-  background: linear-gradient(
-    180deg,
-    rgba(62, 22, 96, 0.96) 0%,
-    rgba(38, 14, 60, 0.64) 28%,
-    rgba(14, 6, 30, 0.28) 50%,
-    rgba(38, 14, 60, 0.64) 72%,
-    rgba(62, 22, 96, 0.96) 100%
-  ) !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(24, 12, 34, 0.88) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(24, 12, 34, 0.88) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(24, 12, 34, 0.96) 0%,
+      rgba(16, 8, 24, 0.64) 28%,
+      rgba(8, 4, 14, 0.28) 50%,
+      rgba(16, 8, 24, 0.64) 72%,
+      rgba(24, 12, 34, 0.96) 100%
+    ) !important;
 }
 
 .menu-link.emporium-feature:hover {
   color: #ff8ab5 !important;
-  background: linear-gradient(
-    180deg,
-    rgba(96, 16, 52, 0.96) 0%,
-    rgba(66, 10, 38, 0.64) 28%,
-    rgba(28, 6, 18, 0.28) 50%,
-    rgba(66, 10, 38, 0.64) 72%,
-    rgba(96, 16, 52, 0.96) 100%
-  ) !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(34, 10, 18, 0.88) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(34, 10, 18, 0.88) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(34, 10, 18, 0.96) 0%,
+      rgba(24, 6, 12, 0.64) 28%,
+      rgba(12, 4, 8, 0.28) 50%,
+      rgba(24, 6, 12, 0.64) 72%,
+      rgba(34, 10, 18, 0.96) 100%
+    ) !important;
 }
 
 /* Damsels → About leaf links: equal width, right-justified, slightly shorter than "about" */
@@ -691,15 +723,14 @@ body {
   padding: 0.82rem 1rem;
   padding-left: 1.15rem;
   padding-right: 0.85rem;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 0.98rem;
   letter-spacing: 0.03em;
   backdrop-filter: none;
 }
 
 /*
- * Night-mode top-level colors with visible sandwich gradients:
- * richer chroma at top/bottom edges, clear dip through the middle
+ * Night-mode top-level colors: vertical stripe sandwich + L/R vignette
  * 1 patreon  — .patreon-feature
  * 2 emporium — .emporium-feature
  * 3 crypto art
@@ -709,60 +740,92 @@ body {
  */
 .side-list > .menu-item:nth-child(3) > .menu-button,
 .side-list > .menu-item:nth-child(3) > .menu-link {
-  /* crypto — night teal sandwich */
-  background: linear-gradient(
-    180deg,
-    rgba(0, 58, 62, 0.94) 0%,
-    rgba(0, 38, 42, 0.58) 28%,
-    rgba(0, 14, 18, 0.22) 50%,
-    rgba(0, 38, 42, 0.58) 72%,
-    rgba(0, 58, 62, 0.94) 100%
-  ) !important;
+  /* crypto — near-black teal tint, same opacities */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(6, 18, 20, 0.82) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(6, 18, 20, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(6, 18, 20, 0.94) 0%,
+      rgba(4, 12, 14, 0.58) 28%,
+      rgba(2, 6, 8, 0.22) 50%,
+      rgba(4, 12, 14, 0.58) 72%,
+      rgba(6, 18, 20, 0.94) 100%
+    ) !important;
   box-shadow:
     inset 0 1px 0 rgba(0, 200, 190, 0.14),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
 }
 .side-list > .menu-item:nth-child(4) > .menu-button,
 .side-list > .menu-item:nth-child(4) > .menu-link {
-  /* virtual realms — night violet sandwich */
-  background: linear-gradient(
-    180deg,
-    rgba(48, 16, 78, 0.94) 0%,
-    rgba(28, 10, 48, 0.58) 28%,
-    rgba(10, 4, 22, 0.22) 50%,
-    rgba(28, 10, 48, 0.58) 72%,
-    rgba(48, 16, 78, 0.94) 100%
-  ) !important;
+  /* virtual realms — near-black violet tint, same opacities */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(18, 10, 26, 0.82) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(18, 10, 26, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(18, 10, 26, 0.94) 0%,
+      rgba(12, 6, 18, 0.58) 28%,
+      rgba(6, 3, 10, 0.22) 50%,
+      rgba(12, 6, 18, 0.58) 72%,
+      rgba(18, 10, 26, 0.94) 100%
+    ) !important;
   box-shadow:
     inset 0 1px 0 rgba(160, 120, 255, 0.14),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
 }
 .side-list > .menu-item:nth-child(5) > .menu-button,
 .side-list > .menu-item:nth-child(5) > .menu-link {
-  /* about — night slate sandwich */
-  background: linear-gradient(
-    180deg,
-    rgba(28, 36, 58, 0.94) 0%,
-    rgba(16, 22, 38, 0.58) 28%,
-    rgba(6, 8, 16, 0.22) 50%,
-    rgba(16, 22, 38, 0.58) 72%,
-    rgba(28, 36, 58, 0.94) 100%
-  ) !important;
+  /* about — near-black slate tint, same opacities */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(12, 14, 20, 0.82) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(12, 14, 20, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(12, 14, 20, 0.94) 0%,
+      rgba(8, 10, 14, 0.58) 28%,
+      rgba(4, 5, 8, 0.22) 50%,
+      rgba(8, 10, 14, 0.58) 72%,
+      rgba(12, 14, 20, 0.94) 100%
+    ) !important;
   box-shadow:
     inset 0 1px 0 rgba(140, 170, 210, 0.12),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
 }
 .side-list > .menu-item:nth-child(6) > .menu-button,
 .side-list > .menu-item:nth-child(6) > .menu-link {
-  /* connect — night indigo sandwich */
-  background: linear-gradient(
-    180deg,
-    rgba(18, 28, 72, 0.94) 0%,
-    rgba(12, 18, 48, 0.58) 28%,
-    rgba(4, 6, 20, 0.22) 50%,
-    rgba(12, 18, 48, 0.58) 72%,
-    rgba(18, 28, 72, 0.94) 100%
-  ) !important;
+  /* connect — near-black indigo tint, same opacities */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(10, 12, 22, 0.82) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(10, 12, 22, 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(10, 12, 22, 0.94) 0%,
+      rgba(6, 8, 16, 0.58) 28%,
+      rgba(3, 4, 10, 0.22) 50%,
+      rgba(6, 8, 16, 0.58) 72%,
+      rgba(10, 12, 22, 0.94) 100%
+    ) !important;
   box-shadow:
     inset 0 1px 0 rgba(100, 140, 255, 0.14),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
@@ -1311,7 +1374,7 @@ body {
   color: var(--accent-pink);
 }
 .menu-link { display:block; color:var(--color-text); text-decoration:none; padding:0.6rem 0; }
-.menu-link.active, .menu-button.active { color:var(--accent-pink); font-weight:700; }
+.menu-link.active, .menu-button.active { color:var(--accent-pink); font-weight:400; }
 .toggle {
   float: right;
   transition: transform 200ms;
