@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 /**
@@ -18,7 +18,7 @@ function toParagraphEmbedUrl(url: string): string {
   }
 }
 
-export default function Home() {
+function HomeContent() {
   const [isMobile, setIsMobile] = useState(false);
   const searchParams = useSearchParams();
   const paragraphUrl = useMemo(() => {
@@ -122,5 +122,13 @@ export default function Home() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }
