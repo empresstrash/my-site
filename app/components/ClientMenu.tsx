@@ -25,9 +25,12 @@ function paragraphEmbedPath(url: string): string {
   return `/?paragraph=${encodeURIComponent(url)}`;
 }
 
-const menuItems: MenuItem[] = [
+const featureMenuItems: MenuItem[] = [
   { label: 'patreon 18+', external: 'https://www.patreon.com/EmpressTrash', className: 'patreon-feature', marquee: false },
   { label: 'emporium: merch shop', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: false },
+];
+
+const menuItems: MenuItem[] = [
   // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
     label: 'crypto art',
@@ -63,6 +66,7 @@ const menuItems: MenuItem[] = [
       {
         label: 'ethereum art',
         children: [
+          { label: 'onchain arcade', path: '/arcade' },
           { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
           { label: 'superrare', external: 'https://superrare.com/empresstrash' },
           { label: 'networked', external: 'https://mint.networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
@@ -95,7 +99,7 @@ const menuItems: MenuItem[] = [
     label: 'virtual realms',
     children: [
       {
-        label: 'builds',
+        label: '3D worlds',
         children: [
           {
             label: 'decentraland',
@@ -125,10 +129,10 @@ const menuItems: MenuItem[] = [
         ],
       },
       {
-        label: 'games',
+        label: '2D play',
         children: [
+          { label: 'onchain arcade', path: '/arcade' },
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
-          { label: 'glowpop', external: 'https://mint.networked.art/0x8469b7b08d30c63fea3a248a198de9d634b63d70/0xad3d1283eda06d5c8e130e6f7c3e17c57dadbb4d/37' },
         ],
       },
     ],
@@ -166,6 +170,25 @@ const menuItems: MenuItem[] = [
     ],
   },
 ];
+
+function GlassSparkles({ count = 52 }: { count?: number }): React.ReactNode {
+  return (
+    <div className="glass-shimmer" aria-hidden="true">
+      {Array.from({ length: count }, (_, i) => (
+        <span
+          key={i}
+          className="glass-sparkle"
+          style={{
+            left: `${(i * 37 + 11) % 97}%`,
+            top: `${(i * 53 + 7) % 96}%`,
+            animationDelay: `${((i * 0.19) % 4.2).toFixed(2)}s`,
+            animationDuration: `${(1.6 + (i % 6) * 0.38).toFixed(2)}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 function renderMarqueeLabel(label: string): React.ReactNode {
   const parts = label.split(/(\*new\*)/gi);
@@ -225,6 +248,12 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
     // if it's a normal internal link (item.path) we do nothing special -- navigation will occur
   };
 
+  const isFeatureCta =
+    item.className === 'patreon-feature' || item.className === 'emporium-feature';
+  const paddingStyle = isFeatureCta
+    ? undefined
+    : { paddingLeft: `${1.25 + level * 0.75}rem` };
+
   return (
     <li className={itemClasses}>
       {item.children ? (
@@ -232,7 +261,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           <button
             className={`menu-button ${item.className || ''}`}
             onClick={handleClick}
-            style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+            style={paddingStyle}
             aria-label={item.ariaLabel || item.label}
           >
             {renderMenuLabel(item)}
@@ -251,7 +280,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           href={item.external}
           onClick={handleClick}
           className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
-          style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+          style={paddingStyle}
           aria-label={item.ariaLabel || item.label}
           title={item.ariaLabel || item.label}
         >
@@ -261,7 +290,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
         <Link
           href={item.path || '/'}
           className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
-          style={{ paddingLeft: `${1.25 + level * 0.75}rem` }}
+          style={paddingStyle}
           aria-label={item.ariaLabel || item.label}
         >
           {renderMenuLabel(item)}
@@ -300,6 +329,15 @@ export default function ClientMenu(): React.ReactNode {
     setMobileOpen(false);
   }, [pathname]);
 
+  // Arcade: mark body so content padding can tighten slightly
+  useEffect(() => {
+    const onArcade = pathname === '/arcade';
+    document.body.classList.toggle('arcade-page-active', onArcade);
+    return () => {
+      document.body.classList.remove('arcade-page-active');
+    };
+  }, [pathname]);
+
   const toggleExpand = (key: string) => {
     setExpandedMap(prev => {
       const isCurrentlyOpen = !!prev[key];
@@ -325,23 +363,38 @@ export default function ClientMenu(): React.ReactNode {
         <div className="menu-backdrop" onClick={() => setMobileOpen(false)} />
       )}
       <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={isMobile && !mobileOpen}>
-        <Link href="/" className="side-menu-title" aria-label="go home">
-          <div className="title-particle-layer" aria-hidden="true">
-            {Array.from({length: 16}, (_, i) => (
-              <span key={i} className={`title-particle tp-${i + 1}`} />
+        <div className="menu-glass-panel">
+          <GlassSparkles count={52} />
+          <Link href="/" className="side-menu-title" aria-label="go home">
+            <div className="title-particle-layer" aria-hidden="true">
+              {Array.from({length: 16}, (_, i) => (
+                <span key={i} className={`title-particle tp-${i + 1}`} />
+              ))}
+            </div>
+            <span>empress trash</span>
+            <small className="side-menu-subtitle">hybrid artist</small>
+          </Link>
+          <div className="menu-title-spacer" aria-hidden="true" />
+          <ul className="side-list">
+            {featureMenuItems.map((item, idx) => (
+              <MenuItem
+                key={`feature-${idx}`}
+                item={item}
+                pathname={pathname}
+                keyPath={item.label}
+                expandedMap={expandedMap}
+                toggleExpand={toggleExpand}
+              />
             ))}
-          </div>
-          <span>empress trash</span>
-          <small className="side-menu-subtitle">multiversatile artist</small>
-        </Link>
-        <ul className="side-list">
-          {menuItems.map((item, idx) => (
-            <MenuItem key={idx} item={item} pathname={pathname} keyPath={item.label} expandedMap={expandedMap} toggleExpand={toggleExpand} />
-          ))}
-        </ul>
+            {menuItems.map((item, idx) => (
+              <MenuItem key={idx} item={item} pathname={pathname} keyPath={item.label} expandedMap={expandedMap} toggleExpand={toggleExpand} />
+            ))}
+          </ul>
+        </div>
       </aside>
 
       <header className="header header-with-side">
+        <GlassSparkles count={36} />
         {isMobile && (
           <button
             className="mobile-menu-button"

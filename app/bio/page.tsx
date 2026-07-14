@@ -66,7 +66,7 @@ export default function BioPage() {
           padding: 0 1rem;
           color: var(--color-text);
           line-height: 1.8;
-          font-family: 'IBM Plex Mono', monospace;
+          font-family: var(--font-family);
         }
         .bio-page h1 {
           font-size: 2.5rem;
