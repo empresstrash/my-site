@@ -91,6 +91,7 @@ const menuItems: MenuItem[] = [
           { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
           { label: 'teia', external: 'https://teia.art/empresstrash' },
           { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
+          { label: 'xtz airdrop tool', path: '/xtzairdrop' },
         ],
       },
     ],
