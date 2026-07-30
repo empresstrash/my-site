@@ -6,6 +6,7 @@ import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
 import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord, FaDeviantart, FaSpotify, FaTwitch } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import GlassSparkles from './GlassSparkles';
 
 interface MenuItem {
   label: string;
@@ -51,6 +52,7 @@ const menuItems: MenuItem[] = [
           { label: 'legacy page', external: 'https://empresstrash.neocities.org/damsels' },
         ],
       },
+      { label: 'full moon token', path: '/full-moon' },
       {
         label: 'bitcoin art',
         children: [
@@ -172,25 +174,6 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-function GlassSparkles({ count = 52 }: { count?: number }): React.ReactNode {
-  return (
-    <div className="glass-shimmer" aria-hidden="true">
-      {Array.from({ length: count }, (_, i) => (
-        <span
-          key={i}
-          className="glass-sparkle"
-          style={{
-            left: `${(i * 37 + 11) % 97}%`,
-            top: `${(i * 53 + 7) % 96}%`,
-            animationDelay: `${((i * 0.19) % 4.2).toFixed(2)}s`,
-            animationDuration: `${(1.6 + (i % 6) * 0.38).toFixed(2)}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 function renderMarqueeLabel(label: string): React.ReactNode {
   const parts = label.split(/(\*new\*)/gi);
   return parts.map((part, i) =>
@@ -288,9 +271,12 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           {renderMenuLabel(item)}
         </a>
       ) : (
+        /* Level-1 page links (full moon token, bio, …) use menu-button so they
+           match expander peers (damsels, bitcoin art). Deeper path leaves keep
+           menu-link (dashed nested style). */
         <Link
           href={item.path || '/'}
-          className={`menu-link ${isActive ? 'active' : ''} ${item.className || ''}`}
+          className={`${level <= 1 ? 'menu-button' : 'menu-link'} ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={paddingStyle}
           aria-label={item.ariaLabel || item.label}
         >
@@ -330,12 +316,15 @@ export default function ClientMenu(): React.ReactNode {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Arcade: mark body so content padding can tighten slightly
+  // Arcade / full-moon: lock content pane (no scroll, fill height)
   useEffect(() => {
     const onArcade = pathname === '/arcade';
+    const onFullMoon = pathname === '/full-moon';
     document.body.classList.toggle('arcade-page-active', onArcade);
+    document.body.classList.toggle('full-moon-page-active', onFullMoon);
     return () => {
       document.body.classList.remove('arcade-page-active');
+      document.body.classList.remove('full-moon-page-active');
     };
   }, [pathname]);
 
