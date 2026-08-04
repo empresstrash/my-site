@@ -2418,10 +2418,6 @@ export default function BioPage() {
 
       <section className="bio-section">
         <h2>Exhibitions + Stuff</h2>
-        <p className="cv-legend">
-          <span className="cv-legend-swatch" aria-hidden="true" />
-          Pink entries have proof links (click once for a single source, or open the menu when there are several). Plain white entries have no public link attached yet.
-        </p>
         <div className="cv-timeline">
           {CV_TIMELINE.map((group) => (
             <div key={group.year} className="cv-year-block">
@@ -2480,28 +2476,9 @@ export default function BioPage() {
           text-align: left;
         }
 
-        .cv-legend {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.55rem;
-          margin: 0 0 1.25rem;
-          font-size: 0.82rem;
-          line-height: 1.45;
-          color: rgba(255, 255, 255, 0.62);
-        }
-        .cv-legend-swatch {
-          flex-shrink: 0;
-          width: 0.7rem;
-          height: 0.7rem;
-          margin-top: 0.28rem;
-          border-radius: 2px;
-          background: var(--accent-pink);
-          box-shadow: 0 0 8px rgba(255, 61, 110, 0.45);
-        }
-
         .cv-timeline {
           position: relative;
-          margin: 0;
+          margin: 0.35rem 0 0;
           padding: 0;
         }
         .cv-year-block {
@@ -2564,7 +2541,7 @@ export default function BioPage() {
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 0.4rem;
+          gap: 0.5rem;
         }
 
         /* Base row — left aligned, no link-like hover by default */
@@ -2599,34 +2576,44 @@ export default function BioPage() {
           display: inline;
         }
 
-        /* Single-link entries */
-        :global(.cv-item--linked) {
-          border-radius: 0 6px 6px 0;
+        /* Linked entries — pink-tinted glass (matches side menu glass language) */
+        :global(.cv-item--linked),
+        :global(.cv-item--multi) {
+          border-radius: 10px;
         }
-        :global(.cv-entry-link) {
+        :global(.cv-entry-link),
+        :global(.cv-entry-multi) {
           display: block;
-          padding: 0.55rem 0.85rem 0.55rem 1rem;
-          border-left: 2px solid var(--accent-pink);
-          background: rgba(255, 0, 127, 0.06);
-          border-radius: 0 6px 6px 0;
+          padding: 0.55rem 0.9rem 0.55rem 1rem;
+          border: 1px solid rgba(255, 100, 150, 0.28);
+          border-left: 2px solid rgba(255, 80, 140, 0.75);
+          border-radius: 10px;
+          background:
+            linear-gradient(
+              165deg,
+              rgba(90, 30, 70, 0.22) 0%,
+              rgba(40, 12, 36, 0.38) 42%,
+              rgba(12, 4, 16, 0.5) 100%
+            ),
+            rgba(255, 40, 100, 0.06);
+          backdrop-filter: blur(14px) saturate(1.35) brightness(0.95);
+          -webkit-backdrop-filter: blur(14px) saturate(1.35) brightness(0.95);
+          box-shadow:
+            0 8px 22px rgba(0, 0, 0, 0.35),
+            0 2px 8px rgba(0, 0, 0, 0.25),
+            0 0 0 1px rgba(120, 40, 90, 0.12),
+            inset 0 1px 0 rgba(255, 160, 200, 0.14),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.35);
           line-height: 1.5;
           font-size: 0.92rem;
-          color: var(--accent-pink);
+          color: #ff6b9a;
           text-decoration: none;
           text-align: left;
-          transition: background 0.15s ease, filter 0.15s ease;
-        }
-        :global(.cv-entry-link:hover),
-        :global(.cv-entry-link:focus-visible) {
-          background: rgba(255, 0, 127, 0.12);
-          text-decoration: underline;
-          text-underline-offset: 0.18em;
-          outline: none;
-        }
-
-        /* Multi-link entries + dropdown */
-        :global(.cv-multi-wrap) {
-          position: relative;
+          transition:
+            background 0.18s ease,
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            filter 0.18s ease;
         }
         :global(.cv-entry-multi) {
           display: flex;
@@ -2634,24 +2621,40 @@ export default function BioPage() {
           gap: 0.5rem;
           width: 100%;
           margin: 0;
-          padding: 0.55rem 0.85rem 0.55rem 1rem;
-          border: none;
-          border-left: 2px solid var(--accent-pink);
-          background: rgba(255, 0, 127, 0.06);
-          border-radius: 0 6px 6px 0;
-          line-height: 1.5;
-          font-size: 0.92rem;
+          border-style: solid;
           font-family: inherit;
-          color: var(--accent-pink);
-          text-align: left;
           cursor: pointer;
-          transition: background 0.15s ease;
         }
+        :global(.cv-entry-link:hover),
+        :global(.cv-entry-link:focus-visible),
         :global(.cv-entry-multi:hover),
         :global(.cv-entry-multi:focus-visible),
         :global(.cv-item--multi.is-open .cv-entry-multi) {
-          background: rgba(255, 0, 127, 0.12);
+          border-color: rgba(255, 120, 170, 0.45);
+          background:
+            linear-gradient(
+              165deg,
+              rgba(110, 40, 85, 0.3) 0%,
+              rgba(55, 16, 48, 0.48) 42%,
+              rgba(18, 6, 22, 0.58) 100%
+            ),
+            rgba(255, 50, 120, 0.1);
+          box-shadow:
+            0 10px 26px rgba(0, 0, 0, 0.4),
+            0 3px 10px rgba(0, 0, 0, 0.28),
+            0 0 0 1px rgba(160, 50, 110, 0.18),
+            0 0 18px rgba(255, 61, 110, 0.12),
+            inset 0 1px 0 rgba(255, 180, 210, 0.18),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.35);
           outline: none;
+        }
+        :global(.cv-entry-link:hover),
+        :global(.cv-entry-link:focus-visible) {
+          text-decoration: underline;
+          text-underline-offset: 0.18em;
+        }
+        :global(.cv-multi-wrap) {
+          position: relative;
         }
         :global(.cv-multi-chevron) {
           flex-shrink: 0;
@@ -2662,25 +2665,39 @@ export default function BioPage() {
         }
         :global(.cv-link-menu) {
           list-style: none;
-          margin: 0.25rem 0 0.35rem;
+          margin: 0.35rem 0 0.35rem;
           padding: 0.35rem 0;
-          border: 1px solid rgba(255, 61, 110, 0.35);
-          border-radius: 8px;
-          background: rgba(12, 8, 12, 0.97);
-          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+          border: 1px solid rgba(255, 100, 150, 0.28);
+          border-radius: 10px;
+          background:
+            linear-gradient(
+              165deg,
+              rgba(50, 40, 90, 0.22) 0%,
+              rgba(12, 8, 24, 0.55) 42%,
+              rgba(4, 2, 10, 0.72) 100%
+            ),
+            rgba(3, 2, 8, 0.65);
+          backdrop-filter: blur(16px) saturate(1.35) brightness(0.92);
+          -webkit-backdrop-filter: blur(16px) saturate(1.35) brightness(0.92);
+          box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 4px 12px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(160, 140, 220, 0.1),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.4);
           z-index: 5;
+          overflow: hidden;
         }
         :global(.cv-link-menu a) {
           display: block;
           padding: 0.55rem 0.9rem;
-          color: var(--accent-pink);
+          color: #ff6b9a;
           text-decoration: none;
           font-size: 0.88rem;
           text-align: left;
         }
         :global(.cv-link-menu a:hover),
         :global(.cv-link-menu a:focus-visible) {
-          background: rgba(255, 0, 127, 0.12);
+          background: rgba(255, 80, 140, 0.12);
           outline: none;
         }
 
