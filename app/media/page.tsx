@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 
 export default function MediaPage() {
   const mediaItems = [
+    { title: 'Beyond The NFT with SinfulMeatStick — Decentraland interview (Mar 2026)', url: 'https://www.youtube.com/watch?v=9vbmFLMmQHU' },
     { title: 'CC Global Summit (2022)', url: 'https://www.youtube.com/watch?v=dcYwLPeDHYI' },
     { title: 'Click Create Malicious Compliance (2023)', url: 'https://www.youtube.com/watch?v=zYMzy0dYloY' },
     { title: 'NorCal and Shill Podcast (Nov 2023)', url: 'https://open.spotify.com/episode/5U0Bg8P01ybSkr3Qs2e28S?go=1&sp_cid=1c48825c2f6317ac390839332dc080c8&utm_source=embed_player_p&utm_medium=desktop&nd=1&dlsi=187c16893d794269' },
