@@ -136,6 +136,7 @@ const menuItems: MenuItem[] = [
         label: '2D play',
         children: [
           { label: 'onchain arcade', path: '/arcade' },
+          { label: 'rodeo tarot', path: '/rodeo-tarot' },
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
         ],
       },
