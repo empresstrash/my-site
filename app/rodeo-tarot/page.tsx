@@ -281,6 +281,13 @@ export default function RodeoTarotPage() {
 
           </section>
         )}
+
+        <p className="rt-disclaimer">
+          Disclaimer: Tarot readings are provided for entertainment and
+          spiritual purposes only, do not substitute for professional medical,
+          legal, or financial advice, and require users to be at least 18 years
+          old and fully responsible for their own actions.
+        </p>
       </div>
 
       {zoom && (

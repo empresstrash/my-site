@@ -487,15 +487,14 @@
   border-color: rgba(255, 122, 154, 0.7);
 }
 
-.rt-footnote {
-  margin-top: 1.75rem;
+.rt-disclaimer {
+  margin: 2rem auto 0.5rem;
+  max-width: 36rem;
+  padding: 0 0.5rem;
   text-align: center;
-  font-size: 0.72rem;
-  line-height: 1.5;
-  color: rgba(160, 150, 190, 0.5);
-  max-width: 32rem;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 0.65rem;
+  line-height: 1.45;
+  color: rgba(160, 150, 190, 0.48);
 }
 
 /* ── Zoom lightbox ─────────────────────────────────────────── */
