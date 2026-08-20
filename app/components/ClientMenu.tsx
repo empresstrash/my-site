@@ -19,121 +19,48 @@ interface MenuItem {
   ariaLabel?: string;
 }
 
-const PARAGRAPH_BIRTH_OF_DAMSELS_URL = 'https://paragraph.com/@empresstrash/the-birth-of-damsels-1';
-const PARAGRAPH_DAMSELS_PART_DEUX_URL = 'https://paragraph.com/@empresstrash/damsels-part-deux';
-
-function paragraphEmbedPath(url: string): string {
-  return `/?paragraph=${encodeURIComponent(url)}`;
-}
-
 const featureMenuItems: MenuItem[] = [
   { label: 'patreon 18+', external: 'https://www.patreon.com/EmpressTrash', className: 'patreon-feature', marquee: false },
   { label: 'emporium: merch shop', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: false },
 ];
 
 const menuItems: MenuItem[] = [
-  // { label: 'gallery', children: [{ label: 'select 1/1', path: '/gallery' }] },
   {
-    label: 'crypto art',
+    label: 'digital art',
     children: [
-      {
-        label: 'damsels',
-        className: 'damsels-18-label',
-        children: [
-          {
-            label: 'about',
-            children: [
-              { label: 'birth of damsels', path: paragraphEmbedPath(PARAGRAPH_BIRTH_OF_DAMSELS_URL), className: 'damsels-about-link' },
-              { label: 'damsels part deux', path: paragraphEmbedPath(PARAGRAPH_DAMSELS_PART_DEUX_URL), className: 'damsels-about-link' },
-            ],
-          },
-          { label: 'eth collection', external: 'https://opensea.io/collection/damsels' },
-          { label: 'tez collection', external: 'https://objkt.com/@empresstrash' },
-          { label: 'legacy page', external: 'https://empresstrash.neocities.org/damsels' },
-        ],
-      },
+      { label: 'damsels', path: '/damsels', className: 'damsels-18-label', ariaLabel: 'damsels 18+' },
       { label: 'full moon token', path: '/full-moon' },
       {
-        label: 'bitcoin art',
+        label: 'marketplaces',
         children: [
-          { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
-          {
-            label: 'lunalauncher',
-            children: [
-              { label: 'lotus blooms', external: 'https://lunalauncher.io/mint/empress-trash-lotus-blooms' },
-            ],
-          },
-        ],
-      },
-      {
-        label: 'ethereum art',
-        children: [
-          { label: 'onchain arcade', path: '/arcade' },
-          { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
           { label: 'superrare', external: 'https://superrare.com/empresstrash' },
+          { label: 'transient', external: 'https://www.transient.xyz/@empresstrash' },
+          { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
           { label: 'networked', external: 'https://networked.art/empresstrash' },
           { label: 'mint.networked', external: 'https://mint.networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
-          { label: 'highlight', external: 'https://highlight.xyz/user/@empresstrash.eth' },
-          { label: 'titles', external: 'https://titles.xyz/profile/313f8455-82ee-4b20-81fd-5a1a564b35cb' },
-          { label: 'manifold', external: 'https://manifold.xyz/@empresstrash' },
+          { label: 'verse', external: 'https://verse.works/empresstrash' },
           { label: 'opensea', external: 'https://opensea.io/EmpressTrash/galleries' },
-          { label: 'transient', external: 'https://www.transient.xyz/@empresstrash' },
-          { label: 'mint gold dust', external: 'https://www.mintgolddust.com/profile/0x8469B7b08D30C63fEA3a248a198dE9D634B63d70/' },
-        ],
-      },
-      {
-        label: 'solana art',
-        children: [
+          { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
+          { label: 'manifold', external: 'https://manifold.xyz/@empresstrash' },
+          { label: 'titles', external: 'https://titles.xyz/profile/313f8455-82ee-4b20-81fd-5a1a564b35cb' },
+          { label: 'highlight', external: 'https://highlight.xyz/user/@empresstrash.eth' },
           { label: 'mallow', external: 'https://mallow.art/u/empresstrash?tab=artworks' },
           { label: 'drip haus', external: 'https://drip.haus/empresstrash' },
+          { label: 'mint gold dust', external: 'https://www.mintgolddust.com/profile/0x8469B7b08D30C63fEA3a248a198dE9D634B63d70/' },
+          { label: 'teia', external: 'https://teia.art/empresstrash' },
+          { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
+          { label: 'lunalauncher', external: 'https://lunalauncher.io/mint/empress-trash-lotus-blooms' },
         ],
       },
       {
-        label: 'tezos art',
+        label: 'auctions & tools',
         children: [
-          { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
-          { label: 'teia', external: 'https://teia.art/empresstrash' },
-          { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
+          { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
           { label: 'xtz airdrop tool', path: '/xtzairdrop' },
         ],
       },
-    ],
-  },
-  {
-    label: 'virtual realms',
-    children: [
       {
-        label: '3D worlds',
-        children: [
-          {
-            label: 'decentraland',
-            className: 'submenu-header',
-            children: [
-              { label: 'atelier', external: 'https://decentraland.org/jump/?position=126%2C104' },
-              { label: 'house', external: 'https://decentraland.org/jump/?realm=empresstrash.dcl.eth' },
-              { label: 'archives', external: 'https://decentraland.org/jump/?position=-116%2C108' },
-            ],
-          },
-          {
-            label: 'substrata',
-            className: 'submenu-header divider-after',
-            children: [
-              { label: 'cusp of rebirth v1 (2026)', external: 'https://substrata.info/world/empresstrash/Cusp+of+Rebirth+V1' },
-              { label: 'full moon airdrops', external: 'https://substrata.info/world/empresstrash/fullmoon' },
-              { label: 'main gallery', external: 'https://substrata.info/world/empresstrash/empresstrash' },
-              { label: 'ponder collective group drop', external: 'https://substrata.info/world/empresstrash/Ponder+Collective+Group+Drop' },
-              { label: 'visible violets v2 group drop', external: 'https://substrata.info/world/empresstrash/Visible+Violets+V2' },
-            ],
-          },
-          { label: 'neocities', external: 'https://empresstrash.neocities.org/' },
-          { label: 'nifty island', external: 'https://www.niftyisland.com/profile/empresstrash' },
-          { label: 'oncyber', external: 'https://oncyber.io/@empresstrash' },
-          { label: 'spatial', external: 'https://www.spatial.io/@empress_trash_48979' },
-          { label: 'dpd gallery', external: 'https://oncyber.io/dospunksdao_empresstrash' },
-        ],
-      },
-      {
-        label: '2D play',
+        label: 'play',
         children: [
           { label: 'onchain arcade', path: '/arcade' },
           { label: 'rodeo tarot', path: '/rodeo-tarot' },
@@ -143,7 +70,42 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
-    label: 'about empress trash',
+    label: 'virtual realms',
+    children: [
+      {
+        label: 'decentraland',
+        className: 'submenu-header',
+        children: [
+          { label: 'atelier', external: 'https://decentraland.org/jump/?position=126%2C104' },
+          { label: 'house', external: 'https://decentraland.org/jump/?realm=empresstrash.dcl.eth' },
+          { label: 'archives', external: 'https://decentraland.org/jump/?position=-116%2C108' },
+        ],
+      },
+      {
+        label: 'substrata',
+        className: 'submenu-header divider-after',
+        children: [
+          { label: 'cusp of rebirth v1 (2026)', external: 'https://substrata.info/world/empresstrash/Cusp+of+Rebirth+V1' },
+          { label: 'full moon airdrops', external: 'https://substrata.info/world/empresstrash/fullmoon' },
+          { label: 'main gallery', external: 'https://substrata.info/world/empresstrash/empresstrash' },
+          { label: 'ponder collective group drop', external: 'https://substrata.info/world/empresstrash/Ponder+Collective+Group+Drop' },
+          { label: 'visible violets v2 group drop', external: 'https://substrata.info/world/empresstrash/Visible+Violets+V2' },
+        ],
+      },
+      {
+        label: 'other worlds',
+        children: [
+          { label: 'oncyber', external: 'https://oncyber.io/@empresstrash' },
+          { label: 'spatial', external: 'https://www.spatial.io/@empress_trash_48979' },
+          { label: 'nifty island', external: 'https://www.niftyisland.com/profile/empresstrash' },
+          { label: 'neocities', external: 'https://empresstrash.neocities.org/' },
+          { label: 'dpd gallery', external: 'https://oncyber.io/dospunksdao_empresstrash' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'about',
     children: [
       { label: 'bio', path: '/bio' },
       { label: 'media', path: '/media' },
@@ -322,11 +284,14 @@ export default function ClientMenu(): React.ReactNode {
   useEffect(() => {
     const onArcade = pathname === '/arcade';
     const onFullMoon = pathname === '/full-moon';
+    const onDamsels = pathname === '/damsels';
     document.body.classList.toggle('arcade-page-active', onArcade);
     document.body.classList.toggle('full-moon-page-active', onFullMoon);
+    document.body.classList.toggle('damsels-page-active', onDamsels);
     return () => {
       document.body.classList.remove('arcade-page-active');
       document.body.classList.remove('full-moon-page-active');
+      document.body.classList.remove('damsels-page-active');
     };
   }, [pathname]);
 

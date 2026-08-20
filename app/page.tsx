@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 /**
  * Paragraph serves some posts (e.g. damsels-part-deux) as text/markdown by default,
@@ -45,6 +46,8 @@ function HomeContent() {
   }, [searchParams]);
 
   const embedSrc = useMemo(() => toParagraphEmbedUrl(paragraphUrl), [paragraphUrl]);
+  const fromParam = searchParams.get('from');
+  const backHref = fromParam === '/damsels' ? '/damsels' : null;
 
   useEffect(() => {
     function update() {
@@ -74,18 +77,28 @@ function HomeContent() {
     };
   }, []);
 
+  const toolbar = (
+    <div className="embed-toolbar">
+      {backHref ? (
+        <Link className="embed-open-button" href={backHref}>
+          back to damsels
+        </Link>
+      ) : null}
+      <a
+        className="embed-open-button"
+        href={paragraphUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {isMobile ? 'view blog in new tab' : 'open on paragraph'}
+      </a>
+    </div>
+  );
+
   if (isMobile) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', overflow: 'hidden' }}>
-        <a
-          className="embed-open-button"
-          href={paragraphUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: 'block', textAlign: 'center', padding: '0.35rem 0.75rem', fontSize: '0.92rem', marginBottom: '0.5rem', flexShrink: 0 }}
-        >
-          View blog in new tab
-        </a>
+        {toolbar}
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
           <iframe
             src={embedSrc}
@@ -101,6 +114,7 @@ function HomeContent() {
 
   return (
     <div className="paragraph-container">
+      {backHref ? toolbar : null}
       <iframe
         src={embedSrc}
         style={{
@@ -108,6 +122,8 @@ function HomeContent() {
           height: '100%',
           border: 'none',
           display: 'block',
+          flex: 1,
+          minHeight: 0,
         }}
         loading="lazy"
         allowFullScreen
@@ -119,6 +135,8 @@ function HomeContent() {
           height: 100%;
           position: relative;
           width: 100%;
+          display: flex;
+          flex-direction: column;
         }
       `}</style>
     </div>

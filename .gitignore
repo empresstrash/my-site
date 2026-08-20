@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local bench — research, dumps, experiments (not the published site)
+# keep wip/README.md in git so the rule is visible; ignore everything else
+/wip/*
+!/wip/README.md

@@ -6,7 +6,7 @@ import { TezosToolkit } from "@taquito/taquito";
 /** Public mainnet RPC — TzKT (ecadinfra often fails in browsers) */
 export const TEZOS_RPC = "https://rpc.tzkt.io/mainnet";
 
-const DAPP_NAME = "Empress Trash XTZ Airdrop Tool";
+const DAPP_NAME = "Empress Trash";
 
 let wallet: BeaconWallet | null = null;
 let tezos: TezosToolkit | null = null;

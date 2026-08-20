@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Published site vs local bench
+
+| Lives in | Ships? |
+|---|---|
+| `app/`, `public/`, `lib/` | Yes — this is the website |
+| `scripts/` | Not a page; official generators for published data |
+| `wip/` | **No.** Local only (gitignored). Research, dumps, experiments. Visitors cannot open `/wip`. |
+
 ## Getting Started
 
 First, run the development server:
