@@ -1867,16 +1867,6 @@ body.damsels-page-active .content > * {
   z-index: 2500;
 }
 
-.embed-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  padding: 0.35rem 0.5rem 0.55rem;
-  flex-shrink: 0;
-}
-
 /* Button that matches menu/link styling for external open links */
 .embed-open-button {
   display: inline-block;

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import {
   DAMSELS_TOTAL,
   LEGACY_PAGE,
@@ -10,7 +9,6 @@ import {
   PARAGRAPH_BIRTH,
   PARAGRAPH_DEUX,
   expandMediaUrls,
-  paragraphEmbedPath,
   type DamselToken,
 } from "@/lib/damsels/constants";
 import "./damsels.css";
@@ -374,12 +372,22 @@ export default function DamselsLanding() {
             </p>
           </div>
           <div className="damsels-link-col">
-            <Link className="damsels-btn damsels-btn-birth" href={paragraphEmbedPath(PARAGRAPH_BIRTH)}>
+            <a
+              className="damsels-btn damsels-btn-birth"
+              href={PARAGRAPH_BIRTH}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               the birth of damsels
-            </Link>
-            <Link className="damsels-btn damsels-btn-deux" href={paragraphEmbedPath(PARAGRAPH_DEUX)}>
+            </a>
+            <a
+              className="damsels-btn damsels-btn-deux"
+              href={PARAGRAPH_DEUX}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               damsels part deux
-            </Link>
+            </a>
           </div>
         </nav>
 

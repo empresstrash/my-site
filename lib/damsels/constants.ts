@@ -14,11 +14,6 @@ export const PARAGRAPH_BIRTH =
 export const PARAGRAPH_DEUX =
   "https://paragraph.com/@empresstrash/damsels-part-deux";
 
-export function paragraphEmbedPath(url: string, from = "/damsels"): string {
-  const params = new URLSearchParams({ paragraph: url, from });
-  return `/?${params.toString()}`;
-}
-
 export const DAMSELS_TOTAL = 666;
 
 export type DamselChain = "eth" | "tez";
