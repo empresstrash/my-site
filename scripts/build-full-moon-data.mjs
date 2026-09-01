@@ -61,6 +61,7 @@ const moonNames = {
   "2026-05-blue": "Blue Moon",
   "2026-06": "Full Moon",
   "2026-07": "Buck Moon",
+  "2026-08": "Partial Lunar Eclipse",
 };
 
 /** Override moonKey for known edge cases (same month, two moons) */

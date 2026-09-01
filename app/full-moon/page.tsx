@@ -76,13 +76,26 @@ function SpaceTwinkles({ count = 48 }: { count?: number }) {
   );
 }
 
+const HEN_FA2 = "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton";
+const OBJKT_PATH_ALIASES: Record<string, string> = {
+  hicetnunc: HEN_FA2,
+  teia: HEN_FA2,
+};
+
 const IPFS_GATEWAYS = [
+  (cid: string) => `https://ipfs.filebase.io/ipfs/${cid}`,
   (cid: string) => `https://gateway.pinata.cloud/ipfs/${cid}`,
-  (cid: string) => `https://nftstorage.link/ipfs/${cid}`,
   (cid: string) => `https://dweb.link/ipfs/${cid}`,
   (cid: string) => `https://w3s.link/ipfs/${cid}`,
-  (cid: string) => `https://4everland.io/ipfs/${cid}`,
 ];
+
+const ARWEAVE_GATEWAYS = [
+  "https://arweave.net/",
+  "https://g8way.io/",
+  "https://ar-io.net/",
+];
+
+const IMAGE_FAILOVER_MS = 2500;
 
 const YEAR_HUE: Record<number, number> = {
   2022: 330,
@@ -150,6 +163,9 @@ function formatMoonLabel(date: string, moonName: string): string {
   }
   if (lower.includes("blood moon")) {
     return `${monYear}, Blood Moon`;
+  }
+  if (lower.includes("partial") && lower.includes("eclipse")) {
+    return `${monYear}, Partial Lunar Eclipse`;
   }
   if (lower.includes("lunar eclipse") || lower.includes("eclipse")) {
     return `${monYear}, Lunar Eclipse`;
@@ -223,57 +239,146 @@ function stripIpfs(uri: string): string {
   if (uri.startsWith("ipfs://")) return uri.slice(7);
   const i = uri.indexOf("/ipfs/");
   if (i !== -1) return uri.slice(i + 6);
-  return uri;
+  return uri.replace(/^\/+/, "");
 }
 
-function toUrl(src: string, gatewayIndex = 0): string {
-  if (src.startsWith("http") && !src.includes("/ipfs/")) return src;
-  return IPFS_GATEWAYS[Math.min(gatewayIndex, IPFS_GATEWAYS.length - 1)](
-    stripIpfs(src),
-  );
+function parseObjktTokenUrl(
+  url: string,
+): { fa: string; tokenId: string } | null {
+  const m = url.match(/objkt\.com\/tokens\/([^/]+)\/(\d+)/i);
+  if (!m) return null;
+  const raw = m[1];
+  const fa = OBJKT_PATH_ALIASES[raw.toLowerCase()] ?? raw;
+  return { fa, tokenId: m[2] };
+}
+
+function twitterPreviews(url: string): string[] {
+  const m = url.match(/pbs\.twimg\.com\/media\/([^/?#]+)/i);
+  if (!m) return [url];
+  const id = m[1].replace(/\.(jpg|jpeg|png|webp)$/i, "");
+  return [
+    `https://pbs.twimg.com/media/${id}?format=jpg&name=small`,
+    `https://pbs.twimg.com/media/${id}?format=jpg&name=medium`,
+    url,
+  ];
+}
+
+function expandMedia(raw: string): string[] {
+  const value = raw.trim();
+  if (!value) return [];
+
+  if (value.startsWith("ipfs://") || value.includes("/ipfs/") || /^(Qm[a-zA-Z0-9]{44,}|baf[a-z0-9]+)/i.test(value)) {
+    const cid = stripIpfs(value);
+    return IPFS_GATEWAYS.map((gw) => gw(cid));
+  }
+
+  if (
+    value.startsWith("ar://") ||
+    /https?:\/\/(www\.)?(arweave\.net|g8way\.io|ar-io\.net)\//i.test(value)
+  ) {
+    const path = value.replace(/^ar:\/\//, "").replace(/^https?:\/\/[^/]+\//, "");
+    return ARWEAVE_GATEWAYS.map((gw) => gw + path);
+  }
+
+  if (/pbs\.twimg\.com\/media\//i.test(value)) return twitterPreviews(value);
+
+  return [value];
+}
+
+/** Objkt CDN thumbs first (same strategy as Damsels), then IPFS/Arweave fallbacks. */
+function moonImageUrls(work: MoonWork): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (url: string) => {
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    out.push(url);
+  };
+
+  if (work.chain === "tezos") {
+    const parsed = parseObjktTokenUrl(work.url);
+    if (parsed) {
+      add(
+        `https://assets.objkt.media/file/assets-003/${parsed.fa}/${parsed.tokenId}/thumb400`,
+      );
+      add(
+        `https://assets.objkt.media/file/assets-003/${parsed.fa}/${parsed.tokenId}/thumb288`,
+      );
+    }
+  }
+
+  for (const raw of [work.image, work.imageFallback]) {
+    if (!raw) continue;
+    for (const url of expandMedia(raw)) add(url);
+  }
+
+  return out;
 }
 
 function chainLabel(chain: Chain): string {
   return chain === "tezos" ? "tezos" : "base";
 }
 
-function MoonImage({
-  src,
-  fallback,
-  alt,
-}: {
-  src: string;
-  fallback?: string;
-  alt: string;
-}) {
-  const [gate, setGate] = useState(0);
-  const [useFallback, setUseFallback] = useState(false);
+function MoonImage({ work }: { work: MoonWork }) {
+  const urls = useMemo(
+    () => moonImageUrls(work),
+    [work.id, work.chain, work.image, work.imageFallback, work.url],
+  );
+  const [idx, setIdx] = useState(0);
   const [failed, setFailed] = useState(false);
-  const active = useFallback && fallback ? fallback : src;
-  const url = toUrl(active, gate);
+  const loaded = useRef(false);
+  const src = urls[idx] ?? null;
+
+  useEffect(() => {
+    loaded.current = false;
+    setIdx(0);
+    setFailed(false);
+  }, [work.id]);
+
+  useEffect(() => {
+    if (!src || failed) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      if (cancelled || loaded.current) return;
+      setIdx((n) => {
+        if (n + 1 < urls.length) return n + 1;
+        setFailed(true);
+        return n;
+      });
+    }, IMAGE_FAILOVER_MS);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [src, failed, urls.length]);
 
   const onError = useCallback(() => {
-    const isIpfs =
-      active.includes("/ipfs/") ||
-      active.startsWith("Qm") ||
-      active.startsWith("baf");
-    if (isIpfs && gate + 1 < IPFS_GATEWAYS.length) {
-      setGate((g) => g + 1);
-      return;
-    }
-    if (!useFallback && fallback) {
-      setUseFallback(true);
-      setGate(0);
-      return;
-    }
-    setFailed(true);
-  }, [active, gate, useFallback, fallback]);
+    if (loaded.current) return;
+    setIdx((n) => {
+      if (n + 1 < urls.length) return n + 1;
+      setFailed(true);
+      return n;
+    });
+  }, [urls.length]);
 
-  if (failed) return <div className="fmt-miss" aria-hidden="true" />;
+  const onLoad = useCallback(() => {
+    loaded.current = true;
+  }, []);
+
+  if (!src || failed) return <div className="fmt-miss" aria-hidden="true" />;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt={alt} loading="lazy" decoding="async" onError={onError} />
+    <img
+      src={src}
+      alt={work.name}
+      loading="eager"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      fetchPriority="high"
+      onLoad={onLoad}
+      onError={onError}
+    />
   );
 }
 
@@ -293,7 +398,7 @@ function ArtPiece({
       rel="noopener noreferrer"
       className={`fmt-core-piece chain-${work.chain}`}
     >
-      <MoonImage src={work.image} fallback={work.imageFallback} alt={work.name} />
+      <MoonImage work={work} />
       <span className="fmt-core-overlay">
         <span className="fmt-core-piece-name">{work.name}</span>
         <span className="fmt-core-piece-meta">

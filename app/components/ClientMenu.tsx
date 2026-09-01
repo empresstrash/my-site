@@ -79,6 +79,8 @@ const menuItems: MenuItem[] = [
           { label: 'atelier', external: 'https://decentraland.org/jump/?position=126%2C104' },
           { label: 'house', external: 'https://decentraland.org/jump/?realm=empresstrash.dcl.eth' },
           { label: 'archives', external: 'https://decentraland.org/jump/?position=-116%2C108' },
+          { label: 'rgbmtl2026', external: 'https://decentraland.org/play/world/rgbmtl.dcl.eth' },
+          { label: 'PanelHaus Art Residency Sculpture Garden', external: 'https://decentraland.org/play/world/empresself.dcl.eth' },
         ],
       },
       {
@@ -97,7 +99,6 @@ const menuItems: MenuItem[] = [
         children: [
           { label: 'oncyber', external: 'https://oncyber.io/@empresstrash' },
           { label: 'spatial', external: 'https://www.spatial.io/@empress_trash_48979' },
-          { label: 'nifty island', external: 'https://www.niftyisland.com/profile/empresstrash' },
           { label: 'neocities', external: 'https://empresstrash.neocities.org/' },
           { label: 'dpd gallery', external: 'https://oncyber.io/dospunksdao_empresstrash' },
         ],
