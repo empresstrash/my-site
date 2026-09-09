@@ -237,107 +237,6 @@
   );
 }
 
-.menu-link.patreon-feature {
-  color: #fff !important;
-  /* near-black purple tint — same opacities */
-  background:
-    linear-gradient(
-      90deg,
-      rgba(18, 10, 26, 0.82) 0%,
-      transparent 22%,
-      transparent 78%,
-      rgba(18, 10, 26, 0.82) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(18, 10, 26, 0.94) 0%,
-      rgba(12, 6, 18, 0.58) 28%,
-      rgba(6, 3, 10, 0.22) 50%,
-      rgba(12, 6, 18, 0.58) 72%,
-      rgba(18, 10, 26, 0.94) 100%
-    ) !important;
-  font-weight: 400;
-  text-align: right !important;
-  font-size: 0.92rem !important;
-  letter-spacing: 0.04em;
-  text-transform: lowercase !important;
-  padding-top: 0.95rem !important;
-  padding-bottom: 0.95rem !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.98), 0 2px 6px rgba(0,0,0,0.98), 0 0 14px rgba(0,0,0,0.76);
-}
-
-.menu-link.emporium-feature {
-  color: #fff !important;
-  /* near-black pink tint — same opacities */
-  background:
-    linear-gradient(
-      90deg,
-      rgba(26, 8, 14, 0.82) 0%,
-      transparent 22%,
-      transparent 78%,
-      rgba(26, 8, 14, 0.82) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(26, 8, 14, 0.94) 0%,
-      rgba(18, 5, 10, 0.58) 28%,
-      rgba(10, 3, 6, 0.22) 50%,
-      rgba(18, 5, 10, 0.58) 72%,
-      rgba(26, 8, 14, 0.94) 100%
-    ) !important;
-  font-weight: 400;
-  text-align: right !important;
-  font-size: 0.92rem !important;
-  letter-spacing: 0.04em;
-  text-transform: lowercase !important;
-  padding-top: 0.95rem !important;
-  padding-bottom: 0.95rem !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.98), 0 2px 6px rgba(0,0,0,0.98), 0 0 14px rgba(0,0,0,0.76);
-  overflow: hidden;
-  white-space: normal;
-  position: relative;
-}
-
-.menu-link.patreon-feature:hover {
-  color: #d4b8ff !important;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(24, 12, 34, 0.88) 0%,
-      transparent 22%,
-      transparent 78%,
-      rgba(24, 12, 34, 0.88) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(24, 12, 34, 0.96) 0%,
-      rgba(16, 8, 24, 0.64) 28%,
-      rgba(8, 4, 14, 0.28) 50%,
-      rgba(16, 8, 24, 0.64) 72%,
-      rgba(24, 12, 34, 0.96) 100%
-    ) !important;
-}
-
-.menu-link.emporium-feature:hover {
-  color: #ff8ab5 !important;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(34, 10, 18, 0.88) 0%,
-      transparent 22%,
-      transparent 78%,
-      rgba(34, 10, 18, 0.88) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(34, 10, 18, 0.96) 0%,
-      rgba(24, 6, 12, 0.64) 28%,
-      rgba(12, 4, 8, 0.28) 50%,
-      rgba(24, 6, 12, 0.64) 72%,
-      rgba(34, 10, 18, 0.96) 100%
-    ) !important;
-}
-
 /* Damsels → About leaf links: equal width, right-justified, slightly shorter than "about" */
 .menu-submenu .menu-item > a.menu-link.damsels-about-link {
   display: block;
@@ -349,34 +248,6 @@
   text-align: right;
   padding: 0.28rem 0.6rem;
   box-sizing: border-box;
-}
-
-.menu-link.emporium-feature::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 0;
-  background: linear-gradient(
-    120deg,
-    rgba(255, 140, 180, 0.12) 0%,
-    rgba(255, 61, 110, 0.16) 45%,
-    rgba(180, 60, 110, 0.1) 100%
-  );
-  opacity: 0.75;
-  pointer-events: none;
-  mix-blend-mode: lighten;
-  z-index: 1;
-}
-
-.menu-link.patreon-feature::before {
-  background: linear-gradient(120deg, rgba(255,255,255,0.08) 0%, rgba(140, 100, 220, 0.12) 50%, rgba(255,255,255,0.05) 100%) !important;
-  opacity: 0.7;
-}
-
-.menu-link.emporium-feature > *,
-.menu-link.patreon-feature > * {
-  position: relative;
-  z-index: 2;
 }
 
 /* Rainbow sheen + pink glitch used by media and side-menu */
@@ -737,24 +608,60 @@ body {
   backdrop-filter: none;
 }
 
-/* Feature CTAs sit at top level — match typewriter + size */
-.side-list > .menu-item > .menu-link.patreon-feature,
-.side-list > .menu-item > .menu-link.emporium-feature {
-  font-family: var(--font-family) !important;
-  font-size: 0.92rem !important;
+.menu-link.patreon-feature {
+  color: #fff !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 170, 0.28) 0%,
+      rgba(255, 0, 140, 0.08) 22%,
+      rgba(255, 0, 140, 0.08) 78%,
+      rgba(255, 0, 170, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 0, 180, 0.32) 0%,
+      rgba(255, 0, 130, 0.12) 28%,
+      rgba(160, 0, 90, 0.06) 50%,
+      rgba(255, 0, 130, 0.12) 72%,
+      rgba(255, 0, 180, 0.32) 100%
+    ) !important;
+  font-family: var(--font-menu) !important;
+  font-weight: 400;
+  text-align: right !important;
+  font-size: 1.02rem !important;
+  letter-spacing: 0.08em;
+  text-transform: lowercase !important;
+  padding-top: 1.2rem !important;
+  padding-bottom: 1.2rem !important;
+  text-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 80, 200, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
+}
+
+.menu-link.patreon-feature:hover {
+  color: #fff !important;
+  filter: brightness(1.12);
+}
+
+.side-list > .menu-item > .menu-link.patreon-feature {
+  font-family: var(--font-menu) !important;
+  font-size: 1.02rem !important;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 /*
  * Night-mode top-level colors: vertical stripe sandwich + L/R vignette
- * 1 patreon  — .patreon-feature
- * 2 emporium — .emporium-feature
- * 3 crypto art
- * 4 virtual realms
- * 5 about
- * 6 connect
+ * 1 patreon
+ * 2 digital art
+ * 3 virtual realms
+ * 4 about
+ * 5 connect
  */
-.side-list > .menu-item:nth-child(3) > .menu-button,
-.side-list > .menu-item:nth-child(3) > .menu-link {
+.side-list > .menu-item:nth-child(2) > .menu-button,
+.side-list > .menu-item:nth-child(2) > .menu-link {
   /* crypto — near-black teal tint, same opacities */
   background:
     linear-gradient(
@@ -776,8 +683,8 @@ body {
     inset 0 1px 0 rgba(0, 200, 190, 0.14),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
 }
-.side-list > .menu-item:nth-child(4) > .menu-button,
-.side-list > .menu-item:nth-child(4) > .menu-link {
+.side-list > .menu-item:nth-child(3) > .menu-button,
+.side-list > .menu-item:nth-child(3) > .menu-link {
   /* virtual realms — near-black violet tint, same opacities */
   background:
     linear-gradient(
@@ -799,8 +706,8 @@ body {
     inset 0 1px 0 rgba(160, 120, 255, 0.14),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
 }
-.side-list > .menu-item:nth-child(5) > .menu-button,
-.side-list > .menu-item:nth-child(5) > .menu-link {
+.side-list > .menu-item:nth-child(4) > .menu-button,
+.side-list > .menu-item:nth-child(4) > .menu-link {
   /* about — near-black slate tint, same opacities */
   background:
     linear-gradient(
@@ -822,8 +729,8 @@ body {
     inset 0 1px 0 rgba(140, 170, 210, 0.12),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35) !important;
 }
-.side-list > .menu-item:nth-child(6) > .menu-button,
-.side-list > .menu-item:nth-child(6) > .menu-link {
+.side-list > .menu-item:nth-child(5) > .menu-button,
+.side-list > .menu-item:nth-child(5) > .menu-link {
   /* connect — near-black indigo tint, same opacities */
   background:
     linear-gradient(
@@ -1460,6 +1367,28 @@ body {
   animation: deepBgHueGradient 28s linear infinite;
 }
 
+/* First paint: do not wait on the body class from useEffect (that left a 12px black gap). */
+.content:has(.home-embed) {
+  padding: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+html:has(.home-embed) .header.header-with-side {
+  border-bottom: none;
+  box-shadow: inset 0 1px 0 rgba(160, 140, 220, 0.08);
+}
+
+body.home-page-active .content {
+  padding: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 body.arcade-page-active .content,
 body.full-moon-page-active .content,
 body.damsels-page-active .content {
@@ -1487,6 +1416,7 @@ body.damsels-page-active .content {
   }
 }
 
+body.home-page-active .content > *,
 body.arcade-page-active .content > *,
 body.full-moon-page-active .content > *,
 body.damsels-page-active .content > * {
@@ -1758,14 +1688,6 @@ body.damsels-page-active .content > * {
     height: 2.25rem;
   }
 
-  /* Feature CTAs + top-level rows stay tappable */
-  .menu-link.patreon-feature,
-  .menu-link.emporium-feature {
-    font-size: 0.88rem !important;
-    padding-top: 0.9rem !important;
-    padding-bottom: 0.9rem !important;
-  }
-
   .side-list > .menu-item > .menu-button,
   .side-list > .menu-item > .menu-link {
     padding: 0.78rem 0.85rem;
@@ -1787,6 +1709,13 @@ body.damsels-page-active .content > * {
 
   .centered-logo {
     padding: 0.12rem 0.38rem;
+  }
+
+  .menu-link.patreon-feature {
+    font-size: 0.86rem !important;
+    letter-spacing: 0.05em;
+    padding-top: 1.05rem !important;
+    padding-bottom: 1.05rem !important;
   }
 
   .centered-logo img {
@@ -1831,6 +1760,11 @@ body.damsels-page-active .content > * {
     padding-right: 0.5rem;
   }
 
+  .content:has(.home-embed),
+  body.home-page-active .content {
+    padding: 0;
+  }
+
   /* Slightly fewer layout issues with nested menus on small screens */
   .menu-submenu .menu-item > .menu-button,
   .menu-submenu .menu-item > .menu-link {
@@ -1851,10 +1785,6 @@ body.damsels-page-active .content > * {
     letter-spacing: 0.03em;
   }
 
-  .menu-link.patreon-feature,
-  .menu-link.emporium-feature {
-    font-size: 0.84rem !important;
-  }
 }
 
 /* backdrop used when mobile menu is open */
@@ -1890,6 +1820,126 @@ body.damsels-page-active .content > * {
   transform: translateY(0);
 }
 
+/* Homepage embed switcher — flush with the header bar */
+.home-embed {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.home-embed-tabs {
+  display: flex;
+  flex-shrink: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background: hsl(268, 38%, 3%);
+  border: 0;
+  border-bottom: 1px solid rgba(160, 140, 220, 0.12);
+  box-shadow: none;
+}
+
+.home-embed-tab {
+  isolation: isolate;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 50%;
+  max-width: none;
+  min-height: 2.85rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0;
+  text-decoration: none;
+  color: rgba(220, 214, 230, 0.62);
+  font-family: var(--font-menu);
+  font-size: 1.02rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+
+.home-embed-tab:last-child {
+  border-right: 0;
+}
+
+.home-embed-tab::before {
+  display: none;
+}
+
+.home-embed-tab:hover {
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.03);
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.home-embed-tab.is-on {
+  color: #ff2eb8;
+  background: rgba(255, 0, 160, 0.08);
+  box-shadow: inset 0 -2px 0 #ff2eb8;
+  text-shadow:
+    0 0 8px rgba(255, 0, 170, 0.55),
+    0 0 14px rgba(255, 0, 140, 0.28);
+}
+
+.home-embed-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.home-embed-pane {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.home-embed-pane[hidden] {
+  display: none;
+}
+
+.home-embed-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.home-embed-frame.is-mobile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% + 20px);
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .home-embed-tabs {
+    gap: 0;
+    padding: 0;
+  }
+
+  .home-embed-tab {
+    max-width: none;
+    min-height: 2.55rem;
+    padding: 0.55rem 0.45rem;
+    font-size: 0.86rem;
+    letter-spacing: 0.05em;
+  }
+}
 
 /* ============================================================
    P5JS ARCADE

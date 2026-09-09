@@ -17,6 +17,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={menuSans.variable}>
       <head>
         <title>empress trash's super site</title>
+        <link rel="icon" href="/crown-favicon.png" type="image/png" sizes="64x64" />
+        <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
       </head>
       <body>
         <ClientMenu />

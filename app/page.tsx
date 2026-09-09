@@ -1,7 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+
+type HomeView = 'paragraph' | 'emporium';
+
+const DEFAULT_PARAGRAPH = 'https://paragraph.com/@empresstrash';
 
 /**
  * Paragraph serves some posts (e.g. damsels-part-deux) as text/markdown by default,
@@ -18,33 +23,40 @@ function toParagraphEmbedUrl(url: string): string {
   }
 }
 
+function parseHomeView(value: string | null): HomeView {
+  return value === 'emporium' ? 'emporium' : 'paragraph';
+}
+
 function HomeContent() {
   const [isMobile, setIsMobile] = useState(false);
+  const [visited, setVisited] = useState<Record<HomeView, boolean>>({
+    paragraph: true,
+    emporium: false,
+  });
   const searchParams = useSearchParams();
-  const paragraphUrl = useMemo(() => {
-    const defaultUrl = 'https://paragraph.com/@empresstrash';
-    const requestedUrl = searchParams.get('paragraph');
+  const view = parseHomeView(searchParams.get('embed'));
 
-    if (!requestedUrl) {
-      return defaultUrl;
-    }
+  const paragraphUrl = useMemo(() => {
+    const requestedUrl = searchParams.get('paragraph');
+    if (!requestedUrl) return DEFAULT_PARAGRAPH;
 
     try {
       const parsedUrl = new URL(requestedUrl);
       const validOrigin = parsedUrl.origin === 'https://paragraph.com';
       const validPath = parsedUrl.pathname.toLowerCase().startsWith('/@empresstrash');
-
-      if (validOrigin && validPath) {
-        return parsedUrl.toString();
-      }
+      if (validOrigin && validPath) return parsedUrl.toString();
     } catch {
-      return defaultUrl;
+      return DEFAULT_PARAGRAPH;
     }
 
-    return defaultUrl;
+    return DEFAULT_PARAGRAPH;
   }, [searchParams]);
 
-  const embedSrc = useMemo(() => toParagraphEmbedUrl(paragraphUrl), [paragraphUrl]);
+  const paragraphSrc = useMemo(() => toParagraphEmbedUrl(paragraphUrl), [paragraphUrl]);
+
+  useEffect(() => {
+    setVisited((prev) => (prev[view] ? prev : { ...prev, [view]: true }));
+  }, [view]);
 
   useEffect(() => {
     function update() {
@@ -74,60 +86,99 @@ function HomeContent() {
     };
   }, []);
 
-  if (isMobile) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', overflow: 'hidden' }}>
-        <a
-          className="embed-open-button"
-          href={paragraphUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: 'block', textAlign: 'center', padding: '0.35rem 0.75rem', fontSize: '0.92rem', marginBottom: '0.5rem', flexShrink: 0 }}
-        >
-          View blog in new tab
-        </a>
-        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          <iframe
-            src={embedSrc}
-            style={{ position: 'absolute', top: 0, left: 0, width: 'calc(100% + 20px)', height: '100%', border: 'none' }}
-            loading="lazy"
-            allowFullScreen
-            title="Paragraph Blog Mobile"
-          />
-        </div>
-      </div>
-    );
-  }
+  const tabHref = (id: HomeView) => {
+    const params = new URLSearchParams();
+    if (id !== 'paragraph') params.set('embed', id);
+    if (paragraphUrl !== DEFAULT_PARAGRAPH) params.set('paragraph', paragraphUrl);
+    const query = params.toString();
+    return query ? `/?${query}` : '/';
+  };
+
+  const paragraphFrameClass = isMobile ? 'home-embed-frame is-mobile' : 'home-embed-frame';
 
   return (
-    <div className="paragraph-container">
-      <iframe
-        src={embedSrc}
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          display: 'block',
-        }}
-        loading="lazy"
-        allowFullScreen
-        title="Paragraph Blog"
-      />
-      <style jsx>{`
-        .paragraph-container {
-          overflow: hidden;
-          height: 100%;
-          position: relative;
-          width: 100%;
-        }
-      `}</style>
+    <div className="home-embed">
+      <nav className="home-embed-tabs" role="tablist" aria-label="homepage embeds">
+        <Link
+          href={tabHref('paragraph')}
+          role="tab"
+          aria-selected={view === 'paragraph'}
+          className={`home-embed-tab${view === 'paragraph' ? ' is-on' : ''}`}
+          scroll={false}
+        >
+          paragraph blog
+        </Link>
+        <Link
+          href={tabHref('emporium')}
+          role="tab"
+          aria-selected={view === 'emporium'}
+          className={`home-embed-tab${view === 'emporium' ? ' is-on' : ''}`}
+          scroll={false}
+        >
+          emporium shop
+        </Link>
+      </nav>
+
+      <div className="home-embed-stage">
+        {visited.paragraph && (
+          <div
+            className="home-embed-pane"
+            role="tabpanel"
+            hidden={view !== 'paragraph'}
+            aria-hidden={view !== 'paragraph'}
+          >
+            <iframe
+              src={paragraphSrc}
+              className={paragraphFrameClass}
+              loading="eager"
+              allowFullScreen
+              title="Paragraph blog"
+            />
+          </div>
+        )}
+
+        {visited.emporium && (
+          <div
+            className="home-embed-pane"
+            role="tabpanel"
+            hidden={view !== 'emporium'}
+            aria-hidden={view !== 'emporium'}
+          >
+            <iframe
+              src="/frame/emporium"
+              className="home-embed-frame"
+              allow="payment *; fullscreen *"
+              allowFullScreen
+              title="Emporium shop"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HomeFallback() {
+  return (
+    <div className="home-embed">
+      <nav className="home-embed-tabs" aria-hidden="true">
+        <span className="home-embed-tab is-on">paragraph blog</span>
+        <span className="home-embed-tab">emporium shop</span>
+      </nav>
+      <div className="home-embed-stage">
+        <iframe
+          src={`${DEFAULT_PARAGRAPH}?format=html`}
+          className="home-embed-frame"
+          title="Paragraph blog"
+        />
+      </div>
     </div>
   );
 }
 
 export default function Home() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<HomeFallback />}>
       <HomeContent />
     </Suspense>
   );

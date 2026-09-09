@@ -20,8 +20,7 @@ interface MenuItem {
 }
 
 const featureMenuItems: MenuItem[] = [
-  { label: 'patreon 18+', external: 'https://www.patreon.com/EmpressTrash', className: 'patreon-feature', marquee: false },
-  { label: 'emporium: merch shop', external: 'https://emporium.empresstrash.com/', className: 'emporium-feature', marquee: false },
+  { label: 'become a patron 18+', external: 'https://www.patreon.com/EmpressTrash', className: 'patreon-feature', ariaLabel: 'become a patron 18+', marquee: false },
 ];
 
 const menuItems: MenuItem[] = [
@@ -168,8 +167,12 @@ function renderMenuLabel(item: MenuItem): React.ReactNode {
     );
   }
 
-  if (item.className === 'emporium-feature') {
-    return item.label;
+  if (item.className === 'patreon-feature') {
+    return (
+      <>
+        become a patron <em className="inline-18-tag">18+</em>
+      </>
+    );
   }
 
   return renderMarqueeLabel(item.label);
@@ -197,9 +200,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
     // if it's a normal internal link (item.path) we do nothing special -- navigation will occur
   };
 
-  const isFeatureCta =
-    item.className === 'patreon-feature' || item.className === 'emporium-feature';
-  const paddingStyle = isFeatureCta
+  const paddingStyle = item.className === 'patreon-feature'
     ? undefined
     : { paddingLeft: `${1.25 + level * 0.75}rem` };
 
@@ -283,13 +284,16 @@ export default function ClientMenu(): React.ReactNode {
 
   // Arcade / full-moon: lock content pane (no scroll, fill height)
   useEffect(() => {
+    const onHome = pathname === '/' || pathname === '/home';
     const onArcade = pathname === '/arcade';
     const onFullMoon = pathname === '/full-moon';
     const onDamsels = pathname === '/damsels';
+    document.body.classList.toggle('home-page-active', onHome);
     document.body.classList.toggle('arcade-page-active', onArcade);
     document.body.classList.toggle('full-moon-page-active', onFullMoon);
     document.body.classList.toggle('damsels-page-active', onDamsels);
     return () => {
+      document.body.classList.remove('home-page-active');
       document.body.classList.remove('arcade-page-active');
       document.body.classList.remove('full-moon-page-active');
       document.body.classList.remove('damsels-page-active');
