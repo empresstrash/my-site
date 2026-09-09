@@ -23,11 +23,14 @@ function stripScripts(html: string): string {
 }
 
 /**
- * Printify sets frame-ancestors so a raw iframe of emporium.empresstrash.com is
- * blank. We proxy HTML, but <base href> would resolve /frame/... back onto
- * their origin and break product clicks. Keep assets on Printify; keep in-store
- * links on this origin.
+ * Printify forbids framing the live shop (CSP frame-ancestors). The catalog is
+ * proxied as static HTML so people can browse. Product URLs always point at
+ * emporium.empresstrash.com in a new tab — no product list to maintain.
  */
+function isLiveShopPath(pathname: string): boolean {
+  return /^\/product(\/|$)/.test(pathname) || /^\/cart(\/|$)/.test(pathname) || /^\/checkout(\/|$)/.test(pathname);
+}
+
 function prepareHtml(html: string, origin: string, site: SiteKey): string {
   const framePrefix = `/frame/${site}`;
   let next = html.replace(/<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi, "");
@@ -42,6 +45,9 @@ function prepareHtml(html: string, origin: string, site: SiteKey): string {
     /href=(["'])(?:https:\/\/emporium\.empresstrash\.com)?(\/[^"']*)\1/gi,
     (full, quote: string, path: string) => {
       if (path.startsWith("/_next") || path.startsWith("/frame/")) return full;
+      if (isLiveShopPath(path)) {
+        return `href=${quote}${origin}${path}${quote} target=${quote}_blank${quote} rel=${quote}noopener noreferrer${quote}`;
+      }
       return `href=${quote}${framePrefix}${path}${quote}`;
     },
   );
@@ -55,16 +61,39 @@ function prepareHtml(html: string, origin: string, site: SiteKey): string {
 (function(){
   var origin = ${JSON.stringify(origin)};
   var prefix = ${JSON.stringify(framePrefix)};
+  function shopPath(pathname) {
+    if (pathname.indexOf(prefix) === 0) return pathname.slice(prefix.length) || "/";
+    return pathname || "/";
+  }
+  function openLive(path) {
+    window.open(origin + path, "_blank", "noopener,noreferrer");
+  }
   document.addEventListener("click", function(e){
     var node = e.target;
     if (node && node.nodeType === 3) node = node.parentElement;
-    var a = node && node.closest ? node.closest("a") : null;
+    if (!node || !node.closest) return;
+    var cart = node.closest("[data-type='CartIcon'], [aria-label='Open cart']");
+    if (cart) {
+      e.preventDefault();
+      e.stopPropagation();
+      openLive("/");
+      return;
+    }
+    var a = node.closest("a");
     if (!a || !a.getAttribute("href")) return;
     try {
       var u = new URL(a.href, location.origin);
-      var path = u.pathname + u.search + u.hash;
-      if (u.origin === location.origin && path.indexOf(prefix) === 0) return;
-      if (u.origin === origin || (u.origin === location.origin && path.indexOf("/product/") === 0)) {
+      var path = shopPath(u.pathname);
+      var live = /^\\/product(\\/|$)/.test(path) || /^\\/cart(\\/|$)/.test(path) || /^\\/checkout(\\/|$)/.test(path);
+      if ((u.origin === origin || u.origin === location.origin) && live) {
+        e.preventDefault();
+        e.stopPropagation();
+        openLive(path + u.search + u.hash);
+        return;
+      }
+      if (a.target === "_blank") return;
+      if (u.origin === location.origin && u.pathname.indexOf(prefix) === 0) return;
+      if (u.origin === origin) {
         e.preventDefault();
         e.stopPropagation();
         location.href = prefix + (u.pathname || "/") + u.search + u.hash;
@@ -89,6 +118,10 @@ export async function GET(
     return new NextResponse("Not found", { status: 404 });
   }
 
+  if (path?.some((part) => part === ".." || part.includes("/") || part.includes("\\"))) {
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   const config = SITES[site];
   const suffix = path?.length ? `/${path.join("/")}` : config.homePath;
   const target = new URL(suffix, config.origin);
@@ -97,6 +130,7 @@ export async function GET(
   let upstream: Response;
   try {
     upstream = await fetch(target, {
+      cache: "no-store",
       redirect: "follow",
       headers: {
         accept: req.headers.get("accept") || "text/html,application/xhtml+xml",
@@ -113,7 +147,7 @@ export async function GET(
   const contentType = upstream.headers.get("content-type") || "text/html; charset=utf-8";
   const headers = new Headers();
   headers.set("content-type", contentType);
-  headers.set("cache-control", "public, max-age=30");
+  headers.set("cache-control", "private, no-store");
   headers.set("x-frame-options", "SAMEORIGIN");
 
   if (contentType.includes("text/html")) {

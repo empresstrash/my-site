@@ -147,7 +147,7 @@ function HomeContent() {
             <iframe
               src="/frame/emporium"
               className="home-embed-frame"
-              allow="payment *; fullscreen *"
+              allow="fullscreen *"
               allowFullScreen
               title="Emporium shop"
             />
