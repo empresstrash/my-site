@@ -72,8 +72,8 @@ function prepareHtml(html: string, origin: string, site: SiteKey): string {
     var node = e.target;
     if (node && node.nodeType === 3) node = node.parentElement;
     if (!node || !node.closest) return;
-    var cart = node.closest("[data-type='CartIcon'], [aria-label='Open cart']");
-    if (cart) {
+    var shopBtn = node.closest("[data-type='CartIcon'], [data-type='MobileNavButton'], [aria-label='Open cart'], [aria-label='Open menu']");
+    if (shopBtn) {
       e.preventDefault();
       e.stopPropagation();
       openLive("/");
