@@ -31,6 +31,15 @@ function trackAt(tracks: NtsTrack[], elapsed: number): { current?: NtsTrack; nex
   return { current: ordered[index].track, next: ordered[index + 1]?.track };
 }
 
+function clean(value: string): string {
+  return value
+    .replace(/&#0*39;|'/g, "'")
+    .replace(/&/g, "&")
+    .replace(/"|&#0*34;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function readJson(url: string): Promise<unknown> {
   const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new Error(`Radio metadata ${response.status}`);
@@ -56,7 +65,7 @@ export async function nowPlaying(id: string): Promise<NowPlaying> {
       };
     }
     if (station.meta.kind === "rp") {
-      const body = (await readJson("https://api.radioparadise.com/api/now_playing?chan=0")) as {
+      const body = (await readJson(`https://api.radioparadise.com/api/now_playing?chan=${station.meta.chan}`)) as {
         artist?: string;
         title?: string;
         album?: string;
@@ -67,6 +76,50 @@ export async function nowPlaying(id: string): Promise<NowPlaying> {
         line: [body.artist, body.title].filter(Boolean).join(" — ") || "On air",
         detail: [body.album, body.year].filter(Boolean).join(" · ") || station.blurb,
         art: body.cover_med || "",
+        next: "",
+      };
+    }
+    if (station.meta.kind === "kexp") {
+      const body = (await readJson("https://api.kexp.org/v2/plays/?limit=5&ordering=-airdate")) as {
+        results?: { play_type?: string; artist?: string; song?: string; album?: string; image_uri?: string; thumbnail_uri?: string }[];
+      };
+      const play = body.results?.find((item) => item.play_type === "trackplay" && item.song);
+      return {
+        line: play ? [play.artist, play.song].filter(Boolean).join(" — ") : "On air",
+        detail: play?.album || station.blurb,
+        art: play?.image_uri || play?.thumbnail_uri || "",
+        next: "",
+      };
+    }
+    if (station.meta.kind === "fip") {
+      const body = (await readJson("https://api.radiofrance.fr/livemeta/pull/7")) as {
+        levels?: { position?: number; items?: string[] }[];
+        steps?: Record<string, { authors?: string; title?: string; titreAlbum?: string; anneeEditionMusique?: string; visual?: string }>;
+      };
+      const level = body.levels?.[0];
+      const id = level?.items?.[level.position ?? 0];
+      const step = id ? body.steps?.[id] : undefined;
+      return {
+        line: [step?.authors, step?.title].filter(Boolean).join(" — ") || "On air",
+        detail: [step?.titreAlbum, step?.anneeEditionMusique].filter(Boolean).join(" · ") || station.blurb,
+        art: step?.visual || "",
+        next: "",
+      };
+    }
+    if (station.meta.kind === "airtime") {
+      const body = (await readJson(station.meta.info)) as {
+        tracks?: { current?: { type?: string; name?: string; metadata?: { artist_name?: string; track_title?: string; album_title?: string } } };
+        shows?: { current?: { name?: string } };
+      };
+      const current = body.tracks?.current;
+      const meta = current?.metadata;
+      const titled = [meta?.artist_name, meta?.track_title].filter(Boolean).join(" — ");
+      const showName = clean(body.shows?.current?.name || "");
+      const line = titled || (current?.type === "track" && current.name ? clean(current.name) : "") || showName || "On air";
+      return {
+        line,
+        detail: line === showName ? station.blurb : showName || station.blurb,
+        art: "",
         next: "",
       };
     }
