@@ -57,7 +57,7 @@ export const STATIONS: Station[] = [
     id: "nts-1",
     group: "NTS",
     name: "Channel 1",
-    blurb: "Live shows. The line is the show, not always the song.",
+    blurb: "Live shows. The line is the song when NTS has posted the tracklist.",
     stream: "https://streams.radiomast.io/nts1",
     meta: { kind: "nts", channel: "1" },
   },

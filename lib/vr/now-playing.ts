@@ -2,6 +2,35 @@ import { stationById, type NowPlaying } from "@/lib/vr/stations";
 
 const EMPTY: NowPlaying = { line: "Now playing unavailable", detail: "", art: "", next: "" };
 
+type NtsTrack = {
+  artist?: string;
+  title?: string;
+  offset?: number | null;
+  duration?: number | null;
+  offset_estimate?: number | null;
+  duration_estimate?: number | null;
+};
+
+function trackLabel(track: NtsTrack): string {
+  return [track.artist, track.title].filter(Boolean).join(" — ") || "On air";
+}
+
+function trackAt(tracks: NtsTrack[], elapsed: number): { current?: NtsTrack; next?: NtsTrack } {
+  const ordered = tracks
+    .map((track) => ({
+      track,
+      start: typeof track.offset === "number" ? track.offset : track.offset_estimate,
+    }))
+    .filter((item): item is { track: NtsTrack; start: number } => typeof item.start === "number")
+    .sort((a, b) => a.start - b.start);
+  if (!ordered.length) return {};
+  let index = 0;
+  for (let i = 0; i < ordered.length; i++) {
+    if (ordered[i].start <= elapsed) index = i;
+  }
+  return { current: ordered[index].track, next: ordered[index + 1]?.track };
+}
+
 async function readJson(url: string): Promise<unknown> {
   const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new Error(`Radio metadata ${response.status}`);
@@ -48,18 +77,47 @@ export async function nowPlaying(id: string): Promise<NowPlaying> {
         channel_name?: string;
         now?: {
           broadcast_title?: string;
-          embeds?: { details?: { description?: string; media?: { picture_large?: string } } };
+          start_timestamp?: string;
+          links?: { rel?: string; href?: string }[];
+          embeds?: {
+            details?: {
+              name?: string;
+              description?: string;
+              media?: { picture_large?: string };
+              links?: { rel?: string; href?: string }[];
+            };
+          };
         };
       }[];
     };
     const show = body.results?.find((item) => item.channel_name === channel);
     const details = show?.now?.embeds?.details;
-    const description = details?.description?.replace(/<[^>]+>/g, "").trim() || station.blurb;
+    const showName = details?.name || show?.now?.broadcast_title || "On air";
+    const description = details?.description?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() || station.blurb;
+    const tracklist =
+      details?.links?.find((link) => link.rel === "tracklist")?.href ||
+      show?.now?.links?.find((link) => link.rel === "tracklist")?.href;
+    let line = showName;
+    let next = "";
+    if (tracklist && show?.now?.start_timestamp) {
+      try {
+        const started = Date.parse(show.now.start_timestamp);
+        if (!Number.isNaN(started)) {
+          const elapsed = Math.floor((Date.now() - started) / 1000);
+          const tracks = (await readJson(tracklist)) as { results?: NtsTrack[] };
+          const playing = trackAt(tracks.results ?? [], elapsed);
+          if (playing.current) line = trackLabel(playing.current);
+          if (playing.next) next = trackLabel(playing.next);
+        }
+      } catch {
+        line = showName;
+      }
+    }
     return {
-      line: show?.now?.broadcast_title || "On air",
-      detail: description,
+      line,
+      detail: line === showName ? description : showName,
       art: details?.media?.picture_large || "",
-      next: "",
+      next,
     };
   } catch {
     return { ...EMPTY, detail: station.blurb };
