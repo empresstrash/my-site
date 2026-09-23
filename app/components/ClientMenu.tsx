@@ -49,21 +49,16 @@ const menuItems: MenuItem[] = [
           { label: 'teia', external: 'https://teia.art/empresstrash' },
           { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
           { label: 'lunalauncher', external: 'https://lunalauncher.io/mint/empress-trash-lotus-blooms' },
-        ],
-      },
-      {
-        label: 'auctions & tools',
-        children: [
           { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
-          { label: 'xtz airdrop tool', path: '/xtzairdrop' },
         ],
       },
       {
-        label: 'play',
+        label: 'play & tools',
         children: [
           { label: 'onchain arcade', path: '/arcade' },
           { label: 'rodeo tarot', path: '/rodeo-tarot' },
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
+          { label: 'xtz airdrop tool', path: '/xtzairdrop' },
         ],
       },
     ],
@@ -197,7 +192,6 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
       e.preventDefault();
       toggleExpand(keyPath);
     }
-    // if it's a normal internal link (item.path) we do nothing special -- navigation will occur
   };
 
   const paddingStyle = item.className === 'patreon-feature'
@@ -237,9 +231,6 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
           {renderMenuLabel(item)}
         </a>
       ) : (
-        /* Level-1 page links (full moon token, bio, …) use menu-button so they
-           match expander peers (damsels, bitcoin art). Deeper path leaves keep
-           menu-link (dashed nested style). */
         <Link
           href={item.path || '/'}
           className={`${level <= 1 ? 'menu-button' : 'menu-link'} ${isActive ? 'active' : ''} ${item.className || ''}`}
@@ -259,15 +250,22 @@ export default function ClientMenu(): React.ReactNode {
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [still, setStill] = useState(false);
 
-  // Home click: close all menus. Refresh: component remounts naturally with {} so menus close.
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const asked = query.has("still");
+    const vr = /OculusBrowser|VRBrowser|Wolvic|Quest|Vuplex|Pico/i.test(navigator.userAgent);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setStill(asked || vr || reduce);
+  }, []);
+
   useEffect(() => {
     if (pathname === '/') {
       setExpandedMap({});
     }
   }, [pathname]);
 
-  // detect mobile viewport on client only
   useEffect(() => {
     function update() {
       setIsMobile(window.innerWidth < 769);
@@ -277,12 +275,10 @@ export default function ClientMenu(): React.ReactNode {
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // close mobile menu when navigating
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Arcade / full-moon: lock content pane (no scroll, fill height)
   useEffect(() => {
     const onHome = pathname === '/' || pathname === '/home';
     const onArcade = pathname === '/arcade';
@@ -304,7 +300,6 @@ export default function ClientMenu(): React.ReactNode {
     setExpandedMap(prev => {
       const isCurrentlyOpen = !!prev[key];
       if (isCurrentlyOpen) {
-        // Closing: remove this key and all descendant keys
         const next: Record<string, boolean> = {};
         for (const k of Object.keys(prev)) {
           if (k !== key && !k.startsWith(key + '/')) {
@@ -313,7 +308,6 @@ export default function ClientMenu(): React.ReactNode {
         }
         return next;
       } else {
-        // Opening: just add this key
         return { ...prev, [key]: true };
       }
     });
@@ -326,10 +320,10 @@ export default function ClientMenu(): React.ReactNode {
       )}
       <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={isMobile && !mobileOpen}>
         <div className="menu-glass-panel">
-          <GlassSparkles count={52} />
+          {still ? null : <GlassSparkles count={52} />}
           <Link href="/" className="side-menu-title" aria-label="go home">
             <div className="title-particle-layer" aria-hidden="true">
-              {Array.from({length: 16}, (_, i) => (
+              {still ? null : Array.from({length: 16}, (_, i) => (
                 <span key={i} className={`title-particle tp-${i + 1}`} />
               ))}
             </div>
@@ -357,12 +351,16 @@ export default function ClientMenu(): React.ReactNode {
 
       <header className="header header-with-side">
         <div className="header-aurora" aria-hidden="true">
+          {still ? null : (
+            <>
           <span className="aurora-band aurora-band-1" />
           <span className="aurora-band aurora-band-2" />
           <span className="aurora-band aurora-band-3" />
           <span className="aurora-band aurora-band-4" />
+            </>
+          )}
         </div>
-        <GlassSparkles count={36} />
+        {still ? null : <GlassSparkles count={36} />}
         {isMobile && (
           <button
             className="mobile-menu-button"
@@ -373,7 +371,7 @@ export default function ClientMenu(): React.ReactNode {
           </button>
         )}
         <div className="logo centered-logo">
-          <img src="/et logo animated.gif" alt="ET Crown" />
+          {still ? null : <img src="/et logo animated.gif" alt="ET Crown" />}
         </div>
       </header>
     </>
