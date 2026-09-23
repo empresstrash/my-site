@@ -83,7 +83,6 @@ function connectTwitch(onLine: (line: Line) => void, onStatus: (status: string) 
 }
 
 export default function Booth() {
-  const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [gateError, setGateError] = useState("");
@@ -112,7 +111,6 @@ export default function Booth() {
       const body = (await response.json()) as { ok?: boolean };
       if (cancelled) return;
       setOpen(Boolean(body.ok));
-      setReady(true);
     });
     const savedVolume = Number(window.localStorage.getItem("atelier-volume"));
     if (savedVolume > 0 && savedVolume <= 1) setVolume(savedVolume);
@@ -227,8 +225,6 @@ export default function Booth() {
     });
   };
 
-  if (!ready) return <div className="vr-booth" />;
-
   if (!open) {
     return (
       <div className="vr-booth">
@@ -251,7 +247,6 @@ export default function Booth() {
           }}
         >
           <h1 className="vr-title">vr booth</h1>
-          <p className="vr-note">Parcel chat and the radio, on this site.</p>
           <label className="vr-label" htmlFor="gate">
             Password
           </label>

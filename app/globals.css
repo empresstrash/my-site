@@ -2669,6 +2669,27 @@ html.pvr-still * {
   caret-color: var(--accent-pink);
 }
 
+html.pvr-still,
+html.pvr-still body,
+html.pvr-still .side-menu,
+html.pvr-still .side-menu *,
+html.pvr-still .header-with-side,
+html.pvr-still .vr-booth,
+html.pvr-still .vr-booth * {
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+html.pvr-still body,
+html.pvr-still .side-menu,
+html.pvr-still .menu-glass-panel,
+html.pvr-still .header-with-side,
+html.pvr-still .vr-chat,
+html.pvr-still .vr-radio,
+html.pvr-still .vr-gate {
+  background-color: #000 !important;
+  background-image: none !important;
+  filter: none !important;
+}
 html.pvr-still .glass-sparkle,
 html.pvr-still .title-particle,
 html.pvr-still .icon-particle,

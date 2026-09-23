@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
+              "(function(){try{var path=location.pathname||'';if(path==='/vr'||path.indexOf('/vr/')===0){document.documentElement.classList.add('pvr-still');return;}var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
           }}
         />
         <ClientMenu />

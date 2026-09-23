@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
 import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord, FaDeviantart, FaSpotify, FaTwitch } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
@@ -311,7 +311,7 @@ export default function ClientMenu(): React.ReactNode {
 
   const still = onBooth || embeddedBrowser;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.classList.toggle('pvr-still', still);
     return () => document.documentElement.classList.remove('pvr-still');
   }, [still]);
