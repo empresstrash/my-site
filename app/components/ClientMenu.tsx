@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
 import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord, FaDeviantart, FaSpotify, FaTwitch } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
@@ -141,6 +141,28 @@ function renderMarqueeLabel(label: string): React.ReactNode {
   );
 }
 
+function isInGameWebView(): boolean {
+  const ua = navigator.userAgent || '';
+  if (/OculusBrowser/i.test(ua)) return false;
+  if ('vuplex' in window) return true;
+  if (/;\s*wv\)|CEF\/|Vuplex/i.test(ua)) return true;
+  if (/Quest/i.test(ua)) return true;
+  if (/Android/i.test(ua) && /Version\/4\.0/i.test(ua)) return true;
+  return false;
+}
+
+function readOpenMenu(): Record<string, boolean> {
+  try {
+    const raw = sessionStorage.getItem('et-menu-open');
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== 'object') return {};
+    return parsed as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
 function renderMenuLabel(item: MenuItem): React.ReactNode {
   if (item.icon) {
     return (
@@ -205,6 +227,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
       {item.children ? (
         <>
           <button
+            type="button"
             className={`menu-button ${item.className || ''}`}
             onClick={handleClick}
             style={paddingStyle}
@@ -238,6 +261,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
            menu-link (dashed nested style). */
         <Link
           href={item.path || '/'}
+          prefetch={false}
           className={`${level <= 1 ? 'menu-button' : 'menu-link'} ${isActive ? 'active' : ''} ${item.className || ''}`}
           style={paddingStyle}
           aria-label={item.ariaLabel || item.label}
@@ -255,26 +279,31 @@ export default function ClientMenu(): React.ReactNode {
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const lastMenuClick = useRef({ key: '', at: 0 });
+  const menuOpenedAt = useRef(0);
+  const skipMenuWrite = useRef(true);
 
-  // Home click: close all menus. Refresh: component remounts naturally with {} so menus close.
   useEffect(() => {
-    if (pathname === '/') {
-      setExpandedMap({});
+    setExpandedMap(readOpenMenu());
+  }, []);
+
+  useEffect(() => {
+    if (skipMenuWrite.current) {
+      skipMenuWrite.current = false;
+      return;
     }
-  }, [pathname]);
+    try {
+      sessionStorage.setItem('et-menu-open', JSON.stringify(expandedMap));
+    } catch {
+      /* the in-game browser may block storage */
+    }
+  }, [expandedMap]);
 
   const onBooth = pathname === '/vr';
   const [embeddedBrowser, setEmbeddedBrowser] = useState(false);
 
   useEffect(() => {
-    const check = () => {
-      const ua = navigator.userAgent || '';
-      if (/OculusBrowser/i.test(ua)) {
-        setEmbeddedBrowser(false);
-        return;
-      }
-      setEmbeddedBrowser('vuplex' in window || /;\s*wv\)|Vuplex|CEF\//i.test(ua));
-    };
+    const check = () => setEmbeddedBrowser(isInGameWebView());
     check();
     window.addEventListener('vuplexready', check);
     return () => window.removeEventListener('vuplexready', check);
@@ -324,6 +353,9 @@ export default function ClientMenu(): React.ReactNode {
   }, [pathname]);
 
   const toggleExpand = (key: string) => {
+    const now = Date.now();
+    if (lastMenuClick.current.key === key && now - lastMenuClick.current.at < 400) return;
+    lastMenuClick.current = { key, at: now };
     setExpandedMap(prev => {
       const isCurrentlyOpen = !!prev[key];
       if (isCurrentlyOpen) {
@@ -345,12 +377,27 @@ export default function ClientMenu(): React.ReactNode {
   return (
     <>
       {isMobile && mobileOpen && (
-        <div className="menu-backdrop" onClick={() => setMobileOpen(false)} />
+        <div
+          className="menu-backdrop"
+          onClick={() => {
+            if (Date.now() - menuOpenedAt.current < 400) return;
+            setMobileOpen(false);
+          }}
+        />
       )}
       <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={isMobile && !mobileOpen}>
         <div className="menu-glass-panel">
           <GlassSparkles count={52} />
-          <Link href="/" className="side-menu-title" aria-label="go home">
+          <Link
+            href="/"
+            prefetch={false}
+            className="side-menu-title"
+            aria-label="go home"
+            onClick={(event) => {
+              if (pathname === '/') event.preventDefault();
+              else setExpandedMap({});
+            }}
+          >
             <div className="title-particle-layer" aria-hidden="true">
               {Array.from({length: 16}, (_, i) => (
                 <span key={i} className={`title-particle tp-${i + 1}`} />
@@ -388,9 +435,18 @@ export default function ClientMenu(): React.ReactNode {
         <GlassSparkles count={36} />
         {isMobile && (
           <button
+            type="button"
             className="mobile-menu-button"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setMobileOpen(v => !v)}
+            onClick={() =>
+              setMobileOpen((open) => {
+                const now = Date.now();
+                if (lastMenuClick.current.key === 'mobile' && now - lastMenuClick.current.at < 400) return open;
+                lastMenuClick.current = { key: 'mobile', at: now };
+                if (!open) menuOpenedAt.current = now;
+                return !open;
+              })
+            }
           >
             ☰
           </button>

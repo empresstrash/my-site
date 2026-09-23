@@ -21,6 +21,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
+          }}
+        />
         <ClientMenu />
         <main className="content">{children}</main>
       </body>
