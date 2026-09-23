@@ -14,6 +14,7 @@ type Line = {
   address?: string;
   text: string;
   at: number;
+  translated?: string;
 };
 
 const EMPTY_NOW: NowPlaying = { line: "Loading the current track", detail: "", art: "", next: "" };
@@ -82,11 +83,12 @@ function connectTwitch(onLine: (line: Line) => void, onStatus: (status: string) 
   };
 }
 
-export default function Booth() {
-  const [open, setOpen] = useState(false);
+export default function Booth({ initialOpen = false }: { initialOpen?: boolean }) {
+  const [open, setOpen] = useState(initialOpen);
   const [password, setPassword] = useState("");
   const [gateError, setGateError] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [translate, setTranslate] = useState(true);
   const [lines, setLines] = useState<Line[]>([]);
   const [dcl, setDcl] = useState<GhostStatus>({
     phase: "connecting",
@@ -104,6 +106,36 @@ export default function Booth() {
   const scroller = useRef<HTMLDivElement>(null);
   const names = useRef(new Map<string, string>());
   const lineSeq = useRef(0);
+  const lang = useRef("en");
+  const translateOn = useRef(true);
+
+  useEffect(() => {
+    lang.current = (navigator.language || "en").split("-")[0] || "en";
+  }, []);
+
+  useEffect(() => {
+    translateOn.current = translate;
+  }, [translate]);
+
+  const pushLine = (line: Line) => {
+    setLines((current) => [...current.slice(-199), line]);
+    if (!translateOn.current) return;
+    const to = lang.current;
+    void fetch("/api/vr/translate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: line.text, to }),
+    })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const body = (await response.json()) as { text?: string };
+        if (!body.text || body.text === line.text) return;
+        setLines((current) =>
+          current.map((item) => (item.id === line.id ? { ...item, translated: body.text } : item)),
+        );
+      })
+      .catch(() => undefined);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -135,7 +167,7 @@ export default function Booth() {
           text: chat.text,
           at: chat.at,
         };
-        setLines((current) => [...current.slice(-199), line]);
+        pushLine(line);
         if (line.address && !names.current.has(line.address)) {
           names.current.set(line.address, line.name);
           const address = line.address;
@@ -155,7 +187,7 @@ export default function Booth() {
   useEffect(() => {
     if (!open) return;
     return connectTwitch(
-      (line) => setLines((current) => [...current.slice(-199), line]),
+      (line) => pushLine(line),
       setTwitchStatus,
     );
   }, [open]);
@@ -294,6 +326,13 @@ export default function Booth() {
                   {item === "all" ? "All" : item === "dcl" ? "DCL" : "Twitch"}
                 </button>
               ))}
+              <button
+                type="button"
+                className={translate ? "vr-chip is-on" : "vr-chip"}
+                onClick={() => setTranslate((on) => !on)}
+              >
+                Translate
+              </button>
             </div>
           </div>
           {dcl.phase === "error" ? <p className="vr-error">{dcl.detail}</p> : null}
@@ -310,7 +349,8 @@ export default function Booth() {
                     {" · "}
                     {clock(line.at)}
                   </p>
-                  <p className="vr-text">{line.text}</p>
+                  <p className="vr-text">{line.translated || line.text}</p>
+                  {line.translated ? <p className="vr-original">{line.text}</p> : null}
                 </article>
               ))
             )}

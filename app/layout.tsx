@@ -1,6 +1,7 @@
 import './globals.css';
 import ClientMenu from './components/ClientMenu';
 import { Barlow } from 'next/font/google';
+import { headers } from 'next/headers';
 
 /** Menu sans — loaded via next/font so it actually applies (CSS @import was easy to miss). */
 const menuSans = Barlow({
@@ -10,15 +11,22 @@ const menuSans = Barlow({
   display: 'swap',
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Server component: interactive state lives in `ClientMenu`.
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const path = (await headers()).get('x-pathname') ?? '';
+  const booth = path === '/vr' || path.startsWith('/vr/');
 
   return (
-    <html lang="en" className={menuSans.variable}>
+    <html lang="en" className={`${menuSans.variable}${booth ? ' pvr-still' : ''}`}>
       <head>
         <title>empress trash's super site</title>
         <link rel="icon" href="/crown-favicon.png" type="image/png" sizes="64x64" />
         <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              'html,body{background:#000;color:#fff}html.pvr-still,html.pvr-still *{animation:none!important;transition:none!important}',
+          }}
+        />
       </head>
       <body>
         <script

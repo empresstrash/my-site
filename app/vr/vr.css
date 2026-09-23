@@ -182,6 +182,13 @@
   color: #fff;
 }
 
+.vr-original {
+  margin: 0.25rem 0 0;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: #fff;
+}
+
 .vr-radio {
   padding: 1rem;
 }
