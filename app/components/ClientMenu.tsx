@@ -32,6 +32,7 @@ const menuItems: MenuItem[] = [
       {
         label: 'marketplaces',
         children: [
+          { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
           { label: 'superrare', external: 'https://superrare.com/empresstrash' },
           { label: 'transient', external: 'https://www.transient.xyz/@empresstrash' },
           { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
@@ -52,18 +53,13 @@ const menuItems: MenuItem[] = [
         ],
       },
       {
-        label: 'auctions & tools',
+        label: 'play & tools',
         children: [
-          { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
           { label: 'xtz airdrop tool', path: '/xtzairdrop' },
-        ],
-      },
-      {
-        label: 'play',
-        children: [
           { label: 'onchain arcade', path: '/arcade' },
           { label: 'rodeo tarot', path: '/rodeo-tarot' },
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
+          { label: 'vr booth', path: '/vr' },
         ],
       },
     ],
@@ -267,6 +263,30 @@ export default function ClientMenu(): React.ReactNode {
     }
   }, [pathname]);
 
+  const onBooth = pathname === '/vr';
+  const [embeddedBrowser, setEmbeddedBrowser] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const ua = navigator.userAgent || '';
+      if (/OculusBrowser/i.test(ua)) {
+        setEmbeddedBrowser(false);
+        return;
+      }
+      setEmbeddedBrowser('vuplex' in window || /;\s*wv\)|Vuplex|CEF\//i.test(ua));
+    };
+    check();
+    window.addEventListener('vuplexready', check);
+    return () => window.removeEventListener('vuplexready', check);
+  }, []);
+
+  const still = onBooth || embeddedBrowser;
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('pvr-still', still);
+    return () => document.documentElement.classList.remove('pvr-still');
+  }, [still]);
+
   // detect mobile viewport on client only
   useEffect(() => {
     function update() {
@@ -288,15 +308,18 @@ export default function ClientMenu(): React.ReactNode {
     const onArcade = pathname === '/arcade';
     const onFullMoon = pathname === '/full-moon';
     const onDamsels = pathname === '/damsels';
+    const onVr = pathname === '/vr';
     document.body.classList.toggle('home-page-active', onHome);
     document.body.classList.toggle('arcade-page-active', onArcade);
     document.body.classList.toggle('full-moon-page-active', onFullMoon);
     document.body.classList.toggle('damsels-page-active', onDamsels);
+    document.body.classList.toggle('vr-page-active', onVr);
     return () => {
       document.body.classList.remove('home-page-active');
       document.body.classList.remove('arcade-page-active');
       document.body.classList.remove('full-moon-page-active');
       document.body.classList.remove('damsels-page-active');
+      document.body.classList.remove('vr-page-active');
     };
   }, [pathname]);
 
@@ -373,7 +396,7 @@ export default function ClientMenu(): React.ReactNode {
           </button>
         )}
         <div className="logo centered-logo">
-          <img src="/et logo animated.gif" alt="ET Crown" />
+          <img src={still ? '/crown-favicon.png' : '/et logo animated.gif'} alt="ET Crown" />
         </div>
       </header>
     </>
