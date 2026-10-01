@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { buildChatPieces, mentionsEmpress, parseTwitchEmoteTag, type EmoteImage, type TwitchEmoteSpan } from "@/lib/vr/chat-text";
 import { startParcelGhost, type GhostStatus } from "@/lib/vr/ghost";
 import { STATIONS, stationById, type NowPlaying } from "@/lib/vr/stations";
+import { loadTwitchEmotes } from "@/lib/vr/twitch-emotes";
 
 type Source = "dcl" | "twitch";
 type Filter = "all" | Source;
@@ -15,9 +17,96 @@ type Line = {
   text: string;
   at: number;
   translated?: string;
+  twitchEmotes?: TwitchEmoteSpan[];
 };
 
 const EMPTY_NOW: NowPlaying = { line: "Loading the current track", detail: "", art: "", next: "" };
+const NO_EMOTES: ReadonlyMap<string, EmoteImage> = new Map();
+
+let audioCtx: AudioContext | null = null;
+let lastPing = 0;
+const pingOn = { current: false };
+
+function audioConstructor(): typeof AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const legacy = window as Window & { webkitAudioContext?: typeof AudioContext };
+  return window.AudioContext || legacy.webkitAudioContext || null;
+}
+
+function armChime(): Promise<void> {
+  const Ctor = audioConstructor();
+  if (!Ctor) return Promise.resolve();
+  if (!audioCtx) audioCtx = new Ctor();
+  return audioCtx.resume().then(() => undefined);
+}
+
+function playChime() {
+  if (!audioCtx || audioCtx.state !== "running") return;
+  const nowMs = Date.now();
+  if (nowMs - lastPing < 1500) return;
+  lastPing = nowMs;
+  const now = audioCtx.currentTime;
+  [880, 1318].forEach((freq, index) => {
+    const osc = audioCtx!.createOscillator();
+    const gain = audioCtx!.createGain();
+    const start = now + index * 0.09;
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.16, start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
+    osc.connect(gain);
+    gain.connect(audioCtx!.destination);
+    osc.start(start);
+    osc.stop(start + 0.3);
+  });
+}
+
+function pingMention() {
+  if (!pingOn.current) return;
+  playChime();
+}
+
+function EmoteImg({ name, src, fallback }: { name: string; src: string; fallback?: string }) {
+  const [current, setCurrent] = useState(src);
+  const [failed, setFailed] = useState(false);
+  if (failed) return <>{name}</>;
+  return (
+    <img
+      className="vr-emote"
+      src={current}
+      alt={name}
+      title={name}
+      onError={() => {
+        if (fallback && current !== fallback) setCurrent(fallback);
+        else setFailed(true);
+      }}
+    />
+  );
+}
+
+function ChatBody({
+  text,
+  twitchEmotes,
+  extras,
+}: {
+  text: string;
+  twitchEmotes?: TwitchEmoteSpan[];
+  extras: ReadonlyMap<string, EmoteImage>;
+}) {
+  const pieces = buildChatPieces(text, twitchEmotes ?? [], extras);
+  return (
+    <>
+      {pieces.map((piece, index) => {
+        if (piece.kind === "text") return <span key={index}>{piece.text}</span>;
+        if (piece.kind === "image") {
+          return <img key={index} className="vr-photo" src={piece.src} alt={piece.alt} />;
+        }
+        return <EmoteImg key={index} name={piece.name} src={piece.src} fallback={piece.fallback} />;
+      })}
+    </>
+  );
+}
 
 function clock(at: number): string {
   return new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -52,18 +141,20 @@ function connectTwitch(onLine: (line: Line) => void, onStatus: (status: string) 
         if (!raw.includes("PRIVMSG")) continue;
         const tagEnd = raw.startsWith("@") ? raw.indexOf(" ") : 0;
         const tags = raw.startsWith("@") ? raw.slice(1, tagEnd) : "";
-        const display = /display-name=([^;]*)/.exec(tags)?.[1];
+        const display = /display-name=([^;]*)/.exec(tags)?.[1]?.replace(/\\s/g, " ");
         const login = /:([^!]+)!/.exec(raw)?.[1];
         const marker = raw.indexOf("PRIVMSG");
         const colon = raw.indexOf(" :", marker);
-        const text = colon >= 0 ? raw.slice(colon + 2).trim() : "";
+        const text = colon >= 0 ? raw.slice(colon + 2).replace(/\s+$/g, "") : "";
         if (!text) continue;
+        const emoteTag = /(?:^|;)emotes=([^;]*)/.exec(tags)?.[1] ?? "";
         onLine({
           id: `twitch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           source: "twitch",
           name: display || login || "twitch",
           text,
           at: Date.now(),
+          twitchEmotes: parseTwitchEmoteTag(emoteTag),
         });
       }
     };
@@ -102,8 +193,15 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   const [now, setNow] = useState<NowPlaying>(EMPTY_NOW);
   const [radioError, setRadioError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [emotes, setEmotes] = useState<ReadonlyMap<string, EmoteImage>>(NO_EMOTES);
+  const [ping, setPing] = useState(false);
+  const [pingReady, setPingReady] = useState(false);
+  const [pending, setPending] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
+  const stickToBottom = useRef(true);
+  const seenIds = useRef(new Set<string>());
+  const filterSeen = useRef<Filter>("all");
   const names = useRef(new Map<string, string>());
   const lineSeq = useRef(0);
   const lang = useRef("en");
@@ -119,6 +217,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   const pushLine = (line: Line) => {
     setLines((current) => [...current.slice(-199), line]);
+    if (mentionsEmpress(line.text)) pingMention();
     if (!translateOn.current) return;
     const to = lang.current;
     void fetch("/api/vr/translate", {
@@ -148,6 +247,9 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     if (savedVolume > 0 && savedVolume <= 1) setVolume(savedVolume);
     const savedStation = window.localStorage.getItem("atelier-station");
     if (savedStation && stationById(savedStation)) setStationId(savedStation);
+    const savedPing = window.localStorage.getItem("atelier-ping") === "1";
+    pingOn.current = savedPing;
+    setPing(savedPing);
     return () => {
       cancelled = true;
     };
@@ -186,6 +288,17 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
+    void loadTwitchEmotes().then((map) => {
+      if (!cancelled) setEmotes(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     return connectTwitch(
       (line) => pushLine(line),
       setTwitchStatus,
@@ -209,15 +322,82 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     };
   }, [open, stationId]);
 
-  useEffect(() => {
+  const visible = useMemo(
+    () => lines.filter((line) => filter === "all" || line.source === filter),
+    [lines, filter],
+  );
+
+  useLayoutEffect(() => {
     const node = scroller.current;
     if (!node) return;
-    node.scrollTop = node.scrollHeight;
-  }, [lines, filter]);
+    if (filter !== filterSeen.current) {
+      filterSeen.current = filter;
+      for (const line of lines) seenIds.current.add(line.id);
+      stickToBottom.current = true;
+      setPending(0);
+      node.scrollTop = node.scrollHeight;
+      return;
+    }
+    const fresh = visible.filter((line) => !seenIds.current.has(line.id));
+    for (const line of lines) seenIds.current.add(line.id);
+    if (stickToBottom.current) {
+      node.scrollTop = node.scrollHeight;
+      if (fresh.length > 0) setPending((count) => (count === 0 ? count : 0));
+      return;
+    }
+    if (fresh.length > 0) setPending((count) => count + fresh.length);
+  }, [visible, filter, lines]);
+
+  useEffect(() => {
+    if (!open) return;
+    const node = scroller.current;
+    if (!node) return;
+    const onScroll = () => {
+      const near = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+      stickToBottom.current = near;
+      if (near) setPending((count) => (count === 0 ? count : 0));
+    };
+    const onLoad = () => {
+      if (stickToBottom.current) node.scrollTop = node.scrollHeight;
+    };
+    node.addEventListener("scroll", onScroll);
+    node.addEventListener("load", onLoad, true);
+    return () => {
+      node.removeEventListener("scroll", onScroll);
+      node.removeEventListener("load", onLoad, true);
+    };
+  }, [open]);
+
+  function togglePing() {
+    const live = Boolean(audioCtx && audioCtx.state === "running");
+    if (pingOn.current && pingReady && live) {
+      pingOn.current = false;
+      setPing(false);
+      setPingReady(false);
+      window.localStorage.setItem("atelier-ping", "0");
+      return;
+    }
+    pingOn.current = true;
+    setPing(true);
+    window.localStorage.setItem("atelier-ping", "1");
+    void armChime()
+      .then(() => {
+        setPingReady(true);
+        lastPing = 0;
+        playChime();
+      })
+      .catch(() => undefined);
+  }
+
+  function jumpToPresent() {
+    const node = scroller.current;
+    stickToBottom.current = true;
+    setPending(0);
+    if (node) node.scrollTop = node.scrollHeight;
+  }
 
   const station = stationById(stationId) ?? STATIONS[0];
   const groups = useMemo(() => [...new Set(STATIONS.map((item) => item.group))], []);
-  const visible = lines.filter((line) => filter === "all" || line.source === filter);
 
   const tune = (nextPlaying: boolean, nextStation = station, useFallback = false) => {
     const audio = audioRef.current;
@@ -238,10 +418,10 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
       setRadioError("This stream did not start. Try another station.");
     };
     if (audio.src !== url) audio.src = url;
-    const pending = audio.play();
+    const playback = audio.play();
     setPlaying(true);
     setRadioError("");
-    void pending?.catch((error: unknown) => {
+    void playback?.catch((error: unknown) => {
       const blocked = error instanceof DOMException && error.name === "NotAllowedError";
       if (blocked) {
         setPlaying(false);
@@ -333,27 +513,46 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
               >
                 Translate
               </button>
+              <button
+                type="button"
+                className={ping ? "vr-chip is-on" : "vr-chip"}
+                aria-pressed={ping}
+                aria-label="Toggle mention ping"
+                title={ping && !pingReady ? "Tap once to allow the sound" : "Play a sound when someone mentions you"}
+                onClick={togglePing}
+              >
+                Ping
+              </button>
             </div>
           </div>
           {dcl.phase === "error" ? <p className="vr-error">{dcl.detail}</p> : null}
-          <div className="vr-stream" ref={scroller}>
-            {visible.length === 0 ? (
-              <p className="vr-muted">Messages from the atelier and from Twitch show up here.</p>
-            ) : (
-              visible.map((line) => (
-                <article key={line.id} className="vr-line">
-                  <p className="vr-meta">
-                    <span className={line.source === "dcl" ? "vr-hot" : ""}>{line.source === "dcl" ? "DCL" : "Twitch"}</span>
-                    {" · "}
-                    {line.name}
-                    {" · "}
-                    {clock(line.at)}
-                  </p>
-                  <p className="vr-text">{line.translated || line.text}</p>
-                  {line.translated ? <p className="vr-original">{line.text}</p> : null}
-                </article>
-              ))
-            )}
+          <div className="vr-stream-wrap">
+            <div className="vr-stream" ref={scroller}>
+              {visible.length === 0 ? (
+                <p className="vr-muted">Text from people at the atelier, and Twitch chat, show up here.</p>
+              ) : (
+                visible.map((line) => (
+                  <article key={line.id} className={mentionsEmpress(line.text) ? "vr-line is-mention" : "vr-line"}>
+                    <p className={`vr-meta vr-meta-${line.source}`}>
+                      <span className="vr-src">{line.source === "dcl" ? "DCL" : "Twitch"}</span>
+                      <span className="vr-dot"> · </span>
+                      <span className="vr-name">{line.name}</span>
+                      <span className="vr-dot"> · </span>
+                      <span className="vr-time">{clock(line.at)}</span>
+                    </p>
+                    <p className="vr-text">
+                      <ChatBody text={line.text} twitchEmotes={line.twitchEmotes} extras={emotes} />
+                    </p>
+                    {line.translated ? <p className="vr-original">{line.translated}</p> : null}
+                  </article>
+                ))
+              )}
+            </div>
+            {pending > 0 ? (
+              <button type="button" className="vr-jump" onClick={jumpToPresent}>
+                {pending === 1 ? "1 new message" : `${pending} new messages`} · jump to present
+              </button>
+            ) : null}
           </div>
           {dcl.phase === "error" ? (
             <button type="button" className="vr-reconnect" onClick={() => setAttempt((value) => value + 1)}>

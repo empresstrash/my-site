@@ -16,7 +16,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const booth = path === '/vr' || path.startsWith('/vr/');
 
   return (
-    <html lang="en" className={`${menuSans.variable}${booth ? ' pvr-still' : ''}`}>
+    <html lang="en" className={`${menuSans.variable}${booth ? ' pvr-still vr-booth' : ''}`}>
       <head>
         <title>empress trash's super site</title>
         <link rel="icon" href="/crown-favicon.png" type="image/png" sizes="64x64" />
@@ -24,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <style
           dangerouslySetInnerHTML={{
             __html:
-              'html,body{background:#000;color:#fff}html.pvr-still,html.pvr-still *{animation:none!important;transition:none!important}',
+              'html,body{background:#000;color:#fff}html.pvr-still,html.pvr-still *{animation:none!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}',
           }}
         />
       </head>
@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var path=location.pathname||'';if(path==='/vr'||path.indexOf('/vr/')===0){document.documentElement.classList.add('pvr-still');return;}var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
+              "(function(){try{var path=location.pathname||'';if(path==='/vr'||path.indexOf('/vr/')===0){document.documentElement.classList.add('pvr-still');document.documentElement.classList.add('vr-booth');return;}document.documentElement.classList.remove('vr-booth');var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
           }}
         />
         <ClientMenu />

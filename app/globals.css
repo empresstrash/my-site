@@ -1425,6 +1425,48 @@ body.vr-page-active .content > * {
   flex: 1 1 auto;
   min-height: 0;
 }
+
+/* VR booth: tuck the site menu away so the booth can use the width.
+   Slide with left, not transform, so the Painting VR browser does not keep a moving layer. */
+html.vr-booth .side-menu {
+  width: min(80vw, 360px);
+  left: -110%;
+  transform: none;
+  z-index: 3000;
+  padding-top: calc(3.4rem + env(safe-area-inset-top, 0px));
+  box-shadow: none;
+}
+html.vr-booth .side-menu.open {
+  left: 0;
+  transform: none;
+}
+html.vr-booth .header-with-side,
+html.vr-booth .content {
+  margin-left: 0;
+}
+html.vr-booth .mobile-menu-button,
+html.vr-booth .header-with-side > .mobile-menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  position: fixed !important;
+  left: max(0.6rem, env(safe-area-inset-left, 0px));
+  top: max(0.5rem, env(safe-area-inset-top, 0px));
+  margin: 0;
+  z-index: 3100;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  cursor: pointer;
+}
 .header-with-side > .glass-shimmer {
   z-index: 1;
 }

@@ -32,24 +32,50 @@ const menuItems: MenuItem[] = [
       {
         label: 'marketplaces',
         children: [
-          { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
-          { label: 'superrare', external: 'https://superrare.com/empresstrash' },
-          { label: 'transient', external: 'https://www.transient.xyz/@empresstrash' },
-          { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
-          { label: 'networked', external: 'https://networked.art/empresstrash' },
-          { label: 'mint.networked', external: 'https://mint.networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
-          { label: 'verse', external: 'https://verse.works/empresstrash' },
-          { label: 'opensea', external: 'https://opensea.io/EmpressTrash/galleries' },
-          { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
-          { label: 'manifold', external: 'https://manifold.xyz/@empresstrash' },
-          { label: 'titles', external: 'https://titles.xyz/profile/313f8455-82ee-4b20-81fd-5a1a564b35cb' },
-          { label: 'highlight', external: 'https://highlight.xyz/user/@empresstrash.eth' },
-          { label: 'mallow', external: 'https://mallow.art/u/empresstrash?tab=artworks' },
-          { label: 'drip haus', external: 'https://drip.haus/empresstrash' },
-          { label: 'mint gold dust', external: 'https://www.mintgolddust.com/profile/0x8469B7b08D30C63fEA3a248a198dE9D634B63d70/' },
-          { label: 'teia', external: 'https://teia.art/empresstrash' },
-          { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
-          { label: 'lunalauncher', external: 'https://lunalauncher.io/mint/empress-trash-lotus-blooms' },
+          {
+            label: 'ethereum',
+            className: 'submenu-header divider-after',
+            children: [
+              { label: 'superrare', external: 'https://superrare.com/empresstrash' },
+              { label: 'opensea', external: 'https://opensea.io/EmpressTrash/galleries' },
+              { label: 'transient', external: 'https://www.transient.xyz/@empresstrash' },
+              { label: 'highlight', external: 'https://highlight.xyz/user/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
+              { label: 'manifold', external: 'https://manifold.xyz/@empresstrash' },
+              { label: 'mint gold dust', external: 'https://www.mintgolddust.com/profile/0x8469B7b08D30C63fEA3a248a198dE9D634B63d70/' },
+              { label: 'mint.networked', external: 'https://mint.networked.art/profile/0x8469b7b08d30c63fea3a248a198de9d634b63d70' },
+              { label: 'networked', external: 'https://networked.art/empresstrash' },
+              { label: 'titles', external: 'https://titles.xyz/profile/313f8455-82ee-4b20-81fd-5a1a564b35cb' },
+              { label: 'verse', external: 'https://verse.works/empresstrash' },
+              { label: 'gbm auctions', external: 'https://empresstrash.gbm.auction/' },
+            ],
+          },
+          {
+            label: 'tezos',
+            className: 'submenu-header divider-after',
+            children: [
+              { label: 'drop.art', external: 'https://drop.art/u/tz1YbJAyfmSwqLbLwCrUTfEMeLgCncM9jj3z/created' },
+              { label: 'mederu', external: 'https://mederu.art/user/tz1YbJAyfmSwqLbLwCrUTfEMeLgCncM9jj3z' },
+              { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
+              { label: 'teia', external: 'https://teia.art/empresstrash' },
+              { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
+            ],
+          },
+          {
+            label: 'bitcoin',
+            className: 'submenu-header divider-after',
+            children: [
+              { label: 'gamma', external: 'https://gamma.io/empresstrash/created' },
+              { label: 'ord.net', external: 'https://ord.net/creator/EmpressTrash' },
+            ],
+          },
+          {
+            label: 'solana',
+            className: 'submenu-header',
+            children: [
+              { label: 'drip haus', external: 'https://drip.haus/empresstrash' },
+              { label: 'mallow', external: 'https://mallow.art/u/empresstrash?tab=artworks' },
+            ],
+          },
         ],
       },
       {
@@ -313,8 +339,12 @@ export default function ClientMenu(): React.ReactNode {
 
   useLayoutEffect(() => {
     document.documentElement.classList.toggle('pvr-still', still);
-    return () => document.documentElement.classList.remove('pvr-still');
-  }, [still]);
+    document.documentElement.classList.toggle('vr-booth', onBooth);
+    return () => {
+      document.documentElement.classList.remove('pvr-still');
+      document.documentElement.classList.remove('vr-booth');
+    };
+  }, [still, onBooth]);
 
   // detect mobile viewport on client only
   useEffect(() => {
@@ -376,7 +406,7 @@ export default function ClientMenu(): React.ReactNode {
 
   return (
     <>
-      {isMobile && mobileOpen && (
+      {(isMobile || onBooth) && mobileOpen && (
         <div
           className="menu-backdrop"
           onClick={() => {
@@ -385,7 +415,7 @@ export default function ClientMenu(): React.ReactNode {
           }}
         />
       )}
-      <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={isMobile && !mobileOpen}>
+      <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={(isMobile || onBooth) && !mobileOpen}>
         <div className="menu-glass-panel">
           <GlassSparkles count={52} />
           <Link
@@ -433,7 +463,7 @@ export default function ClientMenu(): React.ReactNode {
           <span className="aurora-band aurora-band-4" />
         </div>
         <GlassSparkles count={36} />
-        {isMobile && (
+        {(isMobile || onBooth) && (
           <button
             type="button"
             className="mobile-menu-button"

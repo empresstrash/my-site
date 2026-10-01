@@ -35,6 +35,18 @@ const CV_TIMELINE: CvYear[] = [
     year: "2026",
     items: [
       {
+        sortKey: "2026-09-03",
+        date: "Sept 3, 2026",
+        entry:
+          "Wen Moon?, Canal Street Show Vol. 6, Beyond the Veil // Beyond Space & Time (curated by Shills_81), Lume Studios, 393 Broadway, New York, NY",
+        links: [
+          {
+            label: "Show site",
+            url: "https://www.thecanalstshow.com/",
+          },
+        ],
+      },
+      {
         sortKey: "2026-09",
         date: "Sept 2026 – Feb 2027",
         entry:
@@ -216,7 +228,7 @@ const CV_TIMELINE: CvYear[] = [
         sortKey: "2026-01-01",
         date: "2026",
         entry:
-          "Decentraland UGC Community Lead; official YouTube livestreamer and builder, L'Impératrice atelier, Decentraland",
+          "Built L'Impératrice atelier, Decentraland; formerly UGC Community Lead and official livestreamer (role ended). Independent DCL builds ongoing.",
         links: [
           {
             label: "Atelier",
@@ -2400,15 +2412,15 @@ export default function BioPage() {
         </p>
 
         <p>
-          Since venturing into crypto art in 2021, her work has exploded globally with well over 100 exhibitions, curations, and drops, emphasizing community uplift and innovation while escaping traditional art systems. Early crypto milestones include features at Sotheby&apos;s, SuperChief, Nox Gallery, and TED Vancouver, with exhibitions spanning Tokyo, Seoul, NYC, Paris, Palm Springs, Miami, Rome, LA, SXSW, Mexico City, and Melbourne. Beyond art exhibitions, she has spoke at the Creative Commons Global Summit on crypto art and #cc0 ethos, been featured in extensive podcasts, interviews and publications, and has rescued wild animals like a raccoon, opossum, and crow.
+          Since venturing into crypto art in 2021, her work has exploded globally with well over 100 exhibitions, curations, and drops, emphasizing community uplift and innovation while escaping traditional art systems. Early crypto milestones include features at Sotheby&apos;s, SuperChief, Nox Gallery, and TED Vancouver, with exhibitions spanning Tokyo, Seoul, NYC, Paris, Palm Springs, Miami, Rome, LA, SXSW, Mexico City, and Melbourne. In 2026 her work entered the permanent collection of Francisco Carolinum Linz (Wen Moon #850) and the Opepen permanent collection via the CONSTRAINT set, she exhibited obey//resist in Obey and Resist (Beeple × Shepard Fairey) at Beeple Studios in Charleston, and she served as artist curator and featured artist for RGBMTL 5th edition × MUTEK Montréal. Beyond art exhibitions, she has spoke at the Creative Commons Global Summit on crypto art and #cc0 ethos, been featured in extensive podcasts, interviews and publications, and has rescued wild animals like a raccoon, opossum, and crow.
         </p>
 
         <p>
-          Empress Trash&apos;s art embraces abstraction, surrealism, glitch aesthetics, and AI, continually seeking new accessible technologies like Midjourney for surreal visions and custom models on platforms like Titles.xyz. Her process-oriented approach leverages radical expressionism and self-acceptance, delving into meditative explorations of subconscious connections between emotional, physical, mental, sexual, and spiritual realms. Digital art is not new to her, with being an OG on DeviantArt as trash-empress (active since ~2003), she shared early digital portraits, line art, coloring pages, graphic weirdness, and sketches/quick draws, rejecting elitism and drawing from diverse influences. Her Instagram (@empress_trash), X (@empresstrash) and TikTok (@empress_trash) showcases the diverse works she creates.
+          Empress Trash&apos;s art embraces abstraction, surrealism, glitch aesthetics, and AI, continually seeking new accessible technologies and custom models. Her process-oriented approach leverages radical expressionism and self-acceptance, delving into meditative explorations of subconscious connections between emotional, physical, mental, sexual, and spiritual realms. She coined Voluptechne as a voluptuous AI art practice that fuses hand painting, glitch, and historical craft. Digital art is not new to her, with being an OG on DeviantArt as trash-empress (active since ~2003), she shared early digital portraits, line art, coloring pages, graphic weirdness, and sketches/quick draws, rejecting elitism and drawing from diverse influences.
         </p>
 
         <p>
-          Empress Trash is also a metaverse builder, passionately creating virtual spaces to extend her artistic sovereignty. She has built galleries and experiences in Cryptovoxels, contributing to immersive environments that blend glitch, trash and digital outsider art with interactive experiences, including Dumpster Palace Gallery. She participated in XoB Gallery&apos;s virtual exhibitions as artist in residency, showcasing glitchy, avant-garde pieces in metaverse galleries, emphasizing digital ownership and accessibility. Currently, she focuses on Nifty Island, where she designs and curates islands that serve as digital sanctuaries for community engagement and creative rebellion, including her first Prismata island.
+          Empress Trash is also a metaverse builder, passionately creating virtual spaces to extend her artistic sovereignty. She has built galleries and experiences in Cryptovoxels, contributing to immersive environments that blend glitch, trash and digital outsider art with interactive experiences, including Dumpster Palace Gallery. She participated in XoB Gallery&apos;s virtual exhibitions as artist in residency, showcasing glitchy, avant-garde pieces in metaverse galleries, emphasizing digital ownership and accessibility. In SubstrataVR she built and curated Cusp of Rebirth V1, her first annual birthday open-call group exhibition and virtual extravaganza (opened March 20, 2026, ongoing, 90 works, theme of rebirth, renewal, and transformation), and also built Visible Violets V2 with One Love Art DAO. In Decentraland she built the L&apos;Impératrice atelier, was first Artist in Residence at PanelHaus for Voluptechne (weekly OpenHaus sessions and the Diana the Huntress sculpture retexturing series), and continues independent builds and installs. During summer 2026 she served as Decentraland UGC Community Lead and Official livestreamer. Currently, she builds independently and for clients.
         </p>
 
         <p>
@@ -2417,7 +2429,7 @@ export default function BioPage() {
       </section>
 
       <section className="bio-section">
-        <h2>Exhibitions + Stuff</h2>
+        <h2>Exhibitions + Curations</h2>
         <div className="cv-timeline">
           {CV_TIMELINE.map((group) => (
             <div key={group.year} className="cv-year-block">

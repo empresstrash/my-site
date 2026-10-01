@@ -1,3 +1,4 @@
+import { isSpokenDclChat } from "@/lib/vr/chat-text";
 import { decodeChat } from "@/lib/vr/proto";
 
 export type GhostPhase = "connecting" | "live" | "error";
@@ -44,7 +45,7 @@ export function startParcelGhost(handlers: GhostHandlers): () => void {
       room.on(RoomEvent.DataReceived, (payload, participant) => {
         const bytes = payload instanceof Uint8Array ? payload : new Uint8Array(payload);
         const chat = decodeChat(bytes);
-        if (!chat) return;
+        if (!chat || !isSpokenDclChat(chat.message)) return;
         const address = (participant?.identity || "").toLowerCase();
         const raw = chat.timestamp;
         const ms = raw > 10_000_000_000 ? raw : raw > 1_000_000_000 ? raw * 1000 : 0;
