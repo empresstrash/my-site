@@ -45,6 +45,7 @@ export default function ImagesPanel() {
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState("");
   const [drag, setDrag] = useState(false);
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const alive = useRef(true);
   const imagesRef = useRef(images);
@@ -137,9 +138,11 @@ export default function ImagesPanel() {
       return;
     }
     setImages((current) => current.filter((item) => item.id !== image.id));
+    setViewingId((current) => (current === image.id ? null : current));
   }
 
   const canUpload = !busy && (mode === "file" || mode === "blob");
+  const viewing = viewingId ? images.find((image) => image.id === viewingId) ?? null : null;
 
   return (
     <section className="vr-images" aria-label="Images">
@@ -171,33 +174,50 @@ export default function ImagesPanel() {
             }}
           />
         </label>
-        <p className="vr-muted vr-drop-note">{busy || "png, jpg, or gif. Drop files here, then download them in VR."}</p>
+        <p className="vr-muted vr-drop-note">{busy || "png, jpg, or gif. Open a picture, then hold A on it to save it."}</p>
       </div>
       {error ? <p className="vr-error vr-image-status">{error}</p> : null}
       {!error && notice && mode === "off" ? <p className="vr-error vr-image-status">{notice}</p> : null}
-      <div className="vr-image-grid">
-        {images.length === 0 ? (
-          <p className="vr-muted">No images yet.</p>
-        ) : (
-          images.map((image) => (
-            <article key={image.id} className="vr-image-card">
-              <BoothPicture image={image} />
-              <p className="vr-image-name">{image.name}</p>
-              <p className="vr-muted vr-image-meta">
-                {formatBytes(image.bytes)} · {clock(image.at)}
-              </p>
-              <div className="vr-image-actions">
-                <a className="vr-file-btn" href={`/api/vr/images/${image.id}?download=1`} download={image.name}>
-                  Download
-                </a>
-                <button type="button" className="vr-file-quiet" onClick={() => void remove(image)}>
-                  Remove
+      {viewing ? (
+        <div className="vr-image-view">
+          <div className="vr-image-view-bar">
+            <button type="button" className="vr-file-quiet" onClick={() => setViewingId(null)}>
+              Back
+            </button>
+            <p className="vr-image-name">{viewing.name}</p>
+            <button type="button" className="vr-file-quiet" onClick={() => void remove(viewing)}>
+              Remove
+            </button>
+          </div>
+          <p className="vr-muted vr-image-hold">Hold A on the picture to save it.</p>
+          <div className="vr-image-stage">
+            <BoothPicture image={viewing} />
+          </div>
+        </div>
+      ) : (
+        <div className="vr-image-grid">
+          {images.length === 0 ? (
+            <p className="vr-muted">No images yet.</p>
+          ) : (
+            images.map((image) => (
+              <article key={image.id} className="vr-image-card">
+                <button type="button" className="vr-image-open" onClick={() => setViewingId(image.id)} aria-label={`Open ${image.name}`}>
+                  <BoothPicture image={image} />
                 </button>
-              </div>
-            </article>
-          ))
-        )}
-      </div>
+                <p className="vr-image-name">{image.name}</p>
+                <p className="vr-muted vr-image-meta">
+                  {formatBytes(image.bytes)} · {clock(image.at)}
+                </p>
+                <div className="vr-image-actions">
+                  <button type="button" className="vr-file-quiet" onClick={() => void remove(image)}>
+                    Remove
+                  </button>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      )}
     </section>
   );
 }
