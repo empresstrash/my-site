@@ -1,7 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import path from "path";
 import { cookies } from "next/headers";
-import { BlobNotFoundError, del, getDownloadUrl, issueSignedToken, list, presignUrl } from "@vercel/blob";
+import { BlobNotFoundError, del, get, issueSignedToken, list, presignUrl } from "@vercel/blob";
 import { cookieIsValid, VR_COOKIE } from "@/lib/vr/gate";
 import {
   BLOB_PREFIX,
@@ -177,19 +177,7 @@ export function fileResponse(bytes: Buffer, kind: ImageKind, name: string, downl
   });
 }
 
-const signedGets = new Map<string, { inline: string; download: string; exp: number }>();
 
-async function signedUrls(pathname: string): Promise<{ inline: string; download: string }> {
-  const now = Date.now();
-  const saved = signedGets.get(pathname);
-  if (saved && saved.exp > now + 30_000) return saved;
-  const validUntil = now + 10 * 60 * 1000;
-  const token = await issueSignedToken({ pathname, operations: ["get"], validUntil });
-  const { presignedUrl } = await presignUrl(token, { access: "private", operation: "get", pathname, validUntil });
-  const pair = { inline: presignedUrl, download: getDownloadUrl(presignedUrl), exp: validUntil };
-  signedGets.set(pathname, pair);
-  return pair;
-}
 
 async function collectBlobImages(): Promise<BoothImage[]> {
   const images: BoothImage[] = [];
@@ -243,15 +231,34 @@ export async function prepareBlobUpload(pathname: string) {
   };
 }
 
-export async function redirectBlob(id: string, download: boolean): Promise<Response> {
+export async function openImage(id: string): Promise<Response> {
+  const denied = await lockedResponse();
+  if (denied) return denied;
+  const mode = imageStorageMode();
+  if (mode === "file") {
+    const found = await readLocalImage(id);
+    if (!found) return imageJson({ error: "That image is gone." }, 404);
+    return fileResponse(found.bytes, found.image.contentType, found.image.name, false);
+  }
+  if (mode !== "blob") return imageJson({ error: "That image is gone." }, 404);
   const pathname = decodePathId(id);
-  if (!pathname) return imageJson({ error: "That image is gone." }, 404);
-  const urls = await signedUrls(pathname);
-  return new Response(null, {
-    status: 302,
+  const kind = pathname ? kindFromName(pathname) : null;
+  if (!pathname || !kind) return imageJson({ error: "That image is gone." }, 404);
+  let result;
+  try {
+    result = await get(pathname, { access: "private" });
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) return imageJson({ error: "That image is gone." }, 404);
+    throw error;
+  }
+  if (!result || result.statusCode !== 200 || !result.stream) return imageJson({ error: "That image is gone." }, 404);
+  return new Response(result.stream, {
     headers: {
-      location: download ? urls.download : urls.inline,
+      "content-type": kind,
+      "content-length": String(result.blob.size),
+      "content-disposition": contentDisposition(nameFromPath(pathname), false),
       "cache-control": "private, no-store",
+      "x-content-type-options": "nosniff",
     },
   });
 }
@@ -259,7 +266,6 @@ export async function redirectBlob(id: string, download: boolean): Promise<Respo
 export async function deleteBlobImage(id: string): Promise<boolean> {
   const pathname = decodePathId(id);
   if (!pathname) return false;
-  signedGets.delete(pathname);
   try {
     await del(pathname);
   } catch (error) {

@@ -7,6 +7,7 @@ import {
   MAX_IMAGE_BYTES,
   MAX_IMAGE_COUNT,
   fallbackName,
+  imageFileUrl,
   kindOfFile,
   randomId,
   safeFileName,
@@ -28,7 +29,7 @@ function clock(at: number): string {
 
 function BoothPicture({ image }: { image: BoothImage }) {
   const [attempt, setAttempt] = useState(0);
-  const src = `/api/vr/images/${image.id}${attempt ? `?retry=${attempt}` : ""}`;
+  const src = imageFileUrl(image, attempt);
   return (
     <img
       src={src}

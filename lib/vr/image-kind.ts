@@ -20,6 +20,11 @@ export function kindFromName(name: string): ImageKind | null {
   return null;
 }
 
+export function imageFileUrl(image: Pick<BoothImage, "id" | "name">, attempt = 0): string {
+  const name = `${attempt > 0 ? `again-${attempt}-` : ""}${encodeURIComponent(image.name)}`;
+  return `/api/vr/images/${image.id}/${name}`;
+}
+
 export function extensionFor(kind: ImageKind): "png" | "jpg" | "gif" {
   if (kind === "image/png") return "png";
   if (kind === "image/gif") return "gif";
