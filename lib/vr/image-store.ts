@@ -9,7 +9,6 @@ import {
   type ImageKind,
   MAX_IMAGE_BYTES,
   MAX_IMAGE_COUNT,
-  contentDisposition,
   displayName,
   extensionFor,
   isBoothPath,
@@ -165,13 +164,12 @@ export async function deleteLocalImage(id: string): Promise<boolean> {
   });
 }
 
-export function fileResponse(bytes: Buffer, kind: ImageKind, name: string, download: boolean): Response {
+export function fileResponse(bytes: Buffer, kind: ImageKind): Response {
   return new Response(new Uint8Array(bytes), {
     headers: {
       "content-type": kind,
       "content-length": String(bytes.byteLength),
-      "content-disposition": contentDisposition(name, download),
-      "cache-control": "private, no-store",
+      "cache-control": "private, max-age=86400",
       "x-content-type-options": "nosniff",
     },
   });
@@ -238,7 +236,7 @@ export async function openImage(id: string): Promise<Response> {
   if (mode === "file") {
     const found = await readLocalImage(id);
     if (!found) return imageJson({ error: "That image is gone." }, 404);
-    return fileResponse(found.bytes, found.image.contentType, found.image.name, false);
+    return fileResponse(found.bytes, found.image.contentType);
   }
   if (mode !== "blob") return imageJson({ error: "That image is gone." }, 404);
   const pathname = decodePathId(id);
@@ -256,8 +254,7 @@ export async function openImage(id: string): Promise<Response> {
     headers: {
       "content-type": kind,
       "content-length": String(result.blob.size),
-      "content-disposition": contentDisposition(nameFromPath(pathname), false),
-      "cache-control": "private, no-store",
+      "cache-control": "private, max-age=86400",
       "x-content-type-options": "nosniff",
     },
   });

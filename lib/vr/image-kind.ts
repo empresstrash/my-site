@@ -100,8 +100,3 @@ export function nameFromPath(pathname: string): string {
   const name = base.slice(base.indexOf("-") + 1);
   return name || "image";
 }
-
-export function contentDisposition(name: string, download: boolean): string {
-  const ascii = name.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "");
-  return `${download ? "attachment" : "inline"}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`;
-}
