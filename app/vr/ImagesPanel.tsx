@@ -90,12 +90,16 @@ export default function ImagesPanel() {
     }
     if (mode === "blob") {
       const safe = safeFileName(file.name) ?? fallbackName(kind);
-      const { uploadPresigned } = await import("@vercel/blob/client");
-      await uploadPresigned(`vr-booth/${randomId()}-${safe}`, file, {
-        access: "private",
-        contentType: kind,
-        handleUploadUrl: "/api/vr/images/upload",
+      const pathname = `vr-booth/${randomId()}-${safe}`;
+      const started = await fetch("/api/vr/images/upload", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ pathname }),
       });
+      const ticket = (await started.json().catch(() => null)) as { url?: string; error?: string } | null;
+      if (!started.ok || !ticket?.url) throw new Error(ticket?.error || "Upload did not start.");
+      const sent = await fetch(ticket.url, { method: "PUT", body: file });
+      if (!sent.ok) throw new Error("Upload did not finish.");
       return;
     }
     const form = new FormData();
