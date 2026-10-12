@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 // The booth lists files by prefix, so it does not use the Blob upload webhook.
 // A signed PUT URL is enough, and it works with the store's read-write token.
 export async function POST(request: Request) {
-  if (imageStorageMode() !== "blob") return imageJson({ error: "Use the image uploader." }, 409);
   const denied = await lockedResponse();
   if (denied) return denied;
+  if (imageStorageMode() !== "blob") return imageJson({ error: "Use the image uploader." }, 409);
   const body = (await request.json().catch(() => null)) as { pathname?: string } | null;
   const pathname = body?.pathname;
   if (!pathname) return imageJson({ error: "Upload did not start." }, 400);

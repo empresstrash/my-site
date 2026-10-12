@@ -166,13 +166,17 @@ export async function deleteLocalImage(id: string): Promise<boolean> {
 
 export function fileResponse(bytes: Buffer, kind: ImageKind): Response {
   return new Response(new Uint8Array(bytes), {
-    headers: {
-      "content-type": kind,
-      "content-length": String(bytes.byteLength),
-      "cache-control": "private, max-age=86400",
-      "x-content-type-options": "nosniff",
-    },
+    headers: imageHeaders(kind, bytes.byteLength),
   });
+}
+
+function imageHeaders(kind: ImageKind, bytes: number): HeadersInit {
+  return {
+    "content-type": kind,
+    "content-length": String(bytes),
+    "cache-control": "public, max-age=86400",
+    "x-content-type-options": "nosniff",
+  };
 }
 
 
@@ -229,9 +233,9 @@ export async function prepareBlobUpload(pathname: string) {
   };
 }
 
+// Pictures are public. Painting VR saves with a second request that does not send the booth cookie.
+// Uploading and deleting stay behind the password.
 export async function openImage(id: string): Promise<Response> {
-  const denied = await lockedResponse();
-  if (denied) return denied;
   const mode = imageStorageMode();
   if (mode === "file") {
     const found = await readLocalImage(id);
@@ -251,12 +255,7 @@ export async function openImage(id: string): Promise<Response> {
   }
   if (!result || result.statusCode !== 200 || !result.stream) return imageJson({ error: "That image is gone." }, 404);
   return new Response(result.stream, {
-    headers: {
-      "content-type": kind,
-      "content-length": String(result.blob.size),
-      "cache-control": "private, max-age=86400",
-      "x-content-type-options": "nosniff",
-    },
+    headers: imageHeaders(kind, result.blob.size),
   });
 }
 
