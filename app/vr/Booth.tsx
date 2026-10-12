@@ -5,9 +5,11 @@ import { buildChatPieces, mentionsEmpress, parseTwitchEmoteTag, type EmoteImage,
 import { startParcelGhost, type GhostStatus } from "@/lib/vr/ghost";
 import { STATIONS, stationById, type NowPlaying } from "@/lib/vr/stations";
 import { loadTwitchEmotes } from "@/lib/vr/twitch-emotes";
+import ImagesPanel from "./ImagesPanel";
 
 type Source = "dcl" | "twitch";
 type Filter = "all" | Source;
+type Panel = "live" | "images";
 
 type Line = {
   id: string;
@@ -197,6 +199,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   const [ping, setPing] = useState(false);
   const [pingReady, setPingReady] = useState(false);
   const [pending, setPending] = useState(0);
+  const [panel, setPanel] = useState<Panel>("live");
   const audioRef = useRef<HTMLAudioElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
@@ -204,6 +207,8 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   const filterSeen = useRef<Filter>("all");
   const names = useRef(new Map<string, string>());
   const lineSeq = useRef(0);
+  const savedScroll = useRef(0);
+  const leftLive = useRef(false);
   const lang = useRef("en");
   const translateOn = useRef(true);
 
@@ -335,18 +340,30 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
       for (const line of lines) seenIds.current.add(line.id);
       stickToBottom.current = true;
       setPending(0);
-      node.scrollTop = node.scrollHeight;
+      if (panel === "live") node.scrollTop = node.scrollHeight;
       return;
     }
     const fresh = visible.filter((line) => !seenIds.current.has(line.id));
     for (const line of lines) seenIds.current.add(line.id);
     if (stickToBottom.current) {
-      node.scrollTop = node.scrollHeight;
+      if (panel === "live") node.scrollTop = node.scrollHeight;
       if (fresh.length > 0) setPending((count) => (count === 0 ? count : 0));
       return;
     }
     if (fresh.length > 0) setPending((count) => count + fresh.length);
-  }, [visible, filter, lines]);
+  }, [visible, filter, lines, panel]);
+
+  useLayoutEffect(() => {
+    if (panel !== "live") {
+      leftLive.current = true;
+      return;
+    }
+    if (!leftLive.current) return;
+    leftLive.current = false;
+    const node = scroller.current;
+    if (!node) return;
+    node.scrollTop = stickToBottom.current ? node.scrollHeight : savedScroll.current;
+  }, [panel]);
 
   useEffect(() => {
     if (!open) return;
@@ -387,6 +404,13 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
         playChime();
       })
       .catch(() => undefined);
+  }
+
+  function choosePanel(next: Panel) {
+    if (panel === "live" && next !== "live" && scroller.current) {
+      savedScroll.current = scroller.current.scrollTop;
+    }
+    setPanel(next);
   }
 
   function jumpToPresent() {
@@ -492,7 +516,31 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           </p>
         </div>
       </div>
-      <div className="vr-layout">
+      <div className="vr-tabs" role="tablist" aria-label="Booth">
+        <button
+          type="button"
+          role="tab"
+          id="vr-tab-live"
+          className={panel === "live" ? "vr-chip is-on" : "vr-chip"}
+          aria-selected={panel === "live"}
+          aria-controls="vr-panel-live"
+          onClick={() => choosePanel("live")}
+        >
+          Chat & radio
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="vr-tab-images"
+          className={panel === "images" ? "vr-chip is-on" : "vr-chip"}
+          aria-selected={panel === "images"}
+          aria-controls="vr-panel-images"
+          onClick={() => choosePanel("images")}
+        >
+          Images
+        </button>
+      </div>
+      <div className="vr-layout" id="vr-panel-live" role="tabpanel" aria-labelledby="vr-tab-live" hidden={panel !== "live"}>
         <section className="vr-chat">
           <div className="vr-bar">
             <div className="vr-filters">
@@ -620,6 +668,11 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           <p className="vr-blurb vr-muted">{station.blurb}</p>
         </aside>
       </div>
+      {panel === "images" ? (
+        <div id="vr-panel-images" role="tabpanel" aria-labelledby="vr-tab-images" className="vr-images-slot">
+          <ImagesPanel />
+        </div>
+      ) : null}
       <audio ref={audioRef} preload="none" />
     </div>
   );

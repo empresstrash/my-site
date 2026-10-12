@@ -44,3 +44,6 @@ next-env.d.ts
 # keep wip/README.md in git so the rule is visible; ignore everything else
 /wip/*
 !/wip/README.md
+
+# VR booth images uploaded on this computer
+/data/vr-images
