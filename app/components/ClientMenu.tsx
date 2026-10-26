@@ -19,10 +19,6 @@ interface MenuItem {
   ariaLabel?: string;
 }
 
-const featureMenuItems: MenuItem[] = [
-  { label: 'become a patron 18+', external: 'https://www.patreon.com/EmpressTrash', className: 'patreon-feature', ariaLabel: 'become a patron 18+', marquee: false },
-];
-
 const menuItems: MenuItem[] = [
   {
     label: 'digital art',
@@ -97,11 +93,13 @@ const menuItems: MenuItem[] = [
         label: 'decentraland',
         className: 'submenu-header',
         children: [
+          { label: 'profile', external: 'https://decentraland.org/profile/0x0745eeaf0e65e77a65f3fc6aadce51ca3317ca44' },
+          { label: 'archives', external: 'https://decentraland.org/jump/?position=-116%2C108' },
           { label: 'atelier', external: 'https://decentraland.org/jump/?position=126%2C104' },
           { label: 'house', external: 'https://decentraland.org/jump/?realm=empresstrash.dcl.eth' },
-          { label: 'archives', external: 'https://decentraland.org/jump/?position=-116%2C108' },
-          { label: 'rgbmtl2026', external: 'https://decentraland.org/play/world/rgbmtl.dcl.eth' },
           { label: 'PanelHaus Art Residency Sculpture Garden', external: 'https://decentraland.org/play/world/empresself.dcl.eth' },
+          { label: 'rgbmtl2026', external: 'https://decentraland.org/play/world/rgbmtl.dcl.eth' },
+          { label: 'teia community center', external: 'https://decentraland.org/jump/?position=10%2C68&referrer=0x0745eeaf0e65e77a65f3fc6aadce51ca3317ca44' },
         ],
       },
       {
@@ -211,14 +209,6 @@ function renderMenuLabel(item: MenuItem): React.ReactNode {
     );
   }
 
-  if (item.className === 'patreon-feature') {
-    return (
-      <>
-        become a patron <em className="inline-18-tag">18+</em>
-      </>
-    );
-  }
-
   return renderMarqueeLabel(item.label);
 }
 
@@ -244,9 +234,7 @@ function MenuItem({ item, level = 0, pathname, keyPath, expandedMap, toggleExpan
     // if it's a normal internal link (item.path) we do nothing special -- navigation will occur
   };
 
-  const paddingStyle = item.className === 'patreon-feature'
-    ? undefined
-    : { paddingLeft: `${1.25 + level * 0.75}rem` };
+  const paddingStyle = { paddingLeft: `${1.25 + level * 0.75}rem` };
 
   return (
     <li className={itemClasses}>
@@ -438,16 +426,6 @@ export default function ClientMenu(): React.ReactNode {
           </Link>
           <div className="menu-title-spacer" aria-hidden="true" />
           <ul className="side-list">
-            {featureMenuItems.map((item, idx) => (
-              <MenuItem
-                key={`feature-${idx}`}
-                item={item}
-                pathname={pathname}
-                keyPath={item.label}
-                expandedMap={expandedMap}
-                toggleExpand={toggleExpand}
-              />
-            ))}
             {menuItems.map((item, idx) => (
               <MenuItem key={idx} item={item} pathname={pathname} keyPath={item.label} expandedMap={expandedMap} toggleExpand={toggleExpand} />
             ))}

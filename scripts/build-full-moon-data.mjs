@@ -62,6 +62,8 @@ const moonNames = {
   "2026-06": "Full Moon",
   "2026-07": "Buck Moon",
   "2026-08": "Partial Lunar Eclipse",
+  "2026-09": "Harvest Moon",
+  "2026-10": "Hunter's Moon",
 };
 
 /** Override moonKey for known edge cases (same month, two moons) */
@@ -276,6 +278,30 @@ const baseAirdrops = [
     tid: 11,
     date: "2026-07-29",
     moonKey: "2026-07",
+  },
+  {
+    id: "b12",
+    name: "Quis ut Deus",
+    image: "https://arweave.net/iM1r4eGdjwKPWEgCTd-bsgVKa99QPvwUHt-d1pEQGtI",
+    tid: 12,
+    date: "2026-08-28",
+    moonKey: "2026-08",
+  },
+  {
+    id: "b13",
+    name: "Don't Fear The Reaper (Version 2)",
+    image: "https://arweave.net/keISbF3WCpDPEL6VTGYloeWEZf60lsv5eU7fx-xLkuc",
+    tid: 13,
+    date: "2026-09-27",
+    moonKey: "2026-09",
+  },
+  {
+    id: "b14",
+    name: "Hunter Moon 2026",
+    image: "https://arweave.net/xKwClPfqam_78RBpgWzhGGLqBjTVVKuHukE6vPXA1BU",
+    tid: 14,
+    date: "2026-10-26",
+    moonKey: "2026-10",
   },
   {
     id: "bHarvest",
