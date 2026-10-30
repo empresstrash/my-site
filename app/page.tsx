@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 type HomeView = 'substack' | 'emporium';
@@ -18,10 +18,6 @@ type SalonPost = {
 type SalonArticle = SalonPost & { html: string };
 
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const BSKY = 'empresstrash.bsky.social';
-const X_WIDGET = 'https://platform.x.com/widgets.js';
-
-type BskyPost = { text: string; href: string; date: string };
 
 function parseHomeView(value: string | null): HomeView {
   return value === 'emporium' ? 'emporium' : 'substack';
@@ -61,74 +57,11 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
   );
 }
 
-function XTimeline() {
-  const box = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const boxEl = box.current;
-    if (!boxEl) return;
-    let cancelled = false;
-
-    const render = () => {
-      if (cancelled) return;
-      const twttr = (window as Window & {
-        twttr?: { ready?: (fn: () => void) => void; widgets?: { load?: (el?: HTMLElement) => void } };
-      }).twttr;
-      if (!twttr) return;
-      const run = () => twttr.widgets?.load?.(boxEl);
-      if (twttr.ready) twttr.ready(run);
-      else run();
-    };
-
-    const existing = document.querySelector(`script[src="${X_WIDGET}"]`);
-    if (existing) {
-      render();
-      existing.addEventListener('load', render);
-      return () => {
-        cancelled = true;
-        existing.removeEventListener('load', render);
-      };
-    }
-
-    const script = document.createElement('script');
-    script.src = X_WIDGET;
-    script.async = true;
-    script.charset = 'utf-8';
-    script.addEventListener('load', render);
-    document.body.appendChild(script);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <div className="salon-x" ref={box}>
-      <a
-        className="twitter-timeline"
-        href="https://x.com/EmpressTrash?ref_src=twsrc%5Etfw"
-        data-width="270"
-        data-height="480"
-        data-theme="dark"
-        data-chrome="transparent noborders"
-      >
-        Posts by EmpressTrash
-      </a>
-    </div>
-  );
-}
-
-function SalonSide() {
-  const [bsky, setBsky] = useState<BskyPost[]>([]);
+function BioCard() {
   const [xProfile, setXProfile] = useState<{ name: string; bio: string } | null>(null);
   const [avatarOk, setAvatarOk] = useState(true);
 
   useEffect(() => {
-    fetch('/api/bsky')
-      .then((response) => response.json())
-      .then((data: { posts?: BskyPost[] }) => {
-        if (Array.isArray(data.posts)) setBsky(data.posts);
-      })
-      .catch(() => {});
     fetch('/api/x')
       .then((response) => response.json())
       .then((data: { name?: string; bio?: string }) => {
@@ -141,38 +74,16 @@ function SalonSide() {
   }, []);
 
   return (
-    <aside className="salon-side">
-      <section className="salon-card salon-bio">
-        {avatarOk ? (
-          <img src="/api/x/avatar" alt="" referrerPolicy="no-referrer" onError={() => setAvatarOk(false)} />
-        ) : null}
-        <div>
-          <h2>{xProfile?.name || 'Empress Trash'}</h2>
-          {xProfile?.bio ? <p>{xProfile.bio}</p> : null}
-          <a href="https://x.com/EmpressTrash" target="_blank" rel="noopener noreferrer">@EmpressTrash</a>
-        </div>
-      </section>
-      <section className="salon-card salon-x-card">
-        <h2>x</h2>
-        <XTimeline />
-      </section>
-      <section className="salon-card">
-        <h2>bluesky</h2>
-        <ol className="bsky-feed">
-          {bsky.map((post) => (
-            <li key={post.href}>
-              <a href={post.href} target="_blank" rel="noopener noreferrer">
-                <time dateTime={post.date}>{formatDate(post.date)}</time>
-                {post.text}
-              </a>
-            </li>
-          ))}
-        </ol>
-        <a className="salon-more" href={`https://bsky.app/profile/${BSKY}`} target="_blank" rel="noopener noreferrer">
-          @{BSKY}
-        </a>
-      </section>
-    </aside>
+    <section className="menu-glass-panel salon-bio">
+      {avatarOk ? (
+        <img src="/api/x/avatar" alt="" referrerPolicy="no-referrer" onError={() => setAvatarOk(false)} />
+      ) : null}
+      <div>
+        <h2>{xProfile?.name || 'Empress Trash'}</h2>
+        {xProfile?.bio ? <p>{xProfile.bio}</p> : null}
+        <a href="https://x.com/EmpressTrash" target="_blank" rel="noopener noreferrer">@EmpressTrash</a>
+      </div>
+    </section>
   );
 }
 
@@ -294,17 +205,13 @@ function HomeContent() {
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
             <header className="salon-mast">
-              <div>
-                <p className="salon-kicker">empress trash</p>
-                <h1>Salon de l&apos;Empress</h1>
-              </div>
+              <h1>Salon de l&apos;Empress</h1>
               <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
                 subscribe
               </button>
             </header>
 
-            <div className="salon-split">
-            <div className="salon-main">
+            <div className="salon-scroll">
             {postSlug ? (
               <div className="salon-read">
                 <div className="salon-read-bar">
@@ -327,7 +234,8 @@ function HomeContent() {
                 )}
               </div>
             ) : (
-              <div className="salon-list-wrap">
+              <div className="salon-feed">
+                <BioCard />
                 {listFailed ? (
                   <p className="salon-status">
                     The posts didn’t load.{' '}
@@ -341,7 +249,7 @@ function HomeContent() {
                 ) : (
                   <ol className="salon-list">
                     {posts.map((post) => (
-                      <li key={post.slug}>
+                      <li key={post.slug} className="menu-glass-panel">
                         <button type="button" onClick={() => openPost(post.slug)}>
                           {post.image ? <img className="salon-thumb" src={post.image} alt="" /> : null}
                           <span className="salon-copy">
@@ -356,8 +264,6 @@ function HomeContent() {
                 )}
               </div>
             )}
-            </div>
-            <SalonSide />
             </div>
           </div>
         </div>
