@@ -17,10 +17,9 @@ type SalonPost = {
 
 type SalonArticle = SalonPost & { html: string };
 
-const FREE_SUBSCRIBE = 'https://empresstrash.substack.com/api/v1/free?nojs=true';
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const BSKY = 'empresstrash.bsky.social';
-const X_TIMELINE = 'https://syndication.twitter.com/srv/timeline-profile/screen-name/EmpressTrash?dnt=true&theme=dark&chrome=noborders%20transparent&limit=8';
+const X_WIDGET = 'https://platform.x.com/widgets.js';
 
 type BskyPost = { text: string; href: string; date: string };
 
@@ -40,56 +39,88 @@ function formatDate(iso: string): string {
 }
 
 function SubscribePopup({ onClose }: { onClose: () => void }) {
-  const [done, setDone] = useState(false);
-  const sent = useRef(false);
-
   return (
     <div className="salon-pop" role="dialog" aria-modal="true" aria-labelledby="salon-pop-title">
       <button type="button" className="salon-pop-scrim" aria-label="Close subscribe" onClick={onClose} />
       <div className="salon-pop-card">
         <div className="salon-pop-bar">
-          <p id="salon-pop-title">subscribe free</p>
+          <p id="salon-pop-title">subscribe</p>
           <button type="button" onClick={onClose}>close</button>
         </div>
-        {done ? (
-          <p className="salon-free-done">Check your email to confirm.</p>
-        ) : (
-          <form
-            className="salon-free"
-            action={FREE_SUBSCRIBE}
-            method="post"
-            target="salon-free-sub"
-            onSubmit={() => {
-              sent.current = true;
-            }}
-          >
-            <input type="hidden" name="source" value="embed" />
-            <input type="hidden" name="first_session_referrer" value="" />
-            <input type="hidden" name="referral_code" value="" />
-            <input type="hidden" name="referring_pub_id" value="" />
-            <input type="hidden" name="additional_referring_pub_ids" value="" />
-            <label>
-              <input name="email" type="email" required autoComplete="email" placeholder="email" aria-label="Email" />
-            </label>
-            <button type="submit">subscribe</button>
-          </form>
-        )}
         <iframe
-          name="salon-free-sub"
-          title="Subscribe result"
-          hidden
-          onLoad={() => {
-            if (sent.current) setDone(true);
-          }}
+          src="https://empresstrash.substack.com/embed?transparent=1&light=1"
+          title="Subscribe to Salon de l'Empress"
+          width={480}
+          height={320}
+          style={{ border: 0, background: 'transparent' }}
+          scrolling="no"
+          sandbox="allow-scripts allow-forms allow-same-origin"
         />
       </div>
     </div>
   );
 }
 
+function XTimeline() {
+  const box = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const boxEl = box.current;
+    if (!boxEl) return;
+    let cancelled = false;
+
+    const render = () => {
+      if (cancelled) return;
+      const twttr = (window as Window & {
+        twttr?: { ready?: (fn: () => void) => void; widgets?: { load?: (el?: HTMLElement) => void } };
+      }).twttr;
+      if (!twttr) return;
+      const run = () => twttr.widgets?.load?.(boxEl);
+      if (twttr.ready) twttr.ready(run);
+      else run();
+    };
+
+    const existing = document.querySelector(`script[src="${X_WIDGET}"]`);
+    if (existing) {
+      render();
+      existing.addEventListener('load', render);
+      return () => {
+        cancelled = true;
+        existing.removeEventListener('load', render);
+      };
+    }
+
+    const script = document.createElement('script');
+    script.src = X_WIDGET;
+    script.async = true;
+    script.charset = 'utf-8';
+    script.addEventListener('load', render);
+    document.body.appendChild(script);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <div className="salon-x" ref={box}>
+      <a
+        className="twitter-timeline"
+        href="https://x.com/EmpressTrash?ref_src=twsrc%5Etfw"
+        data-width="270"
+        data-height="480"
+        data-theme="dark"
+        data-chrome="transparent noborders"
+      >
+        Posts by EmpressTrash
+      </a>
+    </div>
+  );
+}
+
 function SalonSide() {
   const [bsky, setBsky] = useState<BskyPost[]>([]);
-  const [xProfile, setXProfile] = useState<{ name: string; bio: string; avatar: string } | null>(null);
+  const [xProfile, setXProfile] = useState<{ name: string; bio: string } | null>(null);
+  const [avatarOk, setAvatarOk] = useState(true);
 
   useEffect(() => {
     fetch('/api/bsky')
@@ -100,11 +131,10 @@ function SalonSide() {
       .catch(() => {});
     fetch('/api/x')
       .then((response) => response.json())
-      .then((data: { name?: string; bio?: string; avatar?: string }) => {
+      .then((data: { name?: string; bio?: string }) => {
         setXProfile({
           name: data.name || 'Empress Trash',
           bio: data.bio || '',
-          avatar: data.avatar?.startsWith('https://') ? data.avatar : '',
         });
       })
       .catch(() => {});
@@ -113,7 +143,9 @@ function SalonSide() {
   return (
     <aside className="salon-side">
       <section className="salon-card salon-bio">
-        {xProfile?.avatar ? <img src={xProfile.avatar} alt="" /> : null}
+        {avatarOk ? (
+          <img src="/api/x/avatar" alt="" referrerPolicy="no-referrer" onError={() => setAvatarOk(false)} />
+        ) : null}
         <div>
           <h2>{xProfile?.name || 'Empress Trash'}</h2>
           {xProfile?.bio ? <p>{xProfile.bio}</p> : null}
@@ -122,7 +154,7 @@ function SalonSide() {
       </section>
       <section className="salon-card salon-x-card">
         <h2>x</h2>
-        <iframe className="salon-x" title="Empress Trash on X" src={X_TIMELINE} />
+        <XTimeline />
       </section>
       <section className="salon-card">
         <h2>bluesky</h2>
