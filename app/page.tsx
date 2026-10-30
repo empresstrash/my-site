@@ -57,6 +57,15 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
   );
 }
 
+function plainBio(text: string): string {
+  return text
+    .replace(/https?:\/\/\S+/gi, '')
+    .replace(/\bmerch:\s*/gi, '')
+    .replace(/@\w+/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function BioCard() {
   const [xProfile, setXProfile] = useState<{ name: string; bio: string } | null>(null);
   const [avatarOk, setAvatarOk] = useState(true);
@@ -67,23 +76,22 @@ function BioCard() {
       .then((data: { name?: string; bio?: string }) => {
         setXProfile({
           name: data.name || 'Empress Trash',
-          bio: data.bio || '',
+          bio: plainBio(data.bio || ''),
         });
       })
       .catch(() => {});
   }, []);
 
   return (
-    <section className="menu-glass-panel salon-bio">
+    <Link href="/bio" className="menu-glass-panel salon-bio">
       {avatarOk ? (
         <img src="/api/x/avatar" alt="" referrerPolicy="no-referrer" onError={() => setAvatarOk(false)} />
       ) : null}
       <div>
         <h2>{xProfile?.name || 'Empress Trash'}</h2>
         {xProfile?.bio ? <p>{xProfile.bio}</p> : null}
-        <a href="https://x.com/EmpressTrash" target="_blank" rel="noopener noreferrer">@EmpressTrash</a>
       </div>
-    </section>
+    </Link>
   );
 }
 
@@ -250,7 +258,11 @@ function HomeContent() {
                     {posts.map((post) => (
                       <li key={post.slug} className="menu-glass-panel">
                         <button type="button" onClick={() => openPost(post.slug)}>
-                          {post.image ? <img className="salon-thumb" src={post.image} alt="" /> : null}
+                          {post.image ? (
+                            <span className="salon-thumb-frame">
+                              <img className="salon-thumb" src={post.image} alt="" />
+                            </span>
+                          ) : null}
                           <span className="salon-copy">
                             <time dateTime={post.date}>{formatDate(post.date)}</time>
                             <span className="salon-title">{post.title}</span>
