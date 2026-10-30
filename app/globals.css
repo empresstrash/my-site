@@ -1966,15 +1966,25 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.salon-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .salon-feed {
-  width: min(40rem, 100%);
+  width: min(60rem, 100%);
   margin: 0 auto;
   padding: 1rem 1rem 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
+  display: grid;
+  grid-template-columns: minmax(0, 40rem) 17.5rem;
+  justify-content: center;
+  gap: 1rem;
+  align-items: start;
 }
 
 .salon-read {
@@ -1982,6 +1992,8 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-bio {
+  grid-column: 2;
+  grid-row: 1;
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
@@ -2024,6 +2036,12 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   font-family: var(--font-menu);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
+}
+
+.salon-list,
+.salon-feed > .salon-status {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .salon-list {
@@ -2240,6 +2258,17 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   height: 320px;
   border: 0;
   background: transparent;
+}
+
+@media (max-width: 900px) {
+  .salon-feed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .salon-bio {
+    grid-column: 1;
+    grid-row: 2;
+  }
 }
 
 @media (max-width: 768px) {

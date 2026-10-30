@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
+import { FaBluesky, FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
 import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord, FaDeviantart, FaSpotify, FaTwitch } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -51,7 +51,7 @@ const menuItems: MenuItem[] = [
             children: [
               { label: 'drop.art', external: 'https://drop.art/u/tz1YbJAyfmSwqLbLwCrUTfEMeLgCncM9jj3z/created' },
               { label: 'mederu', external: 'https://mederu.art/user/tz1YbJAyfmSwqLbLwCrUTfEMeLgCncM9jj3z' },
-              { label: 'objkt', external: 'https://objkt.com/@empresstrash' },
+              { label: 'objkt', external: 'https://objkt.com/@empresstrash.com/created' },
               { label: 'teia', external: 'https://teia.art/empresstrash' },
               { label: 'zeroart', external: 'https://www.zeroart.app/tezos/zeroview/tokens.html?contract=KT1NAkxTuLq1MFr3GKHGSqLXh5jX2Ksn8RqJ' },
             ],
@@ -137,6 +137,7 @@ const menuItems: MenuItem[] = [
     children: [
       { label: 'email', external: 'mailto:empresstrash@gmail.com', icon: <FaEnvelope />, ariaLabel: 'Email', className: 'icon-only-link' },
       { label: 'x', external: 'https://x.com/EmpressTrash', icon: <FaXTwitter />, ariaLabel: 'X', className: 'icon-only-link' },
+      { label: 'bluesky', external: 'https://bsky.app/profile/empresstrash.com', icon: <FaBluesky />, ariaLabel: 'Bluesky', className: 'icon-only-link' },
       { label: 'instagram', external: 'https://www.instagram.com/empress_trash/', icon: <FaInstagram />, ariaLabel: 'Instagram', className: 'icon-only-link' },
       { label: 'tiktok', external: 'https://www.tiktok.com/@empresstrash', icon: <FaTiktok />, ariaLabel: 'TikTok', className: 'icon-only-link' },
       { label: 'tumblr', external: 'https://www.tumblr.com/empresstrash-art', icon: <FaTumblr />, ariaLabel: 'Tumblr', className: 'icon-only-link' },

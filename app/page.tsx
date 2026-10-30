@@ -235,7 +235,6 @@ function HomeContent() {
               </div>
             ) : (
               <div className="salon-feed">
-                <BioCard />
                 {listFailed ? (
                   <p className="salon-status">
                     The posts didn’t load.{' '}
@@ -262,6 +261,7 @@ function HomeContent() {
                     ))}
                   </ol>
                 )}
+                <BioCard />
               </div>
             )}
             </div>
