@@ -19,6 +19,10 @@ type SalonArticle = SalonPost & { html: string };
 
 const SUBSCRIBE_SRC = 'https://empresstrash.substack.com/embed?transparent=1&light=1';
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const BSKY = 'empresstrash.bsky.social';
+const BIO = 'Empress Trash (aka Dreya Jay) is a multiversatile artist experimenting at the crossroads of generative AI, crypto art, digital sovereignty, trauma alchemy, historical traditions and unfiltered expression.';
+
+type BskyPost = { text: string; href: string; date: string };
 
 function parseHomeView(value: string | null): HomeView {
   return value === 'emporium' ? 'emporium' : 'substack';
@@ -52,6 +56,77 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
         />
       </div>
     </div>
+  );
+}
+
+function SalonSide() {
+  const [bsky, setBsky] = useState<BskyPost[]>([]);
+  const [avatar, setAvatar] = useState('/crown-favicon.png');
+
+  useEffect(() => {
+    fetch('/api/bsky')
+      .then((response) => response.json())
+      .then((data: { avatar?: string; posts?: BskyPost[] }) => {
+        if (data.avatar?.startsWith('https://')) setAvatar(data.avatar);
+        if (Array.isArray(data.posts)) setBsky(data.posts);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const win = window as Window & { twttr?: { widgets?: { load: () => void } } };
+    if (win.twttr?.widgets) {
+      win.twttr.widgets.load();
+      return;
+    }
+    if (document.getElementById('twitter-wjs')) return;
+    const script = document.createElement('script');
+    script.id = 'twitter-wjs';
+    script.src = 'https://platform.twitter.com/widgets.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  return (
+    <aside className="salon-side">
+      <section className="salon-card salon-bio">
+        <img src={avatar} alt="" />
+        <div>
+          <h2>Empress Trash</h2>
+          <p>{BIO}</p>
+          <a href="/bio">full bio</a>
+        </div>
+      </section>
+      <section className="salon-card">
+        <h2>x</h2>
+        <a
+          className="twitter-timeline"
+          data-theme="dark"
+          data-chrome="transparent noheader nofooter"
+          data-height="420"
+          data-dnt="true"
+          href="https://x.com/EmpressTrash"
+        >
+          Posts by EmpressTrash
+        </a>
+      </section>
+      <section className="salon-card">
+        <h2>bluesky</h2>
+        <ol className="bsky-feed">
+          {bsky.map((post) => (
+            <li key={post.href}>
+              <a href={post.href} target="_blank" rel="noopener noreferrer">
+                <time dateTime={post.date}>{formatDate(post.date)}</time>
+                {post.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+        <a className="salon-more" href={`https://bsky.app/profile/${BSKY}`} target="_blank" rel="noopener noreferrer">
+          @{BSKY}
+        </a>
+      </section>
+    </aside>
   );
 }
 
@@ -182,6 +257,8 @@ function HomeContent() {
               </button>
             </header>
 
+            <div className="salon-split">
+            <div className="salon-main">
             {postSlug ? (
               <div className="salon-read">
                 <div className="salon-read-bar">
@@ -233,6 +310,9 @@ function HomeContent() {
                 )}
               </div>
             )}
+            </div>
+            <SalonSide />
+            </div>
           </div>
         </div>
 
