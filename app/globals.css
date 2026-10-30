@@ -1987,10 +1987,12 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-list button {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   width: min(42rem, 100%);
   margin: 0 auto;
-  padding: 1.15rem 0.2rem 1.2rem;
+  padding: 0.85rem 0.2rem;
   border: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: transparent;
@@ -1998,6 +2000,18 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   text-align: left;
   cursor: pointer;
   font: inherit;
+}
+
+.salon-thumb {
+  flex-shrink: 0;
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.salon-copy {
+  min-width: 0;
 }
 
 .salon-list time,

@@ -12,6 +12,7 @@ type RawPost = {
   slug?: string;
   post_date?: string;
   canonical_url?: string;
+  cover_image?: string | null;
 };
 
 type SalonPost = {
@@ -20,6 +21,7 @@ type SalonPost = {
   slug: string;
   date: string;
   url: string;
+  image: string;
 };
 
 function asPosts(payload: unknown): RawPost[] {
@@ -56,6 +58,7 @@ export async function GET() {
       if (!SLUG.test(slug) || slug.length > 180 || seen.has(slug)) continue;
       const canonical = item.canonical_url ?? "";
       const url = canonical.startsWith(POST_ORIGIN) ? canonical : `${POST_ORIGIN}${slug}`;
+      const cover = item.cover_image ?? "";
       seen.add(slug);
       posts.push({
         title: item.title?.trim() || slug,
@@ -63,6 +66,7 @@ export async function GET() {
         slug,
         date: item.post_date || "",
         url,
+        image: cover.startsWith("https://") ? cover : "",
       });
     }
   }

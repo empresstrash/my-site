@@ -12,6 +12,7 @@ type SalonPost = {
   slug: string;
   date: string;
   url: string;
+  image: string;
 };
 
 type SalonArticle = SalonPost & { html: string };
@@ -219,9 +220,12 @@ function HomeContent() {
                     {posts.map((post) => (
                       <li key={post.slug}>
                         <button type="button" onClick={() => openPost(post.slug)}>
-                          <time dateTime={post.date}>{formatDate(post.date)}</time>
-                          <span className="salon-title">{post.title}</span>
-                          {post.subtitle ? <span className="salon-meta">{post.subtitle}</span> : null}
+                          {post.image ? <img className="salon-thumb" src={post.image} alt="" /> : null}
+                          <span className="salon-copy">
+                            <time dateTime={post.date}>{formatDate(post.date)}</time>
+                            <span className="salon-title">{post.title}</span>
+                            {post.subtitle ? <span className="salon-meta">{post.subtitle}</span> : null}
+                          </span>
                         </button>
                       </li>
                     ))}
