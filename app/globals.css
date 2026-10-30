@@ -1924,10 +1924,10 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-mast {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   flex-shrink: 0;
   align-items: center;
-  justify-content: flex-end;
   gap: 1rem;
   padding: 0.85rem 1.4rem;
   border-bottom: 1px solid rgba(255, 46, 184, 0.28);
@@ -1935,9 +1935,8 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   animation: darkHueCycle 28s linear infinite;
 }
 
-.salon-page-title {
-  grid-column: 1;
-  grid-row: 1;
+.salon-mast h1 {
+  grid-column: 2;
   margin: 0;
   color: #ff4db8;
   font-family: var(--font-menu);
@@ -1946,7 +1945,11 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   letter-spacing: 0.08em;
   line-height: 1.2;
   text-align: center;
-  animation: darkHueCycle 28s linear infinite;
+}
+
+.salon-mast .salon-sub-btn {
+  grid-column: 3;
+  justify-self: end;
 }
 
 .salon-sub-btn,
@@ -1998,7 +2001,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 
 .salon-bio {
   grid-column: 2;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
@@ -2044,7 +2047,7 @@ a.salon-bio {
 .salon-list,
 .salon-feed > .salon-status {
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 1;
 }
 
 .salon-list {
@@ -2296,25 +2299,23 @@ a.salon-bio {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .salon-page-title,
   .salon-list,
   .salon-feed > .salon-status,
   .salon-bio {
     grid-column: 1;
   }
 
-  .salon-page-title {
-    grid-row: 1;
-    font-size: 1.35rem;
-  }
-
   .salon-list,
   .salon-feed > .salon-status {
-    grid-row: 2;
+    grid-row: 1;
   }
 
   .salon-bio {
-    grid-row: 3;
+    grid-row: 2;
+  }
+
+  .salon-mast h1 {
+    font-size: 1.35rem;
   }
 
   .salon-mast {
