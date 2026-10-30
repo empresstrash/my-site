@@ -1924,48 +1924,32 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-mast {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   flex-shrink: 0;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  gap: 1rem;
   padding: 1.15rem 1.4rem 0.9rem;
   border-bottom: 1px solid rgba(255, 46, 184, 0.28);
+  background: rgba(255, 0, 140, 0.1);
+  animation: darkHueCycle 28s linear infinite;
 }
 
 .salon-mast h1 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  width: 100%;
+  grid-column: 2;
   margin: 0;
-  font-family: var(--font-menu);
-  font-size: 0.95rem;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: lowercase;
-}
-
-.salon-cross {
-  color: #ff4db8;
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  line-height: 1;
-  animation: darkHueCycle 28s linear infinite;
-}
-
-.salon-hue-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
   text-align: center;
-  animation: darkHueCycle 28s linear infinite;
 }
 
-.salon-mast .salon-hue-btn,
+.salon-mast .salon-sub-btn {
+  grid-column: 3;
+  justify-self: end;
+}
+
 .salon-sub-btn,
 .salon-read-bar button,
 .salon-read-bar a,
@@ -2293,6 +2277,10 @@ a.salon-bio {
   font-family: var(--font-display);
   font-size: 1.35rem;
   letter-spacing: 0.04em;
+}
+
+.salon-pop-bar button {
+  border-radius: 12px;
 }
 
 .salon-pop-card iframe {
