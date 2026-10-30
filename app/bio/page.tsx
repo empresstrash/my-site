@@ -120,7 +120,7 @@ const CV_TIMELINE: CvYear[] = [
           },
           {
             label: "Residency journal",
-            url: "https://paragraph.com/@empresstrash/decentraland-decentraland-decentraland",
+            url: "https://empresstrash.substack.com/p/decentraland-decentraland-decentraland",
           },
           {
             label: "AIR announcement",
@@ -273,7 +273,7 @@ const CV_TIMELINE: CvYear[] = [
           },
           {
             label: "Residency reflections",
-            url: "https://paragraph.com/@empresstrash/reflections-on-sincretismo-digital-art-residency-birthing-the-comet-in-mexico-city",
+            url: "https://empresstrash.substack.com/p/reflections-on-sincretismo-digital-art-residency-birthing-the-comet-in-mexico-ci",
           }
       ],
       },
@@ -283,12 +283,8 @@ const CV_TIMELINE: CvYear[] = [
         entry: "Completed Damsels collection",
         links: [
           {
-            label: "Birth of Damsels",
-            url: "https://paragraph.com/@empresstrash/the-birth-of-damsels-1",
-          },
-          {
             label: "Damsels part deux",
-            url: "https://paragraph.com/@empresstrash/damsels-part-deux",
+            url: "https://empresstrash.substack.com/p/damsels-part-deux",
           },
           {
             label: "ETH collection",
@@ -1716,10 +1712,6 @@ const CV_TIMELINE: CvYear[] = [
           {
             label: "OpenSea collection",
             url: "https://opensea.io/collection/damsels",
-          },
-          {
-            label: "Birth of Damsels",
-            url: "https://paragraph.com/@empresstrash/the-birth-of-damsels-1",
           }
       ],
       },
@@ -1888,10 +1880,6 @@ const CV_TIMELINE: CvYear[] = [
           {
             label: "NFT Culture interview (career start)",
             url: "https://www.nftculture.com/nft-art/artist-interview-empress-trash/",
-          },
-          {
-            label: "Birth of Damsels",
-            url: "https://paragraph.com/@empresstrash/the-birth-of-damsels-1",
           }
       ],
       },

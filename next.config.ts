@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/wip", destination: "/404", permanent: false },
       { source: "/wip/:path*", destination: "/404", permanent: false },
+      { source: "/journal", destination: "https://empresstrash.substack.com/", permanent: false },
+      { source: "/journal/:path*", destination: "https://empresstrash.substack.com/", permanent: false },
+      { source: "/feed", destination: "https://empresstrash.substack.com/", permanent: false },
     ];
   },
 };

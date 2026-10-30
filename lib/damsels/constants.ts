@@ -9,10 +9,8 @@ export const OPENSEA_COLLECTION = "https://opensea.io/collection/damsels";
 export const OBJKT_COLLECTION = `https://objkt.com/collection/${DAMSELS_TEZ_CONTRACT}`;
 export const LEGACY_PAGE = "https://empresstrash.neocities.org/damsels";
 
-export const PARAGRAPH_BIRTH =
-  "https://paragraph.com/@empresstrash/the-birth-of-damsels-1";
-export const PARAGRAPH_DEUX =
-  "https://paragraph.com/@empresstrash/damsels-part-deux";
+export const SUBSTACK_DEUX =
+  "https://empresstrash.substack.com/p/damsels-part-deux";
 
 export const DAMSELS_TOTAL = 666;
 

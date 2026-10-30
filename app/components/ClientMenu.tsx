@@ -151,7 +151,7 @@ const menuItems: MenuItem[] = [
       { label: 'spotify', external: 'https://open.spotify.com/artist/3h0WMPkEDoO5PvNTddLMvJ', icon: <FaSpotify />, ariaLabel: 'Spotify', className: 'icon-only-link' },
       { label: 'deca', external: 'https://deca.art/EmpressTrash', icon: <img src="https://www.google.com/s2/favicons?domain=deca.art&sz=64" alt="" />, ariaLabel: 'Deca', className: 'icon-only-link deca-icon' },
       { label: 'farcaster', external: 'https://farcaster.xyz/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=farcaster.xyz&sz=64" alt="" />, ariaLabel: 'Farcaster', className: 'icon-only-link' },
-      { label: 'paragraph', external: 'https://paragraph.com/@empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=paragraph.com&sz=64" alt="" />, ariaLabel: 'Paragraph', className: 'icon-only-link' },
+      { label: 'substack', external: 'https://empresstrash.substack.com/', icon: <img src="https://www.google.com/s2/favicons?domain=substack.com&sz=64" alt="" />, ariaLabel: 'Substack', className: 'icon-only-link' },
       { label: 'zeroone', external: 'https://zeroone.art/profile/empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=zeroone.art&sz=64" alt="" />, ariaLabel: 'Zeroone', className: 'icon-only-link' },
       { label: 'zora', external: 'https://zora.co/@empresstrash', icon: <img src="https://www.google.com/s2/favicons?domain=zora.co&sz=64" alt="" />, ariaLabel: 'Zora', className: 'icon-only-link' },
     ],

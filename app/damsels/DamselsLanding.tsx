@@ -6,8 +6,7 @@ import {
   LEGACY_PAGE,
   OBJKT_COLLECTION,
   OPENSEA_COLLECTION,
-  PARAGRAPH_BIRTH,
-  PARAGRAPH_DEUX,
+  SUBSTACK_DEUX,
   expandMediaUrls,
   type DamselToken,
 } from "@/lib/damsels/constants";
@@ -373,16 +372,8 @@ export default function DamselsLanding() {
           </div>
           <div className="damsels-link-col">
             <a
-              className="damsels-btn damsels-btn-birth"
-              href={PARAGRAPH_BIRTH}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              the birth of damsels
-            </a>
-            <a
               className="damsels-btn damsels-btn-deux"
-              href={PARAGRAPH_DEUX}
+              href={SUBSTACK_DEUX}
               target="_blank"
               rel="noopener noreferrer"
             >
