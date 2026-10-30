@@ -2297,11 +2297,54 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-pop-card iframe {
-  display: block;
-  width: 100%;
-  height: 320px;
+  display: none;
+  width: 0;
+  height: 0;
   border: 0;
-  background: transparent;
+}
+
+.salon-free {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.salon-free label {
+  flex: 1;
+  min-width: 0;
+}
+
+.salon-free input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 46, 184, 0.45);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1rem;
+}
+
+.salon-free input:focus {
+  outline: 1px solid #ff4db8;
+}
+
+.salon-free button {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(255, 46, 184, 0.55);
+  border-radius: 10px;
+  background: rgba(255, 0, 160, 0.16);
+  color: #ff4db8;
+  font-family: var(--font-menu);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  cursor: pointer;
+}
+
+.salon-free-done {
+  margin: 0.4rem 0 0.2rem;
+  font-family: var(--font-family);
 }
 
 @media (max-width: 980px) {

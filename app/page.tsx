@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 type HomeView = 'substack' | 'emporium';
@@ -17,7 +17,7 @@ type SalonPost = {
 
 type SalonArticle = SalonPost & { html: string };
 
-const SUBSCRIBE_SRC = 'https://empresstrash.substack.com/embed?transparent=1&light=1';
+const FREE_SUBSCRIBE = 'https://empresstrash.substack.com/api/v1/free?nojs=true';
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const BSKY = 'empresstrash.bsky.social';
 const X_TIMELINE = 'https://syndication.twitter.com/srv/timeline-profile/screen-name/EmpressTrash?dnt=true&theme=dark&chrome=noborders%20transparent&limit=8';
@@ -40,19 +40,47 @@ function formatDate(iso: string): string {
 }
 
 function SubscribePopup({ onClose }: { onClose: () => void }) {
+  const [done, setDone] = useState(false);
+  const sent = useRef(false);
+
   return (
     <div className="salon-pop" role="dialog" aria-modal="true" aria-labelledby="salon-pop-title">
       <button type="button" className="salon-pop-scrim" aria-label="Close subscribe" onClick={onClose} />
       <div className="salon-pop-card">
         <div className="salon-pop-bar">
-          <p id="salon-pop-title">subscribe</p>
+          <p id="salon-pop-title">subscribe free</p>
           <button type="button" onClick={onClose}>close</button>
         </div>
+        {done ? (
+          <p className="salon-free-done">Check your email to confirm.</p>
+        ) : (
+          <form
+            className="salon-free"
+            action={FREE_SUBSCRIBE}
+            method="post"
+            target="salon-free-sub"
+            onSubmit={() => {
+              sent.current = true;
+            }}
+          >
+            <input type="hidden" name="source" value="embed" />
+            <input type="hidden" name="first_session_referrer" value="" />
+            <input type="hidden" name="referral_code" value="" />
+            <input type="hidden" name="referring_pub_id" value="" />
+            <input type="hidden" name="additional_referring_pub_ids" value="" />
+            <label>
+              <input name="email" type="email" required autoComplete="email" placeholder="email" aria-label="Email" />
+            </label>
+            <button type="submit">subscribe</button>
+          </form>
+        )}
         <iframe
-          src={SUBSCRIBE_SRC}
-          title="Subscribe to Salon de l'Empress"
-          width={480}
-          height={320}
+          name="salon-free-sub"
+          title="Subscribe result"
+          hidden
+          onLoad={() => {
+            if (sent.current) setDone(true);
+          }}
         />
       </div>
     </div>
