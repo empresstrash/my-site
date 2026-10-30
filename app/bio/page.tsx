@@ -283,6 +283,10 @@ const CV_TIMELINE: CvYear[] = [
         entry: "Completed Damsels collection",
         links: [
           {
+            label: "Birth of Damsels",
+            url: "https://empresstrash.substack.com/p/the-birth-of-damsels-1html",
+          },
+          {
             label: "Damsels part deux",
             url: "https://empresstrash.substack.com/p/damsels-part-deux",
           },
@@ -1712,6 +1716,10 @@ const CV_TIMELINE: CvYear[] = [
           {
             label: "OpenSea collection",
             url: "https://opensea.io/collection/damsels",
+          },
+          {
+            label: "Birth of Damsels",
+            url: "https://empresstrash.substack.com/p/the-birth-of-damsels-1html",
           }
       ],
       },
@@ -1880,6 +1888,10 @@ const CV_TIMELINE: CvYear[] = [
           {
             label: "NFT Culture interview (career start)",
             url: "https://www.nftculture.com/nft-art/artist-interview-empress-trash/",
+          },
+          {
+            label: "Birth of Damsels",
+            url: "https://empresstrash.substack.com/p/the-birth-of-damsels-1html",
           }
       ],
       },

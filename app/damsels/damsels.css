@@ -202,6 +202,11 @@
   border-color: rgba(255, 208, 234, 0.4);
 }
 
+.damsels-btn-birth {
+  --btn-glass: linear-gradient(135deg, rgba(255, 210, 70, 0.16), rgba(255, 255, 255, 0.08));
+  border-color: rgba(255, 243, 138, 0.42);
+}
+
 .damsels-btn-deux {
   --btn-glass: linear-gradient(135deg, rgba(177, 0, 255, 0.18), rgba(61, 240, 255, 0.1));
   border-color: rgba(246, 184, 255, 0.42);

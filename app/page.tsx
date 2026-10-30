@@ -16,8 +16,7 @@ type SalonPost = {
 
 type SalonArticle = SalonPost & { html: string };
 
-const SUBSTACK_HOME = 'https://empresstrash.substack.com/';
-const SUBSCRIBE_ACTION = 'https://empresstrash.substack.com/api/v1/free?nojs=true';
+const SUBSCRIBE_SRC = 'https://empresstrash.substack.com/embed?transparent=1&light=1';
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function parseHomeView(value: string | null): HomeView {
@@ -28,11 +27,31 @@ function formatDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
   return date.toLocaleDateString('en-US', {
-    month: 'short',
+    month: 'long',
     day: 'numeric',
     year: 'numeric',
     timeZone: 'UTC',
   });
+}
+
+function SubscribePopup({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="salon-pop" role="dialog" aria-modal="true" aria-labelledby="salon-pop-title">
+      <button type="button" className="salon-pop-scrim" aria-label="Close subscribe" onClick={onClose} />
+      <div className="salon-pop-card">
+        <div className="salon-pop-bar">
+          <p id="salon-pop-title">subscribe</p>
+          <button type="button" onClick={onClose}>close</button>
+        </div>
+        <iframe
+          src={SUBSCRIBE_SRC}
+          title="Subscribe to Salon de l'Empress"
+          width={480}
+          height={320}
+        />
+      </div>
+    </div>
+  );
 }
 
 function HomeContent() {
@@ -46,7 +65,7 @@ function HomeContent() {
   const [listFailed, setListFailed] = useState(false);
   const [article, setArticle] = useState<SalonArticle | null>(null);
   const [articleFailed, setArticleFailed] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
+  const [subscribeOpen, setSubscribeOpen] = useState(view === 'substack');
 
   useEffect(() => {
     if (view === 'emporium') setVisitedEmporium(true);
@@ -55,19 +74,29 @@ function HomeContent() {
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
     const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverscroll = document.body.style.overscrollBehavior;
-    const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
-
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
-    document.documentElement.style.overscrollBehavior = 'none';
-
     return () => {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overscrollBehavior = previousBodyOverscroll;
-      document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/salon')
+      .then((response) => {
+        if (!response.ok) throw new Error('salon');
+        return response.json() as Promise<{ posts?: SalonPost[] }>;
+      })
+      .then((payload) => {
+        if (!cancelled) setPosts(Array.isArray(payload.posts) ? payload.posts : []);
+      })
+      .catch(() => {
+        if (!cancelled) setListFailed(true);
+      });
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -92,25 +121,6 @@ function HomeContent() {
     };
   }, [postSlug]);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/salon')
-      .then((response) => {
-        if (!response.ok) throw new Error('salon');
-        return response.json() as Promise<{ posts?: SalonPost[] }>;
-      })
-      .then((payload) => {
-        if (cancelled) return;
-        setPosts(Array.isArray(payload.posts) ? payload.posts : []);
-      })
-      .catch(() => {
-        if (!cancelled) setListFailed(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const tabHref = (id: HomeView) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('paragraph');
@@ -119,8 +129,6 @@ function HomeContent() {
     const query = params.toString();
     return query ? `/?${query}` : '/';
   };
-
-  const selected = postSlug ? posts?.find((post) => post.slug === postSlug) : undefined;
 
   const openPost = (slug: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -147,7 +155,7 @@ function HomeContent() {
           className={`home-embed-tab${view === 'substack' ? ' is-on' : ''}`}
           scroll={false}
         >
-          substack
+          salon
         </Link>
         <Link
           href={tabHref('emporium')}
@@ -161,66 +169,35 @@ function HomeContent() {
       </nav>
 
       <div className="home-embed-stage">
-        <div
-          className="home-embed-pane"
-          role="tabpanel"
-          hidden={view !== 'substack'}
-          aria-hidden={view !== 'substack'}
-        >
+        <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
-            {subscribed ? (
-              <p className="salon-subscribed">Check your email to confirm.</p>
-            ) : (
-              <form
-                className="salon-subscribe"
-                action={SUBSCRIBE_ACTION}
-                method="post"
-                target="salon-subscribe"
-                onSubmit={() => {
-                  window.setTimeout(() => setSubscribed(true), 0);
-                }}
-              >
-                <input type="hidden" name="source" value="embed" />
-                <label className="salon-email">
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    placeholder="email for salon de l'empress"
-                    aria-label="Email"
-                  />
-                </label>
-                <button type="submit">subscribe</button>
-              </form>
-            )}
-            <iframe name="salon-subscribe" title="Subscribe result" hidden />
+            <header className="salon-mast">
+              <div>
+                <p className="salon-kicker">empress trash</p>
+                <h1>Salon de l&apos;Empress</h1>
+              </div>
+              <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
+                subscribe
+              </button>
+            </header>
 
             {postSlug ? (
               <div className="salon-read">
                 <div className="salon-read-bar">
-                  <button type="button" onClick={closePost}>
-                    all posts
-                  </button>
-                  <a href={article?.url ?? selected?.url ?? `${SUBSTACK_HOME}p/${postSlug}`} target="_blank" rel="noopener noreferrer">
+                  <button type="button" onClick={closePost}>all posts</button>
+                  <a href={article?.url ?? `https://empresstrash.substack.com/p/${postSlug}`} target="_blank" rel="noopener noreferrer">
                     open on substack
                   </a>
                 </div>
                 {articleFailed ? (
-                  <p className="salon-status">
-                    This post didn’t load.{' '}
-                    <a href={`${SUBSTACK_HOME}p/${postSlug}`} target="_blank" rel="noopener noreferrer">
-                      Read it on Substack
-                    </a>
-                    .
-                  </p>
+                  <p className="salon-status">This post didn’t load.</p>
                 ) : !article ? (
-                  <p className="salon-status">Loading the post…</p>
+                  <p className="salon-status">Loading…</p>
                 ) : (
                   <article className="salon-article">
+                    <time dateTime={article.date}>{formatDate(article.date)}</time>
                     <h1>{article.title}</h1>
                     {article.subtitle ? <p className="salon-dek">{article.subtitle}</p> : null}
-                    {article.date ? <time dateTime={article.date}>{formatDate(article.date)}</time> : null}
                     <div className="salon-body" dangerouslySetInnerHTML={{ __html: article.html }} />
                   </article>
                 )}
@@ -229,27 +206,26 @@ function HomeContent() {
               <div className="salon-list-wrap">
                 {listFailed ? (
                   <p className="salon-status">
-                    The post list didn’t load.{' '}
-                    <a href={SUBSTACK_HOME} target="_blank" rel="noopener noreferrer">
-                      Read it on Substack
+                    The posts didn’t load.{' '}
+                    <a href="https://empresstrash.substack.com/" target="_blank" rel="noopener noreferrer">
+                      Read them on Substack
                     </a>
                     .
                   </p>
                 ) : posts === null ? (
-                  <p className="salon-status">Loading the salon…</p>
+                  <p className="salon-status">Loading…</p>
                 ) : (
-                  <ul className="salon-list">
+                  <ol className="salon-list">
                     {posts.map((post) => (
                       <li key={post.slug}>
                         <button type="button" onClick={() => openPost(post.slug)}>
+                          <time dateTime={post.date}>{formatDate(post.date)}</time>
                           <span className="salon-title">{post.title}</span>
-                          <span className="salon-meta">
-                            {[formatDate(post.date), post.subtitle].filter(Boolean).join(' — ')}
-                          </span>
+                          {post.subtitle ? <span className="salon-meta">{post.subtitle}</span> : null}
                         </button>
                       </li>
                     ))}
-                  </ul>
+                  </ol>
                 )}
               </div>
             )}
@@ -257,22 +233,13 @@ function HomeContent() {
         </div>
 
         {visitedEmporium && (
-          <div
-            className="home-embed-pane"
-            role="tabpanel"
-            hidden={view !== 'emporium'}
-            aria-hidden={view !== 'emporium'}
-          >
-            <iframe
-              src="/frame/emporium"
-              className="home-embed-frame"
-              allow="fullscreen *"
-              allowFullScreen
-              title="Emporium shop"
-            />
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'emporium'} aria-hidden={view !== 'emporium'}>
+            <iframe src="/frame/emporium" className="home-embed-frame" allow="fullscreen *" allowFullScreen title="Emporium shop" />
           </div>
         )}
       </div>
+
+      {view === 'substack' && subscribeOpen ? <SubscribePopup onClose={() => setSubscribeOpen(false)} /> : null}
     </div>
   );
 }
@@ -281,7 +248,7 @@ function HomeFallback() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" aria-hidden="true">
-        <span className="home-embed-tab is-on">substack</span>
+        <span className="home-embed-tab is-on">salon</span>
         <span className="home-embed-tab">emporium shop</span>
       </nav>
       <div className="home-embed-stage" />

@@ -6,6 +6,7 @@ import {
   LEGACY_PAGE,
   OBJKT_COLLECTION,
   OPENSEA_COLLECTION,
+  SUBSTACK_BIRTH,
   SUBSTACK_DEUX,
   expandMediaUrls,
   type DamselToken,
@@ -371,6 +372,14 @@ export default function DamselsLanding() {
             </p>
           </div>
           <div className="damsels-link-col">
+            <a
+              className="damsels-btn damsels-btn-birth"
+              href={SUBSTACK_BIRTH}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              the birth of damsels
+            </a>
             <a
               className="damsels-btn damsels-btn-deux"
               href={SUBSTACK_DEUX}
