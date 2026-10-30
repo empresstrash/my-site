@@ -213,10 +213,12 @@ function HomeContent() {
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
             <header className="salon-mast">
-              <h1>Salon de l&apos;Empress</h1>
-              <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
-                subscribe
-              </button>
+              <div className="salon-mast-line">
+                <h1>Salon de l&apos;Empress</h1>
+                <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
+                  subscribe
+                </button>
+              </div>
             </header>
 
             <div className="salon-scroll">

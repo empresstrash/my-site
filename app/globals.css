@@ -1924,19 +1924,24 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-mast {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
   flex-shrink: 0;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.85rem 1.4rem;
   border-bottom: 1px solid rgba(255, 46, 184, 0.28);
   background: rgba(255, 0, 140, 0.1);
   animation: darkHueCycle 28s linear infinite;
 }
 
+.salon-mast-line {
+  width: min(60rem, 100%);
+  margin: 0 auto;
+  padding: 0.85rem 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 40rem) 17.5rem;
+  gap: 1rem;
+  align-items: center;
+}
+
 .salon-mast h1 {
-  grid-column: 2;
+  grid-column: 1;
   margin: 0;
   color: #ff4db8;
   font-family: var(--font-menu);
@@ -1948,7 +1953,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-mast .salon-sub-btn {
-  grid-column: 3;
+  grid-column: 2;
   justify-self: end;
 }
 
@@ -2314,12 +2319,22 @@ a.salon-bio {
     grid-row: 2;
   }
 
-  .salon-mast h1 {
-    font-size: 1.35rem;
+  .salon-mast-line {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.7rem 0.85rem;
   }
 
-  .salon-mast {
-    padding: 0.7rem 0.85rem;
+  .salon-mast h1 {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.35rem;
+    padding-inline: 6.5rem;
+  }
+
+  .salon-mast .salon-sub-btn {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
   }
 
   .salon-pop-card {
