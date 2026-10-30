@@ -20,7 +20,7 @@ type SalonArticle = SalonPost & { html: string };
 const SUBSCRIBE_SRC = 'https://empresstrash.substack.com/embed?transparent=1&light=1';
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const BSKY = 'empresstrash.bsky.social';
-const BIO = 'Empress Trash (aka Dreya Jay) is a multiversatile artist experimenting at the crossroads of generative AI, crypto art, digital sovereignty, trauma alchemy, historical traditions and unfiltered expression.';
+const X_TIMELINE = 'https://syndication.twitter.com/srv/timeline-profile/screen-name/EmpressTrash?dnt=true&theme=dark&chrome=noborders%20transparent&limit=8';
 
 type BskyPost = { text: string; href: string; date: string };
 
@@ -61,54 +61,40 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
 
 function SalonSide() {
   const [bsky, setBsky] = useState<BskyPost[]>([]);
-  const [avatar, setAvatar] = useState('/crown-favicon.png');
+  const [xProfile, setXProfile] = useState<{ name: string; bio: string; avatar: string } | null>(null);
 
   useEffect(() => {
     fetch('/api/bsky')
       .then((response) => response.json())
-      .then((data: { avatar?: string; posts?: BskyPost[] }) => {
-        if (data.avatar?.startsWith('https://')) setAvatar(data.avatar);
+      .then((data: { posts?: BskyPost[] }) => {
         if (Array.isArray(data.posts)) setBsky(data.posts);
       })
       .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const win = window as Window & { twttr?: { widgets?: { load: () => void } } };
-    if (win.twttr?.widgets) {
-      win.twttr.widgets.load();
-      return;
-    }
-    if (document.getElementById('twitter-wjs')) return;
-    const script = document.createElement('script');
-    script.id = 'twitter-wjs';
-    script.src = 'https://platform.twitter.com/widgets.js';
-    script.async = true;
-    document.body.appendChild(script);
+    fetch('/api/x')
+      .then((response) => response.json())
+      .then((data: { name?: string; bio?: string; avatar?: string }) => {
+        setXProfile({
+          name: data.name || 'Empress Trash',
+          bio: data.bio || '',
+          avatar: data.avatar?.startsWith('https://') ? data.avatar : '',
+        });
+      })
+      .catch(() => {});
   }, []);
 
   return (
     <aside className="salon-side">
       <section className="salon-card salon-bio">
-        <img src={avatar} alt="" />
+        {xProfile?.avatar ? <img src={xProfile.avatar} alt="" /> : null}
         <div>
-          <h2>Empress Trash</h2>
-          <p>{BIO}</p>
-          <a href="/bio">full bio</a>
+          <h2>{xProfile?.name || 'Empress Trash'}</h2>
+          {xProfile?.bio ? <p>{xProfile.bio}</p> : null}
+          <a href="https://x.com/EmpressTrash" target="_blank" rel="noopener noreferrer">@EmpressTrash</a>
         </div>
       </section>
-      <section className="salon-card">
+      <section className="salon-card salon-x-card">
         <h2>x</h2>
-        <a
-          className="twitter-timeline"
-          data-theme="dark"
-          data-chrome="transparent noheader nofooter"
-          data-height="420"
-          data-dnt="true"
-          href="https://x.com/EmpressTrash"
-        >
-          Posts by EmpressTrash
-        </a>
+        <iframe className="salon-x" title="Empress Trash on X" src={X_TIMELINE} />
       </section>
       <section className="salon-card">
         <h2>bluesky</h2>
