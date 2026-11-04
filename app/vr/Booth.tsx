@@ -818,19 +818,6 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           ) : null}
         </section>
         <aside className="vr-radio">
-          <p className="vr-now">
-            {now.art.startsWith("https://") ? <img className="vr-art" src={now.art} alt="" /> : null}
-            <span className="vr-songbox" ref={songBox} title={songText}>
-              <span className={songScroll ? "vr-songline is-scroll" : "vr-songline"}>
-                <span className="vr-songcopy">{songText}</span>
-                {songScroll ? (
-                  <span className="vr-songcopy" aria-hidden="true">
-                    {songText}
-                  </span>
-                ) : null}
-              </span>
-            </span>
-          </p>
           <div className="vr-station-row">
             <label className="vr-label" htmlFor="station">
               Station
@@ -878,6 +865,17 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
               +
             </button>
             <span className="vr-volume-readout">{Math.round(volume * 100)}%</span>
+            {now.art.startsWith("https://") ? <img className="vr-art" src={now.art} alt="" /> : null}
+            <span className="vr-songbox" ref={songBox} title={songText}>
+              <span className={songScroll ? "vr-songline is-scroll" : "vr-songline"}>
+                <span className="vr-songcopy">{songText}</span>
+                {songScroll ? (
+                  <span className="vr-songcopy" aria-hidden="true">
+                    {songText}
+                  </span>
+                ) : null}
+              </span>
+            </span>
             {radioError ? <span className="vr-error">{radioError}</span> : null}
           </div>
         </aside>
