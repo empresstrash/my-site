@@ -250,6 +250,10 @@
   color: #9146ff;
 }
 
+.vr-meta-x .vr-src {
+  color: #8ecbff;
+}
+
 .vr-name {
   font-weight: 700;
 }
@@ -260,6 +264,10 @@
 
 .vr-meta-twitch .vr-name {
   color: #c8a8ff;
+}
+
+.vr-meta-x .vr-name {
+  color: #d6eeff;
 }
 
 .vr-time {

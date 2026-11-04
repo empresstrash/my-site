@@ -7,7 +7,7 @@ import { STATIONS, stationById, type NowPlaying } from "@/lib/vr/stations";
 import { loadTwitchEmotes } from "@/lib/vr/twitch-emotes";
 import ImagesPanel from "./ImagesPanel";
 
-type Source = "dcl" | "twitch";
+type Source = "dcl" | "twitch" | "x";
 type Filter = "all" | Source;
 type Panel = "live" | "images";
 
@@ -31,7 +31,7 @@ function isSavedLine(value: unknown): value is Line {
   if (!value || typeof value !== "object") return false;
   const line = value as Line;
   return (
-    (line.source === "dcl" || line.source === "twitch") &&
+    (line.source === "dcl" || line.source === "twitch" || line.source === "x") &&
     typeof line.id === "string" &&
     typeof line.name === "string" &&
     typeof line.text === "string" &&
@@ -149,6 +149,69 @@ function clock(at: number): string {
   return new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+function connectX(
+  onLine: (line: Line) => void,
+  onRemove: (id: string) => void,
+  onStatus: (status: string) => void,
+): () => void {
+  let stopped = false;
+  let retry: ReturnType<typeof setTimeout> | null = null;
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
+  const run = async () => {
+    if (stopped) return;
+    try {
+      const response = await fetch("/api/vr/x-chat");
+      if (stopped) return;
+      const type = response.headers.get("content-type") || "";
+      if (!response.ok || !response.body || !type.includes("text/event-stream")) {
+        onStatus("X off");
+        return;
+      }
+      onStatus("X Live");
+      reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (!stopped) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+        for (const chunk of chunks) {
+          const data = chunk
+            .split("\n")
+            .filter((row) => row.startsWith("data:"))
+            .map((row) => row.slice(5).trim())
+            .join("");
+          if (!data) continue;
+          const body = JSON.parse(data) as { off?: boolean; remove?: string; line?: { id: string; name: string; text: string; at: number } };
+          if (body.off) {
+            onStatus("X off");
+            return;
+          }
+          if (body.remove) onRemove(body.remove);
+          if (body.line?.id && body.line.text) {
+            onLine({ id: body.line.id, source: "x", name: body.line.name || "X", text: body.line.text, at: body.line.at || Date.now() });
+          }
+        }
+      }
+    } catch {
+      /* retry below */
+    }
+    if (stopped) return;
+    onStatus("X reconnecting");
+    retry = setTimeout(() => void run(), 4000);
+  };
+
+  void run();
+  return () => {
+    stopped = true;
+    if (retry) clearTimeout(retry);
+    void reader?.cancel();
+  };
+}
+
 function connectTwitch(onLine: (line: Line) => void, onStatus: (status: string) => void): () => void {
   let stopped = false;
   let socket: WebSocket | null = null;
@@ -242,6 +305,8 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     peers: 0,
   });
   const [twitchStatus, setTwitchStatus] = useState("Twitch off until the page opens");
+  const [xOn, setXOn] = useState(false);
+  const [xStatus, setXStatus] = useState("X off");
   const [stationId, setStationId] = useState(STATIONS[0].id);
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -257,6 +322,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   const chatReady = useRef(false);
+  const knownIds = useRef(new Set<string>());
   const seenIds = useRef(new Set<string>());
   const filterSeen = useRef<Filter>("all");
   const names = useRef(new Map<string, string>());
@@ -275,6 +341,8 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   }, [translate]);
 
   const pushLine = (line: Line) => {
+    if (knownIds.current.has(line.id)) return;
+    knownIds.current.add(line.id);
     setLines((current) => [...current.slice(-199), line]);
     if (mentionsEmpress(line.text)) pingMention();
     if (!translateOn.current) return;
@@ -318,6 +386,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     if (!open) return;
     const saved = loadSavedLines();
     chatReady.current = true;
+    for (const line of saved) knownIds.current.add(line.id);
     if (saved.length === 0) return;
     setLines((current) => {
       const ids = new Set(current.map((item) => item.id));
@@ -380,6 +449,29 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
       (line) => pushLine(line),
       setTwitchStatus,
     );
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    let stop = () => {};
+    let cancelled = false;
+    void fetch("/api/vr/x-chat?probe=1")
+      .then(async (response) => {
+        if (!response.ok || cancelled) return;
+        const body = (await response.json()) as { ready?: boolean };
+        if (!body.ready || cancelled) return;
+        setXOn(true);
+        stop = connectX(
+          (line) => pushLine(line),
+          (id) => setLines((current) => current.filter((item) => item.id !== id)),
+          setXStatus,
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+      stop();
+    };
   }, [open]);
 
   useEffect(() => {
@@ -604,6 +696,11 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           <p className="vr-pill">
             Twitch <span className={twitchStatus.startsWith("Live") ? "vr-hot" : ""}>{twitchStatus.startsWith("Live") ? "Live" : "Connecting"}</span>
           </p>
+          {xOn ? (
+            <p className="vr-pill">
+              X <span className={xStatus.startsWith("X Live") ? "vr-hot" : ""}>{xStatus === "X Live" ? "Live" : xStatus === "X reconnecting" ? "Connecting" : "Off"}</span>
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="vr-tabs" role="tablist" aria-label="Booth">
@@ -634,14 +731,14 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
         <section className="vr-chat">
           <div className="vr-bar">
             <div className="vr-filters">
-              {(["all", "dcl", "twitch"] as const).map((item) => (
+              {(["all", "dcl", "twitch", "x"] as const).filter((item) => item !== "x" || xOn).map((item) => (
                 <button
                   key={item}
                   type="button"
                   className={filter === item ? "vr-chip is-on" : "vr-chip"}
                   onClick={() => setFilter(item)}
                 >
-                  {item === "all" ? "All" : item === "dcl" ? "DCL" : "Twitch"}
+                  {item === "all" ? "All" : item === "dcl" ? "DCL" : item === "twitch" ? "Twitch" : "X"}
                 </button>
               ))}
               <button
@@ -667,12 +764,16 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           <div className="vr-stream-wrap">
             <div className="vr-stream" ref={scroller}>
               {visible.length === 0 ? (
-                <p className="vr-muted">Text from people at the atelier, and Twitch chat, show up here.</p>
+                <p className="vr-muted">
+                  {xOn
+                    ? "Text from people at the atelier, Twitch, and X show up here."
+                    : "Text from people at the atelier, and Twitch chat, show up here."}
+                </p>
               ) : (
                 visible.map((line) => (
                   <article key={line.id} className={mentionsEmpress(line.text) ? "vr-line is-mention" : "vr-line"}>
                     <p className={`vr-meta vr-meta-${line.source}`}>
-                      <span className="vr-src">{line.source === "dcl" ? "DCL" : "Twitch"}</span>
+                      <span className="vr-src">{line.source === "dcl" ? "DCL" : line.source === "twitch" ? "Twitch" : "X"}</span>
                       <span className="vr-dot"> · </span>
                       <span className="vr-name">{line.name}</span>
                       <span className="vr-dot"> · </span>
