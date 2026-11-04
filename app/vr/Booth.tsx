@@ -698,74 +698,54 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
             </button>
           ) : null}
         </section>
-        <aside className="vr-radio">
-          <div className="vr-station-row">
-            <label className="vr-label" htmlFor="station">
-              Station
-            </label>
-            <select
-              id="station"
-              className="vr-select"
-              value={stationId}
-              onChange={(event) => {
-                const next = stationById(event.target.value) ?? STATIONS[0];
-                setStationId(next.id);
-                window.localStorage.setItem("atelier-station", next.id);
-                setNow(EMPTY_NOW);
-                if (playing) tune(true, next);
-              }}
-            >
-              {groups.map((group) => (
-                <optgroup key={group} label={group}>
-                  {STATIONS.filter((item) => item.group === group).map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-          <div className="vr-now">
-            {now.art.startsWith("https://") ? <img className="vr-art" src={now.art} alt="" /> : null}
-            <p className="vr-station">{station.name}</p>
-            <p className="vr-track">{now.line}</p>
-            {now.detail || now.next ? (
-              <p className="vr-detail vr-muted">{now.detail || `Next · ${now.next}`}</p>
-            ) : null}
-          </div>
-          <div className="vr-controls">
-            <button type="button" className="vr-play" onClick={() => tune(!playing)}>
-              {playing ? "Pause" : "Play"}
-            </button>
-            <div className="vr-volume-block">
-              <div className="vr-volume-meta">
-                <span id="volume-label">Volume</span>
-                <span>{Math.round(volume * 100)}%</span>
-              </div>
-              <div className="vr-volume-row">
-                <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.05)}>
-                  −
-                </button>
-                <input
-                  id="volume"
-                  className="vr-volume"
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={volume}
-                  aria-labelledby="volume-label"
-                  onChange={(event) => commitVolume(Number(event.target.value))}
-                />
-                <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.05)}>
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-          {radioError ? <p className="vr-error">{radioError}</p> : null}
-          <p className="vr-blurb vr-muted">{station.blurb}</p>
+        <aside className="vr-radio" title={now.line}>
+          <label className="vr-label" htmlFor="station">
+            Station
+          </label>
+          <select
+            id="station"
+            className="vr-select"
+            value={stationId}
+            onChange={(event) => {
+              const next = stationById(event.target.value) ?? STATIONS[0];
+              setStationId(next.id);
+              window.localStorage.setItem("atelier-station", next.id);
+              setNow(EMPTY_NOW);
+              if (playing) tune(true, next);
+            }}
+          >
+            {groups.map((group) => (
+              <optgroup key={group} label={group}>
+                {STATIONS.filter((item) => item.group === group).map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <button type="button" className="vr-play" onClick={() => tune(!playing)}>
+            {playing ? "Pause" : "Play"}
+          </button>
+          <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.05)}>
+            −
+          </button>
+          <input
+            id="volume"
+            className="vr-volume"
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            aria-label="Volume"
+            onChange={(event) => commitVolume(Number(event.target.value))}
+          />
+          <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.05)}>
+            +
+          </button>
+          <span className="vr-volume-readout">{Math.round(volume * 100)}%</span>
+          {radioError ? <span className="vr-error">{radioError}</span> : null}
         </aside>
       </div>
       {panel === "images" ? (
