@@ -834,12 +834,10 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
         </section>
         <aside className="vr-radio">
           <div className="vr-station-row">
-            <label className="vr-label" htmlFor="station">
-              Station
-            </label>
             <select
               id="station"
               className="vr-select"
+              aria-label="Station"
               value={stationId}
               onChange={(event) => {
                 const next = stationById(event.target.value) ?? STATIONS[0];

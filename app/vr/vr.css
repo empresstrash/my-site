@@ -340,12 +340,6 @@
   width: 100%;
 }
 
-.vr-radio .vr-label {
-  flex: none;
-  margin-top: 0;
-  font-size: 1.05rem;
-}
-
 .vr-radio .vr-select {
   flex: 0 1 11rem;
   width: 11rem;
