@@ -24,6 +24,41 @@ type Line = {
 
 const EMPTY_NOW: NowPlaying = { line: "Loading the current track", detail: "", art: "", next: "" };
 const NO_EMOTES: ReadonlyMap<string, EmoteImage> = new Map();
+const CHAT_KEY = "atelier-chat-log";
+const CHAT_KEEP_MS = 36 * 60 * 60 * 1000;
+
+function isSavedLine(value: unknown): value is Line {
+  if (!value || typeof value !== "object") return false;
+  const line = value as Line;
+  return (
+    (line.source === "dcl" || line.source === "twitch") &&
+    typeof line.id === "string" &&
+    typeof line.name === "string" &&
+    typeof line.text === "string" &&
+    typeof line.at === "number"
+  );
+}
+
+function loadSavedLines(): Line[] {
+  try {
+    const raw = localStorage.getItem(CHAT_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { savedAt?: number; lines?: unknown };
+    if (!parsed?.savedAt || Date.now() - parsed.savedAt > CHAT_KEEP_MS) return [];
+    if (!Array.isArray(parsed.lines)) return [];
+    return parsed.lines.filter(isSavedLine).slice(-200);
+  } catch {
+    return [];
+  }
+}
+
+function saveLines(lines: Line[]) {
+  try {
+    localStorage.setItem(CHAT_KEY, JSON.stringify({ savedAt: Date.now(), lines: lines.slice(-200) }));
+  } catch {
+    /* the headset can block storage; the live list still stays in the page */
+  }
+}
 
 let audioCtx: AudioContext | null = null;
 let lastPing = 0;
@@ -161,6 +196,7 @@ function connectTwitch(onLine: (line: Line) => void, onStatus: (status: string) 
       }
     };
     ws.onclose = () => {
+      if (socket === ws) socket = null;
       if (stopped) return;
       onStatus("Twitch disconnected. Retrying.");
       retry = setTimeout(open, 4000);
@@ -168,9 +204,26 @@ function connectTwitch(onLine: (line: Line) => void, onStatus: (status: string) 
     ws.onerror = () => onStatus("Twitch chat did not connect.");
   };
 
+  const wake = () => {
+    if (document.visibilityState !== "visible" || stopped) return;
+    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+      try {
+        socket.send("PING");
+      } catch {
+        /* onclose retries */
+      }
+      return;
+    }
+    if (retry) clearTimeout(retry);
+    retry = null;
+    open();
+  };
+
+  document.addEventListener("visibilitychange", wake);
   open();
   return () => {
     stopped = true;
+    document.removeEventListener("visibilitychange", wake);
     if (retry) clearTimeout(retry);
     socket?.close();
   };
@@ -203,6 +256,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   const audioRef = useRef<HTMLAudioElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
+  const chatReady = useRef(false);
   const seenIds = useRef(new Set<string>());
   const filterSeen = useRef<Filter>("all");
   const names = useRef(new Map<string, string>());
@@ -262,12 +316,30 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   useEffect(() => {
     if (!open) return;
+    const saved = loadSavedLines();
+    chatReady.current = true;
+    if (saved.length === 0) return;
+    setLines((current) => {
+      const ids = new Set(current.map((item) => item.id));
+      const extra = saved.filter((item) => !ids.has(item.id));
+      if (extra.length === 0) return current;
+      return [...extra, ...current].sort((a, b) => a.at - b.at).slice(-200);
+    });
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !chatReady.current || lines.length === 0) return;
+    saveLines(lines);
+  }, [lines, open]);
+
+  useEffect(() => {
+    if (!open) return;
     const stop = startParcelGhost({
       onStatus: setDcl,
       onChat: (chat) => {
         const known = names.current.get(chat.address);
         const line: Line = {
-          id: `dcl-${lineSeq.current++}`,
+          id: `dcl-${chat.at}-${lineSeq.current++}`,
           source: "dcl",
           name: known || (chat.address.startsWith("0x") ? `${chat.address.slice(0, 6)}…${chat.address.slice(-4)}` : chat.address || "Someone"),
           address: chat.address.startsWith("0x") ? chat.address : undefined,
@@ -370,18 +442,29 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     const node = scroller.current;
     if (!node) return;
     const onScroll = () => {
+      if (document.visibilityState === "hidden" || node.clientHeight < 40) return;
       const near = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
       stickToBottom.current = near;
       if (near) setPending((count) => (count === 0 ? count : 0));
     };
-    const onLoad = () => {
+    const snap = () => {
       if (stickToBottom.current) node.scrollTop = node.scrollHeight;
     };
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      snap();
+    };
     node.addEventListener("scroll", onScroll);
-    node.addEventListener("load", onLoad, true);
+    node.addEventListener("load", onVisible, true);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("resize", snap);
+    window.visualViewport?.addEventListener("resize", snap);
     return () => {
       node.removeEventListener("scroll", onScroll);
-      node.removeEventListener("load", onLoad, true);
+      node.removeEventListener("load", onVisible, true);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("resize", snap);
+      window.visualViewport?.removeEventListener("resize", snap);
     };
   }, [open]);
 
@@ -422,6 +505,13 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   const station = stationById(stationId) ?? STATIONS[0];
   const groups = useMemo(() => [...new Set(STATIONS.map((item) => item.group))], []);
+
+  function commitVolume(next: number) {
+    const clamped = Math.min(1, Math.max(0, Math.round(next * 100) / 100));
+    setVolume(clamped);
+    window.localStorage.setItem("atelier-volume", String(clamped));
+    if (audioRef.current) audioRef.current.volume = clamped;
+  }
 
   const tune = (nextPlaying: boolean, nextStation = station, useFallback = false) => {
     const audio = audioRef.current;
@@ -609,60 +699,70 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           ) : null}
         </section>
         <aside className="vr-radio">
-          <label className="vr-label" htmlFor="station">
-            Station
-          </label>
-          <select
-            id="station"
-            className="vr-select"
-            value={stationId}
-            onChange={(event) => {
-              const next = stationById(event.target.value) ?? STATIONS[0];
-              setStationId(next.id);
-              window.localStorage.setItem("atelier-station", next.id);
-              setNow(EMPTY_NOW);
-              if (playing) tune(true, next);
-            }}
-          >
-            {groups.map((group) => (
-              <optgroup key={group} label={group}>
-                {STATIONS.filter((item) => item.group === group).map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-          <div>
+          <div className="vr-station-row">
+            <label className="vr-label" htmlFor="station">
+              Station
+            </label>
+            <select
+              id="station"
+              className="vr-select"
+              value={stationId}
+              onChange={(event) => {
+                const next = stationById(event.target.value) ?? STATIONS[0];
+                setStationId(next.id);
+                window.localStorage.setItem("atelier-station", next.id);
+                setNow(EMPTY_NOW);
+                if (playing) tune(true, next);
+              }}
+            >
+              {groups.map((group) => (
+                <optgroup key={group} label={group}>
+                  {STATIONS.filter((item) => item.group === group).map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          <div className="vr-now">
             {now.art.startsWith("https://") ? <img className="vr-art" src={now.art} alt="" /> : null}
             <p className="vr-station">{station.name}</p>
             <p className="vr-track">{now.line}</p>
-            {now.detail ? <p className="vr-detail vr-muted">{now.detail}</p> : null}
-            {now.next ? <p className="vr-detail vr-muted">Next · {now.next}</p> : null}
+            {now.detail || now.next ? (
+              <p className="vr-detail vr-muted">{now.detail || `Next · ${now.next}`}</p>
+            ) : null}
           </div>
           <div className="vr-controls">
             <button type="button" className="vr-play" onClick={() => tune(!playing)}>
               {playing ? "Pause" : "Play"}
             </button>
-            <label className="vr-label" htmlFor="volume">
-              Volume
-            </label>
-            <input
-              id="volume"
-              className="vr-volume"
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={(event) => {
-                const next = Number(event.target.value);
-                setVolume(next);
-                window.localStorage.setItem("atelier-volume", String(next));
-                if (audioRef.current) audioRef.current.volume = next;
-              }}
-            />
+            <div className="vr-volume-block">
+              <div className="vr-volume-meta">
+                <span id="volume-label">Volume</span>
+                <span>{Math.round(volume * 100)}%</span>
+              </div>
+              <div className="vr-volume-row">
+                <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.05)}>
+                  −
+                </button>
+                <input
+                  id="volume"
+                  className="vr-volume"
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  aria-labelledby="volume-label"
+                  onChange={(event) => commitVolume(Number(event.target.value))}
+                />
+                <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.05)}>
+                  +
+                </button>
+              </div>
+            </div>
           </div>
           {radioError ? <p className="vr-error">{radioError}</p> : null}
           <p className="vr-blurb vr-muted">{station.blurb}</p>

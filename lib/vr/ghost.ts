@@ -25,6 +25,8 @@ export function startParcelGhost(handlers: GhostHandlers): () => void {
   let roomClose: (() => void) | null = null;
   let retry: ReturnType<typeof setTimeout> | null = null;
   let refresh: ReturnType<typeof setTimeout> | null = null;
+  let connecting = false;
+  let current: { state: string } | null = null;
 
   const stopRoom = () => {
     roomClose?.();
@@ -32,7 +34,8 @@ export function startParcelGhost(handlers: GhostHandlers): () => void {
   };
 
   const connect = async (quiet = false) => {
-    if (stopped) return;
+    if (stopped || connecting) return;
+    connecting = true;
     if (!quiet) handlers.onStatus({ phase: "connecting", detail: "Opening the atelier", peers: 0 });
     try {
       const response = await fetch("/api/vr/room");
@@ -41,7 +44,15 @@ export function startParcelGhost(handlers: GhostHandlers): () => void {
       if (stopped) return;
       const { Room, RoomEvent } = await import("livekit-client");
       const room = new Room();
+      current = room;
       let closed = false;
+      room.on(RoomEvent.Disconnected, () => {
+        if (current === room) current = null;
+        if (stopped || closed) return;
+        roomClose = null;
+        if (retry) clearTimeout(retry);
+        retry = setTimeout(() => void connect(true), 1500);
+      });
       room.on(RoomEvent.DataReceived, (payload, participant) => {
         const bytes = payload instanceof Uint8Array ? payload : new Uint8Array(payload);
         const chat = decodeChat(bytes);
@@ -79,12 +90,25 @@ export function startParcelGhost(handlers: GhostHandlers): () => void {
       const message = error instanceof Error ? error.message : "The atelier room did not open";
       handlers.onStatus({ phase: "error", detail: message, peers: 0 });
       retry = setTimeout(() => void connect(), 8000);
+    } finally {
+      connecting = false;
     }
   };
 
+  const wake = () => {
+    if (document.visibilityState !== "visible" || stopped) return;
+    const state = current?.state;
+    if (state === "connected" || state === "connecting" || state === "reconnecting" || state === "signalReconnecting") return;
+    if (retry) clearTimeout(retry);
+    retry = null;
+    void connect(true);
+  };
+
+  document.addEventListener("visibilitychange", wake);
   void connect();
   return () => {
     stopped = true;
+    document.removeEventListener("visibilitychange", wake);
     if (retry) clearTimeout(retry);
     if (refresh) clearTimeout(refresh);
     stopRoom();

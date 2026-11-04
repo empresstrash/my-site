@@ -1,7 +1,9 @@
 .vr-booth {
   box-sizing: border-box;
   height: 100%;
+  max-height: 100%;
   min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   text-align: left;
@@ -94,15 +96,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  padding: 0 0 0.75rem;
+  padding: 0.45rem 0 0.4rem;
 }
 
 .vr-layout {
   min-height: 0;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
-  flex-direction: column-reverse;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.65rem;
+  overflow: hidden;
 }
 
 .vr-layout[hidden] {
@@ -117,9 +120,11 @@
 }
 
 .vr-chat {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .vr-bar,
@@ -128,13 +133,13 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.75rem 0.9rem;
+  gap: 0.45rem;
+  padding: 0.4rem 0.75rem;
   border-bottom: 2px solid #fff;
 }
 
 .vr-head .vr-title {
-  font-size: 2.1rem;
+  font-size: 1.7rem;
 }
 
 .vr-pills,
@@ -174,10 +179,28 @@
 }
 
 .vr-stream {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-y: scroll;
   padding: 0.9rem;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: auto;
+  scrollbar-color: #ff3d6e #000;
+}
+
+.vr-stream::-webkit-scrollbar {
+  width: 22px;
+}
+
+.vr-stream::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.vr-stream::-webkit-scrollbar-thumb {
+  background: #ff3d6e;
+  border: 3px solid #000;
 }
 
 .vr-jump {
@@ -287,12 +310,47 @@
 }
 
 .vr-radio {
-  padding: 1rem;
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 0.55rem 0.75rem 0.6rem;
+}
+
+.vr-station-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.vr-radio .vr-label {
+  flex: none;
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+.vr-radio .vr-select {
+  flex: 1;
+  width: auto;
+  height: 2.7rem;
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.vr-now {
+  margin-top: 0.35rem;
+}
+
+.vr-radio .vr-track,
+.vr-radio .vr-detail,
+.vr-radio .vr-blurb {
+  margin-top: 0.2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .vr-station {
-  margin: 0.4rem 0 0;
-  font-size: 1.9rem;
+  margin: 0.35rem 0 0;
+  font-size: 1.45rem;
   font-weight: 700;
   color: #fff;
 }
@@ -308,9 +366,10 @@
 
 .vr-controls {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.9rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
 }
 
 .vr-play,
@@ -324,19 +383,91 @@
 }
 
 .vr-play {
+  width: 100%;
+  height: 2.8rem;
   background: #ff3d6e;
   color: #000;
   border: 0;
 }
 
+.vr-volume-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.vr-volume-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.vr-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.vr-nudge {
+  flex: none;
+  width: 2.7rem;
+  height: 2.7rem;
+  border: 2px solid #fff;
+  background: #000;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .vr-volume {
   flex: 1;
-  accent-color: #ff3d6e;
+  width: 100%;
+  height: 2.7rem;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.vr-volume::-webkit-slider-runnable-track {
+  height: 1.15rem;
+  background: #111;
+  border: 2px solid #fff;
+}
+
+.vr-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-top: -0.75rem;
+  background: #ff3d6e;
+  border: 2px solid #fff;
+}
+
+.vr-volume::-moz-range-track {
+  height: 1.15rem;
+  background: #111;
+  border: 2px solid #fff;
+}
+
+.vr-volume::-moz-range-thumb {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #ff3d6e;
+  border: 2px solid #fff;
+  border-radius: 0;
 }
 
 .vr-art {
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 3.2rem;
+  height: 3.2rem;
   object-fit: cover;
   border: 2px solid #fff;
   float: right;
@@ -496,13 +627,50 @@
   border: 2px solid #fff;
 }
 
-@media (min-width: 980px) {
-  .vr-layout {
-    flex-direction: row;
-  }
+/* The booth fills the Quest window. The site header shrinks on this page only. */
+html.vr-booth .header-with-side {
+  max-height: 2.35rem;
+  padding: 0.1rem 0.5rem;
+}
 
-  .vr-radio {
-    width: 22rem;
-    flex: none;
+html.vr-booth .centered-logo {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html.vr-booth .centered-logo img {
+  width: 28px;
+  max-height: 1.7rem;
+}
+
+html.vr-booth .mobile-menu-button,
+html.vr-booth .header-with-side > .mobile-menu-button {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 1rem;
+  top: 0.2rem;
+}
+
+html.vr-booth .content,
+html.vr-booth body.vr-page-active .content {
+  overflow: hidden;
+  padding-top: 0.3rem;
+  padding-bottom: 0.15rem;
+}
+
+html.vr-booth body.vr-page-active .content > * {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+/* A very short window keeps the station, play, and volume, and leaves the chat a pane to scroll. */
+@media (max-height: 620px) {
+  .vr-now,
+  .vr-blurb {
+    display: none;
   }
 }
