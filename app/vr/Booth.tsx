@@ -320,6 +320,8 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
   const [panel, setPanel] = useState<Panel>("live");
   const audioRef = useRef<HTMLAudioElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
+  const songBox = useRef<HTMLSpanElement>(null);
+  const [songScroll, setSongScroll] = useState(false);
   const stickToBottom = useRef(true);
   const chatReady = useRef(false);
   const knownIds = useRef(new Set<string>());
@@ -597,6 +599,22 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   const station = stationById(stationId) ?? STATIONS[0];
   const groups = useMemo(() => [...new Set(STATIONS.map((item) => item.group))], []);
+  const songExtra =
+    now.detail && now.detail !== station.blurb && now.detail !== now.line
+      ? now.detail
+      : now.next
+        ? `Next · ${now.next}`
+        : "";
+  const songText = [now.line, songExtra].filter(Boolean).join("   ·   ");
+
+  useLayoutEffect(() => {
+    const box = songBox.current;
+    const copy = box?.querySelector(".vr-songcopy");
+    if (!box || !(copy instanceof HTMLElement)) return;
+    const overflow = copy.scrollWidth > box.clientWidth + 2;
+    setSongScroll(overflow);
+    if (overflow) box.style.setProperty("--song-seconds", `${Math.max(20, Math.round(copy.scrollWidth / 18))}s`);
+  }, [songText, open, panel]);
 
   function commitVolume(next: number) {
     const clamped = Math.min(1, Math.max(0, Math.round(next * 100) / 100));
@@ -799,54 +817,69 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
             </button>
           ) : null}
         </section>
-        <aside className="vr-radio" title={now.line}>
-          <label className="vr-label" htmlFor="station">
-            Station
-          </label>
-          <select
-            id="station"
-            className="vr-select"
-            value={stationId}
-            onChange={(event) => {
-              const next = stationById(event.target.value) ?? STATIONS[0];
-              setStationId(next.id);
-              window.localStorage.setItem("atelier-station", next.id);
-              setNow(EMPTY_NOW);
-              if (playing) tune(true, next);
-            }}
-          >
-            {groups.map((group) => (
-              <optgroup key={group} label={group}>
-                {STATIONS.filter((item) => item.group === group).map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-          <button type="button" className="vr-play" onClick={() => tune(!playing)}>
-            {playing ? "Pause" : "Play"}
-          </button>
-          <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.01)}>
-            −
-          </button>
-          <input
-            id="volume"
-            className="vr-volume"
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={volume}
-            aria-label="Volume"
-            onChange={(event) => commitVolume(Number(event.target.value))}
-          />
-          <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.01)}>
-            +
-          </button>
-          <span className="vr-volume-readout">{Math.round(volume * 100)}%</span>
-          {radioError ? <span className="vr-error">{radioError}</span> : null}
+        <aside className="vr-radio">
+          <p className="vr-now">
+            {now.art.startsWith("https://") ? <img className="vr-art" src={now.art} alt="" /> : null}
+            <span className="vr-songbox" ref={songBox} title={songText}>
+              <span className={songScroll ? "vr-songline is-scroll" : "vr-songline"}>
+                <span className="vr-songcopy">{songText}</span>
+                {songScroll ? (
+                  <span className="vr-songcopy" aria-hidden="true">
+                    {songText}
+                  </span>
+                ) : null}
+              </span>
+            </span>
+          </p>
+          <div className="vr-station-row">
+            <label className="vr-label" htmlFor="station">
+              Station
+            </label>
+            <select
+              id="station"
+              className="vr-select"
+              value={stationId}
+              onChange={(event) => {
+                const next = stationById(event.target.value) ?? STATIONS[0];
+                setStationId(next.id);
+                window.localStorage.setItem("atelier-station", next.id);
+                setNow(EMPTY_NOW);
+                if (playing) tune(true, next);
+              }}
+            >
+              {groups.map((group) => (
+                <optgroup key={group} label={group}>
+                  {STATIONS.filter((item) => item.group === group).map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <button type="button" className="vr-play" onClick={() => tune(!playing)}>
+              {playing ? "Pause" : "Play"}
+            </button>
+            <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.01)}>
+              −
+            </button>
+            <input
+              id="volume"
+              className="vr-volume"
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              aria-label="Volume"
+              onChange={(event) => commitVolume(Number(event.target.value))}
+            />
+            <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.01)}>
+              +
+            </button>
+            <span className="vr-volume-readout">{Math.round(volume * 100)}%</span>
+            {radioError ? <span className="vr-error">{radioError}</span> : null}
+          </div>
         </aside>
       </div>
       {panel === "images" ? (
