@@ -727,7 +727,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           <button type="button" className="vr-play" onClick={() => tune(!playing)}>
             {playing ? "Pause" : "Play"}
           </button>
-          <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.05)}>
+          <button type="button" className="vr-nudge" aria-label="Quieter" onClick={() => commitVolume(volume - 0.01)}>
             −
           </button>
           <input
@@ -741,7 +741,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
             aria-label="Volume"
             onChange={(event) => commitVolume(Number(event.target.value))}
           />
-          <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.05)}>
+          <button type="button" className="vr-nudge" aria-label="Louder" onClick={() => commitVolume(volume + 0.01)}>
             +
           </button>
           <span className="vr-volume-readout">{Math.round(volume * 100)}%</span>
