@@ -609,11 +609,26 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   useLayoutEffect(() => {
     const box = songBox.current;
-    const copy = box?.querySelector(".vr-songcopy");
-    if (!box || !(copy instanceof HTMLElement)) return;
-    const overflow = copy.scrollWidth > box.clientWidth + 2;
-    setSongScroll(overflow);
-    if (overflow) box.style.setProperty("--song-seconds", `${Math.max(20, Math.round(copy.scrollWidth / 18))}s`);
+    if (!box) return;
+
+    const measure = () => {
+      const copy = box.querySelector(".vr-songcopy");
+      if (!(copy instanceof HTMLElement) || box.clientWidth < 2) return;
+      const padRight = Number.parseFloat(getComputedStyle(copy).paddingRight) || 0;
+      const needed = copy.scrollWidth - padRight;
+      const overflow = needed > box.clientWidth + 2;
+      setSongScroll(overflow);
+      if (overflow) box.style.setProperty("--song-seconds", `${Math.max(20, Math.round(needed / 18))}s`);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, [songText, open, panel]);
 
   function commitVolume(next: number) {
