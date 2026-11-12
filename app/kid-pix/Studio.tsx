@@ -12,6 +12,7 @@ import {
   TOOLS,
   WACKY_MODES,
   blankInk,
+  chalkDots,
   drawStamp,
   floodFill,
   hexToRgb,
@@ -23,6 +24,8 @@ import {
   softDot,
   sprayDots,
   strokeSegment,
+  traceCurve,
+  tracePoly,
   traceShape,
   type DrawMode,
   type MixId,
@@ -34,8 +37,9 @@ import {
   type Tool,
   type WackyMode,
 } from "./engine";
+import { COLOR_MES, drawMoopies, MOOPIE_MOTIONS, paintColorMe, paintSlide, type Moopie } from "./deluxe";
 import { playSound, setMusic, stopMusic, unlockAudio, type SoundKind } from "./sounds";
-import { forgetSheet, loadSheet, saveSheet } from "./store";
+import { forgetSheet, loadBook, saveBook } from "./store";
 
 type Hist = { undo: boolean; redo: boolean };
 type View = { x: number; y: number; scale: number };
@@ -49,8 +53,13 @@ type Stroke = {
   clientX: number;
   clientY: number;
   hue: number;
+  bending?: boolean;
   van?: VanGrab;
 };
+type Snap = { ink: ImageData; moopies: Moopie[] };
+type PageSlot = { ink: HTMLCanvasElement; moopies: Moopie[] };
+type Bend = { a: Point; b: Point; c: Point };
+type PendingBook = { bitmaps: ImageBitmap[]; moopies: Moopie[][]; index: number };
 type Pinch = { dist: number; wx: number; wy: number; scale: number };
 
 const MAX_BITMAP = 1_400_000;
@@ -66,8 +75,20 @@ export default function Studio() {
   const previewRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
-  const undoStack = useRef<ImageData[]>([]);
-  const redoStack = useRef<ImageData[]>([]);
+  const undoStack = useRef<Snap[]>([]);
+  const redoStack = useRef<Snap[]>([]);
+  const moopiesRef = useRef<Moopie[]>([]);
+  const moopieCanvasRef = useRef<HTMLCanvasElement>(null);
+  const moopieSeq = useRef(0);
+  const pagesRef = useRef<PageSlot[]>([]);
+  const pageIndexRef = useRef(0);
+  const bendRef = useRef<Bend | null>(null);
+  const polyRef = useRef<Point[]>([]);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const showRef = useRef<HTMLCanvasElement>(null);
+  const colorMeIndex = useRef(0);
+  const pendingBook = useRef<PendingBook | null>(null);
+  const movesRef = useRef(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const strokeRef = useRef<Stroke | null>(null);
   const pinchRef = useRef<Pinch | null>(null);
@@ -102,6 +123,11 @@ export default function Studio() {
   const [help, setHelp] = useState(false);
   const [flash, setFlash] = useState(false);
   const [savedNote, setSavedNote] = useState("on this device");
+  const [moves, setMoves] = useState(false);
+  const [polyCount, setPolyCount] = useState(0);
+  const [pageCount, setPageCount] = useState({ index: 0, total: 1 });
+  const [show, setShow] = useState(false);
+  const [moving, setMoving] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const live = useRef({ tool, drawMode, wacky, shape, filled, stamp, color, paper, pattern, symmetry, size, pixel, sound });
@@ -139,13 +165,28 @@ export default function Studio() {
     return { canvas, ctx };
   }
 
+  function cloneMoopies() {
+    return moopiesRef.current.map((item) => ({ ...item }));
+  }
+
   function remember() {
     const pair = inkContext();
     if (!pair) return;
-    undoStack.current.push(pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height));
+    undoStack.current.push({
+      ink: pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height),
+      moopies: cloneMoopies(),
+    });
     if (undoStack.current.length > MAX_UNDO) undoStack.current.shift();
     redoStack.current = [];
     setHist({ undo: true, redo: false });
+  }
+
+  function restoreSnap(snap: Snap) {
+    const pair = inkContext();
+    if (!pair) return;
+    pair.ctx.putImageData(snap.ink, 0, 0);
+    moopiesRef.current = snap.moopies.map((item) => ({ ...item }));
+    setMoving(moopiesRef.current.length > 0);
   }
 
   function scheduleSave() {
@@ -159,11 +200,24 @@ export default function Studio() {
   async function persist() {
     const canvas = inkRef.current;
     if (!canvas || canvas.width < 2 || !loaded.current) return;
+    capturePage();
     const id = ++saveSeq.current;
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((value) => resolve(value), "image/png"));
-    if (!blob || id !== saveSeq.current) return;
+    const pages: { ink: Blob; moopies: Moopie[] }[] = [];
+    for (const slot of pagesRef.current) {
+      if (!slot) continue;
+      const blob = await new Promise<Blob | null>((resolve) => slot.ink.toBlob((value) => resolve(value), "image/png"));
+      if (!blob) return;
+      pages.push({ ink: blob, moopies: slot.moopies.map((item) => ({ ...item })) });
+    }
+    if (!pages.length || id !== saveSeq.current) return;
     const cur = live.current;
-    await saveSheet({ ink: blob, paper: cur.paper, pattern: cur.pattern, symmetry: cur.symmetry });
+    await saveBook({
+      pages,
+      index: Math.min(pageIndexRef.current, pages.length - 1),
+      paper: cur.paper,
+      pattern: cur.pattern,
+      symmetry: cur.symmetry,
+    });
     setSavedNote("saved on this device");
   }
 
@@ -202,7 +256,7 @@ export default function Studio() {
     ctx.restore();
   }
 
-  function dab(ctx: CanvasRenderingContext2D, at: Point, kind: "brush" | "spray" | "wacky" | "stamp") {
+  function dab(ctx: CanvasRenderingContext2D, at: Point, kind: "brush" | "spray" | "wacky" | "stamp" | "chalk") {
     const canvas = inkRef.current;
     if (!canvas) return;
     const points = mirrorPoint(at, live.current.symmetry, canvas.width, canvas.height);
@@ -210,6 +264,7 @@ export default function Studio() {
     for (const p of points) {
       if (kind === "brush") softDot(ctx, p.x, p.y, Math.max(2, cur.size * 0.85), rgba(cur.color, 0.9));
       else if (kind === "spray") sprayDots(ctx, p.x, p.y, Math.max(8, cur.size * 1.8), cur.color, cur.pixel);
+      else if (kind === "chalk") chalkDots(ctx, p.x, p.y, Math.max(4, cur.size), cur.color);
       else if (kind === "wacky") {
         const wobble = cur.wacky === "zigzag" || cur.wacky === "vine" ? Math.sin(hueRef.current * 0.35) * cur.size : 0;
         paintWacky(ctx, cur.wacky, p.x + wobble, p.y, Math.max(6, cur.size), cur.color, hueRef.current);
@@ -217,7 +272,7 @@ export default function Studio() {
     }
   }
 
-  function walk(ctx: CanvasRenderingContext2D, a: Point, b: Point, step: number, kind: "brush" | "spray" | "wacky") {
+  function walk(ctx: CanvasRenderingContext2D, a: Point, b: Point, step: number, kind: "brush" | "spray" | "wacky" | "chalk") {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const dist = Math.hypot(dx, dy) || 1;
@@ -247,7 +302,11 @@ export default function Studio() {
     }
     if (cur.drawMode === "brush") walk(ctx, a, b, Math.max(2, cur.size * 0.35), "brush");
     else if (cur.drawMode === "spray") walk(ctx, a, b, Math.max(6, cur.size), "spray");
-    else if (cur.drawMode === "marker") paintLine(ctx, a, b, Math.max(6, widthFor(event) * 1.35), false, 0.38);
+    else if (cur.drawMode === "chalk") walk(ctx, a, b, Math.max(3, cur.size * 0.45), "chalk");
+    else if (cur.drawMode === "crayon") {
+      paintLine(ctx, a, b, Math.max(6, widthFor(event) * 1.2), false, 0.5);
+      paintLine(ctx, { x: a.x + 1.5, y: a.y + 0.5 }, { x: b.x + 1.5, y: b.y + 0.5 }, Math.max(3, widthFor(event) * 0.45), false, 0.35);
+    } else if (cur.drawMode === "marker") paintLine(ctx, a, b, Math.max(6, widthFor(event) * 1.35), false, 0.38);
     else paintLine(ctx, a, b, Math.max(1, widthFor(event) * 0.7), false, 1);
   }
 
@@ -304,11 +363,244 @@ export default function Studio() {
     scheduleSave();
   }
 
+  function previewCurve(bend: Bend) {
+    const preview = previewRef.current;
+    const ink = inkRef.current;
+    const ctx = preview?.getContext("2d");
+    if (!preview || !ink || !ctx) return;
+    ctx.clearRect(0, 0, preview.width, preview.height);
+    const cur = live.current;
+    ctx.save();
+    ctx.strokeStyle = cur.color;
+    ctx.lineWidth = Math.max(2, cur.size * 0.55);
+    ctx.lineCap = "round";
+    const as = mirrorPoint(bend.a, cur.symmetry, ink.width, ink.height);
+    const bs = mirrorPoint(bend.b, cur.symmetry, ink.width, ink.height);
+    const cs = mirrorPoint(bend.c, cur.symmetry, ink.width, ink.height);
+    const count = Math.min(as.length, bs.length, cs.length);
+    for (let i = 0; i < count; i++) {
+      traceCurve(ctx, as[i], bs[i], cs[i]);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function commitCurve(bend: Bend) {
+    const pair = inkContext();
+    if (!pair || hypot(bend.a, bend.b) < 2) return;
+    remember();
+    const cur = live.current;
+    pair.ctx.save();
+    pair.ctx.strokeStyle = cur.color;
+    pair.ctx.lineWidth = Math.max(2, cur.size * 0.55);
+    pair.ctx.lineCap = "round";
+    const as = mirrorPoint(bend.a, cur.symmetry, pair.canvas.width, pair.canvas.height);
+    const bs = mirrorPoint(bend.b, cur.symmetry, pair.canvas.width, pair.canvas.height);
+    const cs = mirrorPoint(bend.c, cur.symmetry, pair.canvas.width, pair.canvas.height);
+    const count = Math.min(as.length, bs.length, cs.length);
+    for (let i = 0; i < count; i++) {
+      traceCurve(pair.ctx, as[i], bs[i], cs[i]);
+      pair.ctx.stroke();
+    }
+    pair.ctx.restore();
+    playSound("tick", cur.sound);
+    scheduleSave();
+  }
+
+  function previewPoly(points: Point[]) {
+    const preview = previewRef.current;
+    const ink = inkRef.current;
+    const ctx = preview?.getContext("2d");
+    if (!preview || !ink || !ctx) return;
+    ctx.clearRect(0, 0, preview.width, preview.height);
+    const cur = live.current;
+    ctx.save();
+    ctx.strokeStyle = cur.color;
+    ctx.fillStyle = cur.color;
+    ctx.lineWidth = Math.max(2, cur.size * 0.45);
+    ctx.lineJoin = "round";
+    const mirrored = points.map((point) => mirrorPoint(point, cur.symmetry, ink.width, ink.height));
+    const count = mirrored[0]?.length ?? 0;
+    for (let i = 0; i < count; i++) {
+      tracePoly(
+        ctx,
+        mirrored.map((set) => set[i]),
+        false,
+      );
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function closePoly() {
+    const points = polyRef.current;
+    const pair = inkContext();
+    if (!pair || points.length < 3) return;
+    remember();
+    const cur = live.current;
+    pair.ctx.save();
+    pair.ctx.strokeStyle = cur.color;
+    pair.ctx.fillStyle = cur.color;
+    pair.ctx.lineWidth = Math.max(2, cur.size * 0.45);
+    pair.ctx.lineJoin = "round";
+    const mirrored = points.map((point) => mirrorPoint(point, cur.symmetry, pair.canvas.width, pair.canvas.height));
+    const count = mirrored[0]?.length ?? 0;
+    for (let i = 0; i < count; i++) {
+      tracePoly(
+        pair.ctx,
+        mirrored.map((set) => set[i]),
+        true,
+      );
+      if (cur.filled) pair.ctx.fill();
+      else pair.ctx.stroke();
+    }
+    pair.ctx.restore();
+    polyRef.current = [];
+    setPolyCount(0);
+    clearPreview();
+    playSound("click", cur.sound);
+    scheduleSave();
+  }
+
+  function capturePage() {
+    const pair = inkContext();
+    if (!pair) return;
+    let slot = pagesRef.current[pageIndexRef.current];
+    if (!slot) {
+      slot = { ink: document.createElement("canvas"), moopies: [] };
+      pagesRef.current[pageIndexRef.current] = slot;
+    }
+    slot.ink.width = pair.canvas.width;
+    slot.ink.height = pair.canvas.height;
+    const ctx = slot.ink.getContext("2d");
+    ctx?.clearRect(0, 0, slot.ink.width, slot.ink.height);
+    ctx?.drawImage(pair.canvas, 0, 0);
+    slot.moopies = cloneMoopies();
+  }
+
+  function resetHistory() {
+    undoStack.current = [];
+    redoStack.current = [];
+    setHist({ undo: false, redo: false });
+    bendRef.current = null;
+    polyRef.current = [];
+    setPolyCount(0);
+    clearPreview();
+  }
+
+  function showPage(index: number) {
+    const slot = pagesRef.current[index];
+    const pair = inkContext();
+    if (!slot || !pair) return;
+    pageIndexRef.current = index;
+    pair.ctx.clearRect(0, 0, pair.canvas.width, pair.canvas.height);
+    pair.ctx.drawImage(slot.ink, 0, 0, pair.canvas.width, pair.canvas.height);
+    moopiesRef.current = slot.moopies.map((item) => ({ ...item }));
+    setMoving(moopiesRef.current.length > 0);
+    resetHistory();
+    setPageCount({ index, total: pagesRef.current.length });
+    scheduleSave();
+  }
+
+  function addPage() {
+    if (pagesRef.current.length >= 8) return;
+    const pair = inkContext();
+    if (!pair) return;
+    capturePage();
+    const blank = document.createElement("canvas");
+    blank.width = pair.canvas.width;
+    blank.height = pair.canvas.height;
+    pagesRef.current.push({ ink: blank, moopies: [] });
+    pageIndexRef.current = pagesRef.current.length - 1;
+    pair.ctx.clearRect(0, 0, pair.canvas.width, pair.canvas.height);
+    moopiesRef.current = [];
+    setMoving(false);
+    resetHistory();
+    setPageCount({ index: pageIndexRef.current, total: pagesRef.current.length });
+    playSound("click", live.current.sound);
+    scheduleSave();
+  }
+
+  function nextPage() {
+    if (pagesRef.current.length < 2) return;
+    capturePage();
+    showPage((pageIndexRef.current + 1) % pagesRef.current.length);
+  }
+
+  function loadColoring() {
+    const pair = inkContext();
+    if (!pair) return;
+    remember();
+    pair.ctx.clearRect(0, 0, pair.canvas.width, pair.canvas.height);
+    paintColorMe(pair.ctx, COLOR_MES[colorMeIndex.current % COLOR_MES.length]);
+    colorMeIndex.current += 1;
+    playSound("click", live.current.sound);
+    scheduleSave();
+  }
+
+  async function placePhoto(file: File) {
+    const pair = inkContext();
+    if (!pair) return;
+    const bitmap = await createImageBitmap(file);
+    remember();
+    const scale = Math.min(pair.canvas.width / bitmap.width, pair.canvas.height / bitmap.height);
+    const width = bitmap.width * scale;
+    const height = bitmap.height * scale;
+    pair.ctx.drawImage(bitmap, (pair.canvas.width - width) / 2, (pair.canvas.height - height) / 2, width, height);
+    bitmap.close();
+    playSound("click", live.current.sound);
+    scheduleSave();
+  }
+
+  function playShow() {
+    capturePage();
+    if (!pagesRef.current.length) return;
+    setShow(true);
+    playSound("click", live.current.sound);
+  }
+
+  function applyBook(book: PendingBook) {
+    const pair = inkContext();
+    if (!pair || book.bitmaps.length === 0) return;
+    pagesRef.current = book.bitmaps.map((bitmap, index) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = pair.canvas.width;
+      canvas.height = pair.canvas.height;
+      canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      return { ink: canvas, moopies: (book.moopies[index] || []).map((item) => ({ ...item })) };
+    });
+    const index = Math.max(0, Math.min(book.index, pagesRef.current.length - 1));
+    pageIndexRef.current = index;
+    pair.ctx.clearRect(0, 0, pair.canvas.width, pair.canvas.height);
+    pair.ctx.drawImage(pagesRef.current[index].ink, 0, 0);
+    moopiesRef.current = pagesRef.current[index].moopies.map((item) => ({ ...item }));
+    setMoving(moopiesRef.current.length > 0);
+    setPageCount({ index, total: pagesRef.current.length });
+  }
+
   function placeStamp(at: Point) {
     const pair = inkContext();
     if (!pair) return;
     remember();
-    dab(pair.ctx, at, "stamp");
+    if (movesRef.current) {
+      moopieSeq.current += 1;
+      const id = moopieSeq.current;
+      moopiesRef.current = [
+        ...moopiesRef.current,
+        {
+          id,
+          stamp: live.current.stamp,
+          x: at.x / pair.canvas.width,
+          y: at.y / pair.canvas.height,
+          size: Math.max(0.05, live.current.size / 180),
+          color: live.current.color,
+          motion: MOOPIE_MOTIONS[id % MOOPIE_MOTIONS.length],
+          phase: id * 0.7,
+        },
+      ];
+      setMoving(true);
+    } else dab(pair.ctx, at, "stamp");
     playSound("thwack", live.current.sound);
     scheduleSave();
   }
@@ -404,7 +696,7 @@ export default function Studio() {
     const cur = live.current;
     if (cur.tool === "eraser") return "scratch";
     if (cur.tool === "wacky") return "boing";
-    if (cur.tool === "draw" && cur.drawMode === "spray") return "spray";
+    if (cur.tool === "draw" && (cur.drawMode === "spray" || cur.drawMode === "chalk" || cur.drawMode === "crayon")) return cur.drawMode === "spray" ? "spray" : "soft";
     if (cur.tool === "draw" && cur.drawMode === "brush") return "soft";
     return "tick";
   }
@@ -433,6 +725,26 @@ export default function Studio() {
     }
     if (cur.tool === "stamp") {
       placeStamp(at);
+      return;
+    }
+    if (cur.tool === "shape" && cur.shape === "polygon") {
+      polyRef.current = [...polyRef.current, at];
+      setPolyCount(polyRef.current.length);
+      previewPoly(polyRef.current);
+      return;
+    }
+    if (bendRef.current && cur.tool === "shape" && cur.shape === "curve") {
+      bendRef.current = { ...bendRef.current, c: at };
+      strokeRef.current = {
+        tool: "shape",
+        pointerId: event.pointerId,
+        origin: bendRef.current.a,
+        last: at,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        hue: hueRef.current,
+        bending: true,
+      };
       return;
     }
     if (cur.tool === "mix") return;
@@ -475,7 +787,19 @@ export default function Studio() {
       stroke.clientY = event.clientY;
       return;
     }
-    if (stroke.tool === "line" || stroke.tool === "shape") {
+    if (stroke.bending && bendRef.current) {
+      bendRef.current = { ...bendRef.current, c: at };
+      previewCurve(bendRef.current);
+      stroke.last = at;
+      return;
+    }
+    if (stroke.tool === "shape" && live.current.shape === "curve") {
+      const mid = { x: (stroke.origin.x + at.x) / 2, y: (stroke.origin.y + at.y) / 2 };
+      previewCurve({ a: stroke.origin, b: at, c: mid });
+      stroke.last = at;
+      return;
+    }
+    if (stroke.tool === "line" || (stroke.tool === "shape" && live.current.shape !== "polygon")) {
       previewShape(stroke.origin, at);
       stroke.last = at;
       return;
@@ -503,6 +827,18 @@ export default function Studio() {
     if (!stroke || stroke.pointerId !== event.pointerId) return;
     strokeRef.current = null;
     const at = pointFrom(event) ?? stroke.last;
+    if (stroke.bending && bendRef.current) {
+      clearPreview();
+      commitCurve(bendRef.current);
+      bendRef.current = null;
+      return;
+    }
+    if (stroke.tool === "shape" && live.current.shape === "curve") {
+      const mid = { x: (stroke.origin.x + at.x) / 2, y: (stroke.origin.y + at.y) / 2 };
+      bendRef.current = { a: stroke.origin, b: at, c: mid };
+      previewCurve(bendRef.current);
+      return;
+    }
     if (stroke.tool === "line" || stroke.tool === "shape") {
       clearPreview();
       commitShape(stroke.origin, at);
@@ -538,6 +874,10 @@ export default function Studio() {
       movePinch();
       return;
     }
+    if (live.current.tool === "shape" && live.current.shape === "polygon" && polyRef.current.length > 0) {
+      const at = pointFrom(event.nativeEvent);
+      if (at) previewPoly([...polyRef.current, at]);
+    }
     moveStroke(event.nativeEvent);
   }
 
@@ -555,13 +895,16 @@ export default function Studio() {
   function undo() {
     const pair = inkContext();
     const prev = undoStack.current.at(-1);
-    if (!pair || !prev || prev.width !== pair.canvas.width || prev.height !== pair.canvas.height) {
+    if (!pair || !prev || prev.ink.width !== pair.canvas.width || prev.ink.height !== pair.canvas.height) {
       setHist({ undo: undoStack.current.length > 0, redo: redoStack.current.length > 0 });
       return;
     }
     undoStack.current.pop();
-    redoStack.current.push(pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height));
-    pair.ctx.putImageData(prev, 0, 0);
+    redoStack.current.push({
+      ink: pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height),
+      moopies: cloneMoopies(),
+    });
+    restoreSnap(prev);
     setHist({ undo: undoStack.current.length > 0, redo: true });
     playSound("undo", live.current.sound);
     scheduleSave();
@@ -570,13 +913,16 @@ export default function Studio() {
   function redo() {
     const pair = inkContext();
     const next = redoStack.current.at(-1);
-    if (!pair || !next || next.width !== pair.canvas.width || next.height !== pair.canvas.height) {
+    if (!pair || !next || next.ink.width !== pair.canvas.width || next.ink.height !== pair.canvas.height) {
       setHist({ undo: undoStack.current.length > 0, redo: redoStack.current.length > 0 });
       return;
     }
     redoStack.current.pop();
-    undoStack.current.push(pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height));
-    pair.ctx.putImageData(next, 0, 0);
+    undoStack.current.push({
+      ink: pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height),
+      moopies: cloneMoopies(),
+    });
+    restoreSnap(next);
     setHist({ undo: true, redo: redoStack.current.length > 0 });
     playSound("redo", live.current.sound);
     scheduleSave();
@@ -601,8 +947,10 @@ export default function Studio() {
     const pair = inkContext();
     if (!pair) return;
     const image = pair.ctx.getImageData(0, 0, pair.canvas.width, pair.canvas.height);
-    if (!blankInk(image)) remember();
+    if (!blankInk(image) || moopiesRef.current.length > 0) remember();
     pair.ctx.clearRect(0, 0, pair.canvas.width, pair.canvas.height);
+    moopiesRef.current = [];
+    setMoving(false);
     setFlash(true);
     window.setTimeout(() => setFlash(false), 420);
     playSound("boom", live.current.sound);
@@ -645,6 +993,7 @@ export default function Studio() {
     if (!ctx) return;
     ctx.drawImage(paperCanvas, 0, 0);
     ctx.drawImage(ink, 0, 0);
+    drawMoopies(ctx, moopiesRef.current, 0, false);
     const blob = await new Promise<Blob | null>((resolve) => out.toBlob((value) => resolve(value), "image/png"));
     if (!blob) return;
     fileSeq.current += 1;
@@ -711,6 +1060,11 @@ export default function Studio() {
         ctx.drawImage(pending.current, 0, 0, w, h);
         pending.current = null;
       }
+      if (pendingBook.current && ctx) {
+        const book = pendingBook.current;
+        pendingBook.current = null;
+        applyBook(book);
+      }
     };
 
     fit();
@@ -733,24 +1087,26 @@ export default function Studio() {
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const sheet = await loadSheet();
+      const book = await loadBook();
       if (cancel) return;
-      if (sheet) {
-        setPaper(sheet.paper || PAPERS[0]);
-        setPattern(sheet.pattern || "plain");
-        setSymmetry(sheet.symmetry || "off");
-        try {
-          const bitmap = await createImageBitmap(sheet.ink);
-          if (cancel) return;
-          const ink = inkRef.current;
-          if (ink && ink.width > 2) {
-            const ctx = ink.getContext("2d");
-            ctx?.clearRect(0, 0, ink.width, ink.height);
-            ctx?.drawImage(bitmap, 0, 0, ink.width, ink.height);
-          } else pending.current = bitmap;
-        } catch {
-          /* keep the blank page */
+      if (book) {
+        setPaper(book.paper || PAPERS[0]);
+        setPattern(book.pattern || "plain");
+        setSymmetry(book.symmetry || "off");
+        const bitmaps: ImageBitmap[] = [];
+        const moopies: Moopie[][] = [];
+        for (const page of book.pages) {
+          try {
+            bitmaps.push(await createImageBitmap(page.ink));
+            moopies.push(page.moopies || []);
+          } catch {
+            /* skip a page that did not decode */
+          }
         }
+        if (cancel) return;
+        const packed = { bitmaps, moopies, index: book.index || 0 };
+        if (inkRef.current && inkRef.current.width > 2) applyBook(packed);
+        else pendingBook.current = packed;
       }
       loaded.current = true;
     })();
@@ -767,6 +1123,7 @@ export default function Studio() {
 
   useLayoutEffect(() => {
     live.current = { tool, drawMode, wacky, shape, filled, stamp, color, paper, pattern, symmetry, size, pixel, sound };
+    movesRef.current = moves;
     actions.current = { undo, redo, savePng };
   });
 
@@ -790,6 +1147,67 @@ export default function Studio() {
   }, []);
 
   useEffect(() => () => stopMusic(), []);
+
+  useEffect(() => {
+    if (!moving) {
+      const canvas = moopieCanvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (canvas && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+    let frame = 0;
+    let last = 0;
+    const loop = (time: number) => {
+      frame = window.requestAnimationFrame(loop);
+      if (time - last < 80) return;
+      last = time;
+      const canvas = moopieCanvasRef.current;
+      const ink = inkRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ink || !ctx) return;
+      if (canvas.width !== ink.width || canvas.height !== ink.height) {
+        canvas.width = ink.width;
+        canvas.height = ink.height;
+      }
+      drawMoopies(ctx, moopiesRef.current, time);
+    };
+    frame = window.requestAnimationFrame(loop);
+    return () => window.cancelAnimationFrame(frame);
+  }, [moving]);
+
+  useEffect(() => {
+    if (!show) return;
+    const canvas = showRef.current;
+    const stage = stageRef.current;
+    if (!canvas || !stage) return;
+    const rect = stage.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(2, Math.round(rect.width * dpr));
+    canvas.height = Math.max(2, Math.round(rect.height * dpr));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const pages = pagesRef.current.filter((slot) => slot);
+    let index = pageIndexRef.current % Math.max(1, pages.length);
+    let frame = 0;
+    const draw = (time: number) => {
+      const slot = pages[index];
+      if (!slot) return;
+      paintSlide(ctx, slot.ink, slot.moopies, live.current.paper, live.current.pattern, time);
+    };
+    const loop = (time: number) => {
+      draw(time);
+      frame = window.requestAnimationFrame(loop);
+    };
+    frame = window.requestAnimationFrame(loop);
+    const timer = window.setInterval(() => {
+      index = (index + 1) % Math.max(1, pages.length);
+      playSound("whir", live.current.sound);
+    }, 1800);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+    };
+  }, [show]);
 
   const symmetryLabel = symmetry === "off" ? "solo" : symmetry === "lr" ? "mirror" : symmetry;
   const optionRow =
@@ -815,13 +1233,26 @@ export default function Studio() {
         <button type="button" className={filled ? "kp-chip is-on" : "kp-chip"} onClick={() => setFilled((value) => !value)}>
           {filled ? "filled" : "outline"}
         </button>
+        {shape === "polygon" ? (
+          <button type="button" className="kp-chip" onClick={closePoly} disabled={polyCount < 3}>
+            close
+          </button>
+        ) : null}
       </>
     ) : tool === "stamp" ? (
-      STAMPS.map((item) => (
-        <button key={item.id} type="button" className={stamp === item.id ? "kp-chip is-on" : "kp-chip"} onClick={() => setStamp(item.id)}>
-          {item.label}
+      <>
+        <button type="button" className={moves ? "kp-chip" : "kp-chip is-on"} onClick={() => setMoves(false)}>
+          still
         </button>
-      ))
+        <button type="button" className={moves ? "kp-chip is-on" : "kp-chip"} onClick={() => setMoves(true)}>
+          moopie
+        </button>
+        {STAMPS.map((item) => (
+          <button key={item.id} type="button" className={stamp === item.id ? "kp-chip is-on" : "kp-chip"} onClick={() => setStamp(item.id)}>
+            {item.label}
+          </button>
+        ))}
+      </>
     ) : tool === "mix" ? (
       MIXES.map((item) => (
         <button key={item.id} type="button" className="kp-chip" onClick={() => runMix(item.id)}>
@@ -858,6 +1289,21 @@ export default function Studio() {
         </button>
         <button type="button" className="kp-bar kp-boom" onClick={boom}>
           boom
+        </button>
+        <button type="button" className="kp-bar" onClick={nextPage}>
+          {pageCount.index + 1}/{pageCount.total}
+        </button>
+        <button type="button" className="kp-bar" onClick={addPage}>
+          + page
+        </button>
+        <button type="button" className="kp-bar" onClick={playShow}>
+          play
+        </button>
+        <button type="button" className="kp-bar" onClick={loadColoring}>
+          color
+        </button>
+        <button type="button" className="kp-bar" onClick={() => photoRef.current?.click()}>
+          photo
         </button>
         <button type="button" className="kp-bar" onClick={() => void savePng()}>
           save
@@ -900,6 +1346,10 @@ export default function Studio() {
               aria-pressed={tool === item.id}
               onClick={() => {
                 if (tool === "letter" && item.id !== "letter") commitDraft();
+                bendRef.current = null;
+                polyRef.current = [];
+                setPolyCount(0);
+                clearPreview();
                 setTool(item.id);
                 playSound("click", sound);
               }}
@@ -924,8 +1374,15 @@ export default function Studio() {
           <div className="kp-world" ref={worldRef}>
             <canvas ref={paperRef} data-layer="paper" />
             <canvas ref={inkRef} data-layer="ink" />
+            <canvas ref={moopieCanvasRef} data-layer="moopie" className="kp-preview" />
             <canvas ref={previewRef} data-layer="preview" className="kp-preview" />
           </div>
+          {show ? (
+            <div className="kp-show" onPointerDown={() => setShow(false)}>
+              <canvas ref={showRef} />
+              <p>tap to stop</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="kp-dock">
@@ -996,6 +1453,19 @@ export default function Studio() {
         </div>
       </div>
 
+      <input
+        ref={photoRef}
+        className="sr"
+        type="file"
+        accept="image/*"
+        aria-label="Choose a photo from this device"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (file) void placePhoto(file);
+        }}
+      />
+
       {draft ? (
         <form
           className="kp-text"
@@ -1025,14 +1495,14 @@ export default function Studio() {
           <div className="kp-help-card">
             <h2 id="kp-help-title">kid pix</h2>
             <p>
-              A drawing toy for a finger, a pencil, or a headset. It keeps the loud parts of the original — wacky marks, stamps, a mixer, a van, and a boom button — and adds more than one undo, redo, pinch zoom, symmetry, pressure, and paper patterns.
+              A drawing toy for a finger, a pencil, or a headset. Chalk, crayon, curves, polygons, coloring pictures, moving stamps, and a slideshow are in here as original tools. The pictures and sounds are not from the Kid Pix discs.
             </p>
             <p>Pictures stay in this browser. Save shares a PNG from the device. Nothing is uploaded.</p>
             <ul>
-              <li>Draw has pencil, brush, marker, and spray. Wacky has its own marks.</li>
-              <li>Mirror, quad, and radial copy your stroke while you make it.</li>
-              <li>Two fingers pinch to zoom. Move drags the page. Fit resets it.</li>
-              <li>Boom clears the page. Undo brings it back.</li>
+              <li>Draw adds chalk and crayon. Wacky includes a tree. Mixer can blur, fade, or drip.</li>
+              <li>Stamps can sit still or move. Color drops a picture to fill. Photo places a picture from this device.</li>
+              <li>+ page adds a slide. The page count moves between them. Play runs the show.</li>
+              <li>Mirror, quad, and radial copy a stroke. Boom clears the page. Undo brings it back.</li>
             </ul>
             <div className="kp-help-actions">
               <button

@@ -72,6 +72,12 @@ html.vr-booth:has(.kp) .centered-logo img {
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
 }
 
+@media (max-width: 900px) {
+  .kp-top {
+    flex-wrap: wrap;
+  }
+}
+
 .kp-title {
   display: flex;
   flex-direction: column;
@@ -194,6 +200,87 @@ html.vr-booth:has(.kp) .centered-logo img {
 
 .kp-preview {
   pointer-events: none;
+}
+
+.kp-show {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: #000;
+  touch-action: none;
+}
+
+.kp-show canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.kp-show p {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  margin: 0;
+  padding: 6px 10px;
+  background: #000;
+  border: 2px solid #fff;
+  font-size: 0.8rem;
+}
+
+.kp-gate-wrap {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.kp-gate {
+  margin: 0;
+  width: min(100%, 28rem);
+  text-align: left;
+  border: 2px solid #fff;
+  background: #000;
+  color: #fff;
+  padding: 1.2rem;
+}
+
+.kp-gate h1 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.kp-gate p,
+.kp-gate label {
+  display: block;
+  margin: 0 0 0.8rem;
+  line-height: 1.4;
+}
+
+.kp-gate input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-bottom: 0.7rem;
+  border: 2px solid #fff;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  padding: 0 0.7rem;
+}
+
+.kp-gate button {
+  min-height: 48px;
+  border: 0;
+  background: #ff3d6e;
+  color: #14020a;
+  font: 700 1rem/1 var(--font-menu), sans-serif;
+  padding: 0 1rem;
+  cursor: pointer;
+}
+
+.kp-gate .kp-error {
+  color: #ff4d78;
 }
 
 .kp-dock {

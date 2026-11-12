@@ -12,9 +12,9 @@ export type Tool =
   | "mix"
   | "hand";
 
-export type DrawMode = "pencil" | "brush" | "marker" | "spray";
-export type WackyMode = "rainbow" | "dots" | "zigzag" | "spark" | "bubbles" | "confetti" | "drip" | "boxes" | "vine";
-export type ShapeKind = "rect" | "oval" | "triangle" | "star";
+export type DrawMode = "pencil" | "brush" | "marker" | "spray" | "chalk" | "crayon";
+export type WackyMode = "rainbow" | "dots" | "zigzag" | "spark" | "bubbles" | "confetti" | "drip" | "boxes" | "vine" | "tree";
+export type ShapeKind = "rect" | "oval" | "triangle" | "star" | "curve" | "polygon";
 export type StampId =
   | "star"
   | "heart"
@@ -28,7 +28,7 @@ export type StampId =
   | "fish"
   | "crown"
   | "ghost";
-export type MixId = "mirror" | "flip" | "invert" | "pop" | "melt" | "swirl" | "pixel" | "smear" | "kaleid" | "glitch";
+export type MixId = "mirror" | "flip" | "invert" | "pop" | "melt" | "swirl" | "pixel" | "smear" | "kaleid" | "glitch" | "blur" | "fade" | "drip";
 export type Symmetry = "off" | "lr" | "quad" | "radial";
 export type PaperPattern = "plain" | "dots" | "grid" | "ruled" | "stars";
 
@@ -57,6 +57,8 @@ export const DRAW_MODES: { id: DrawMode; label: string }[] = [
   { id: "brush", label: "brush" },
   { id: "marker", label: "marker" },
   { id: "spray", label: "spray" },
+  { id: "chalk", label: "chalk" },
+  { id: "crayon", label: "crayon" },
 ];
 
 export const WACKY_MODES: { id: WackyMode; label: string }[] = [
@@ -69,6 +71,7 @@ export const WACKY_MODES: { id: WackyMode; label: string }[] = [
   { id: "drip", label: "drip" },
   { id: "boxes", label: "boxes" },
   { id: "vine", label: "vine" },
+  { id: "tree", label: "tree" },
 ];
 
 export const SHAPES: { id: ShapeKind; label: string }[] = [
@@ -76,6 +79,8 @@ export const SHAPES: { id: ShapeKind; label: string }[] = [
   { id: "oval", label: "oval" },
   { id: "triangle", label: "triangle" },
   { id: "star", label: "star" },
+  { id: "curve", label: "curve" },
+  { id: "polygon", label: "polygon" },
 ];
 
 export const STAMPS: { id: StampId; label: string }[] = [
@@ -104,6 +109,9 @@ export const MIXES: { id: MixId; label: string }[] = [
   { id: "smear", label: "smear" },
   { id: "kaleid", label: "kaleid" },
   { id: "glitch", label: "glitch" },
+  { id: "blur", label: "blur" },
+  { id: "fade", label: "fade" },
+  { id: "drip", label: "drip" },
 ];
 
 export const PATTERNS: { id: PaperPattern; label: string }[] = [
@@ -325,6 +333,61 @@ export function mixPixels(image: ImageData, kind: MixId) {
     return;
   }
 
+  if (kind === "fade") {
+    for (let i = 0; i < dst.length; i += 4) dst[i + 3] = Math.round(src[i + 3] * 0.45);
+    return;
+  }
+
+  if (kind === "drip") {
+    for (let x = 0; x < width; x++) {
+      const shift = 6 + Math.floor(hash(x + 4) * 30);
+      for (let y = 0; y < height; y++) {
+        const sy = y - shift;
+        if (sy < 0) {
+          const here = at(x, y);
+          dst[here + 3] = 0;
+        } else copyPixel(src, at(x, sy), dst, at(x, y));
+      }
+    }
+    return;
+  }
+
+  if (kind === "blur") {
+    const blurOnce = (from: Uint8ClampedArray, to: Uint8ClampedArray) => {
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          let a = 0;
+          let n = 0;
+          for (let oy = -1; oy <= 1; oy++) {
+            for (let ox = -1; ox <= 1; ox++) {
+              const sx = x + ox;
+              const sy = y + oy;
+              if (sx < 0 || sy < 0 || sx >= width || sy >= height) continue;
+              const i = at(sx, sy);
+              r += from[i];
+              g += from[i + 1];
+              b += from[i + 2];
+              a += from[i + 3];
+              n += 1;
+            }
+          }
+          const o = at(x, y);
+          to[o] = r / n;
+          to[o + 1] = g / n;
+          to[o + 2] = b / n;
+          to[o + 3] = a / n;
+        }
+      }
+    };
+    const mid = new Uint8ClampedArray(dst.length);
+    blurOnce(src, mid);
+    blurOnce(mid, dst);
+    return;
+  }
+
   if (kind === "glitch") {
     const shift = Math.max(4, Math.round(width / 80));
     for (let y = 0; y < height; y++) {
@@ -465,6 +528,33 @@ export function strokeSegment(ctx: CanvasRenderingContext2D, a: Point, b: Point,
   ctx.stroke();
 }
 
+export function chalkDots(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.45;
+  const grain = Math.max(2, size * 0.7);
+  for (let n = 0; n < 7; n++) {
+    const ox = (Math.random() - 0.5) * grain;
+    const oy = (Math.random() - 0.5) * grain;
+    ctx.fillRect(x + ox, y + oy, Math.max(1.2, size * 0.22), Math.max(1.2, size * 0.22));
+  }
+  ctx.restore();
+}
+
+export function traceCurve(ctx: CanvasRenderingContext2D, a: Point, b: Point, control: Point) {
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.quadraticCurveTo(control.x, control.y, b.x, b.y);
+}
+
+export function tracePoly(ctx: CanvasRenderingContext2D, points: Point[], close: boolean) {
+  if (points.length === 0) return;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  if (close) ctx.closePath();
+}
+
 export function sprayDots(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, color: string, pixel: boolean) {
   ctx.fillStyle = color;
   const span = pixel ? 2 : 1.6;
@@ -518,6 +608,15 @@ export function paintWacky(ctx: CanvasRenderingContext2D, mode: WackyMode, x: nu
     ctx.beginPath();
     ctx.arc(x, y, s * 0.22, 0, Math.PI * 2);
     ctx.fill();
+  } else if (mode === "tree") {
+    ctx.beginPath();
+    ctx.moveTo(x, y + s * 0.2);
+    ctx.lineTo(x, y - s * 1.4);
+    ctx.moveTo(x, y - s * 0.7);
+    ctx.lineTo(x - s * 0.7, y - s * 1.3);
+    ctx.moveTo(x, y - s * 0.9);
+    ctx.lineTo(x + s * 0.75, y - s * 1.45);
+    ctx.stroke();
   } else {
     ctx.beginPath();
     ctx.moveTo(x - s * 0.5, y);

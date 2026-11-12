@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
+import { cookieIsValid, VR_COOKIE } from "@/lib/vr/gate";
+import Gate from "./Gate";
 import Studio from "./Studio";
 import "./kid-pix.css";
 
 export const metadata: Metadata = {
   title: "kid pix · Empress Trash",
-  description: "A touch drawing toy for iPad and VR. Pictures stay on this device.",
+  description: "A private drawing page.",
 };
 
 export const viewport: Viewport = {
@@ -16,6 +19,9 @@ export const viewport: Viewport = {
   interactiveWidget: "overlays-content",
 };
 
-export default function KidPixPage() {
+export default async function KidPixPage() {
+  const jar = await cookies();
+  const open = cookieIsValid(jar.get(VR_COOKIE)?.value);
+  if (!open) return <Gate />;
   return <Studio />;
 }
