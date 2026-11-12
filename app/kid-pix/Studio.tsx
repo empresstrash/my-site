@@ -1524,7 +1524,7 @@ export default function Studio() {
           <div className="kp-help-card">
             <h2 id="kp-help-title">kid pix</h2>
             <p>
-              A homemade drawing toy with the same kinds of tools as the later paint programs: chalk, crayon, curves, polygons, coloring pictures, moving stamps, a masher, a toy TV mixer, and a fading slideshow. The pictures, icons, and sounds are original. The sounds are cheap synthesized toys, not recordings from a disc.
+              A homemade drawing toy with the same kinds of tools as the later paint programs: chalk, crayon, curves, polygons, coloring pictures, moving stamps, a masher, a toy TV mixer, and a fading slideshow. The pictures, icons, and sounds are original. The sounds are cheap synthesized toys, not recordings from a disc. The 1.0 switch opens the separate open-source Kid Pix, from kidpix.app.
             </p>
             <p>Pictures stay in this browser. Save shares a PNG from the device. Nothing is uploaded.</p>
             <ul>

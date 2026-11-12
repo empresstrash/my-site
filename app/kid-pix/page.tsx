@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { cookieIsValid, VR_COOKIE } from "@/lib/vr/gate";
 import Gate from "./Gate";
-import Studio from "./Studio";
+import Picker from "./Picker";
 import "./kid-pix.css";
 
 export const metadata: Metadata = {
@@ -23,5 +24,9 @@ export default async function KidPixPage() {
   const jar = await cookies();
   const open = cookieIsValid(jar.get(VR_COOKIE)?.value);
   if (!open) return <Gate />;
-  return <Studio />;
+  return (
+    <Suspense fallback={null}>
+      <Picker />
+    </Suspense>
+  );
 }
