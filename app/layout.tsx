@@ -14,9 +14,10 @@ const menuSans = Barlow({
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const path = (await headers()).get('x-pathname') ?? '';
   const booth = path === '/vr' || path.startsWith('/vr/');
+  const kidPix = path === '/kid-pix';
 
   return (
-    <html lang="en" className={`${menuSans.variable}${booth ? ' pvr-still vr-booth' : ''}`}>
+    <html lang="en" className={`${menuSans.variable}${booth ? ' pvr-still vr-booth' : ''}${kidPix ? ' vr-booth' : ''}`}>
       <head>
         <title>empress trash's super site</title>
         <link rel="icon" href="/crown-favicon.png" type="image/png" sizes="64x64" />
@@ -32,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var path=location.pathname||'';if(path==='/vr'||path.indexOf('/vr/')===0){document.documentElement.classList.add('pvr-still');document.documentElement.classList.add('vr-booth');return;}document.documentElement.classList.remove('vr-booth');var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
+              "(function(){try{var path=location.pathname||'';var booth=path==='/vr'||path.indexOf('/vr/')===0;var draw=path==='/kid-pix';if(booth){document.documentElement.classList.add('pvr-still');document.documentElement.classList.add('vr-booth');return;}document.documentElement.classList.remove('vr-booth');if(draw)document.documentElement.classList.add('vr-booth');var ua=navigator.userAgent||'';if(/OculusBrowser/i.test(ua))return;if(/;\\s*wv\\)|CEF\\/|Vuplex/i.test(ua)||/Quest/i.test(ua)||(/Android/i.test(ua)&&/Version\\/4\\.0/i.test(ua)))document.documentElement.classList.add('pvr-still');}catch(e){}})();",
           }}
         />
         <ClientMenu />

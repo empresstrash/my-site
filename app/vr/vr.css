@@ -171,6 +171,15 @@
   border-color: #ff3d6e;
 }
 
+a.vr-draw-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.95rem;
+}
+
 .vr-stream-wrap {
   position: relative;
   flex: 1;

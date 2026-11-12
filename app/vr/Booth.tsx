@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { buildChatPieces, mentionsEmpress, parseTwitchEmoteTag, type EmoteImage, type TwitchEmoteSpan } from "@/lib/vr/chat-text";
 import { startParcelGhost, type GhostStatus } from "@/lib/vr/ghost";
 import { STATIONS, stationById, type NowPlaying } from "@/lib/vr/stations";
@@ -759,6 +760,9 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
         >
           Images
         </button>
+        <Link href="/kid-pix?vr=1" className="vr-chip vr-draw-link">
+          kid pix
+        </Link>
       </div>
       <div className="vr-layout" id="vr-panel-live" role="tabpanel" aria-labelledby="vr-tab-live" hidden={panel !== "live"}>
         <section className="vr-chat">

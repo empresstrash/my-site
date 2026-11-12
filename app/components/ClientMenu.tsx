@@ -80,6 +80,7 @@ const menuItems: MenuItem[] = [
           { label: 'xtz airdrop tool', path: '/xtzairdrop' },
           { label: 'onchain arcade', path: '/arcade' },
           { label: 'rodeo tarot', path: '/rodeo-tarot' },
+          { label: 'kid pix', path: '/kid-pix' },
           { label: 'glitch block party on remix.gg', external: 'https://remix.gg/g/57bd911d-aacb-45ba-b3f6-cf3ee7f5dda1?version=28b4e045-8dff-4263-ac9c-1a4563ebeb14' },
           { label: 'vr booth', path: '/vr' },
         ],
@@ -315,6 +316,8 @@ export default function ClientMenu(): React.ReactNode {
   }, [expandedMap]);
 
   const onBooth = pathname === '/vr';
+  const onKidPix = pathname === '/kid-pix';
+  const menuDrawer = isMobile || onBooth || onKidPix;
   const [embeddedBrowser, setEmbeddedBrowser] = useState(false);
 
   useEffect(() => {
@@ -327,13 +330,15 @@ export default function ClientMenu(): React.ReactNode {
   const still = onBooth || embeddedBrowser;
 
   useLayoutEffect(() => {
+    document.body.classList.toggle('kidpix-page-active', onKidPix);
     document.documentElement.classList.toggle('pvr-still', still);
-    document.documentElement.classList.toggle('vr-booth', onBooth);
+    document.documentElement.classList.toggle('vr-booth', onBooth || onKidPix);
     return () => {
+      document.body.classList.remove('kidpix-page-active');
       document.documentElement.classList.remove('pvr-still');
       document.documentElement.classList.remove('vr-booth');
     };
-  }, [still, onBooth]);
+  }, [still, onBooth, onKidPix]);
 
   // detect mobile viewport on client only
   useEffect(() => {
@@ -395,7 +400,7 @@ export default function ClientMenu(): React.ReactNode {
 
   return (
     <>
-      {(isMobile || onBooth) && mobileOpen && (
+      {menuDrawer && mobileOpen && (
         <div
           className="menu-backdrop"
           onClick={() => {
@@ -404,7 +409,7 @@ export default function ClientMenu(): React.ReactNode {
           }}
         />
       )}
-      <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={(isMobile || onBooth) && !mobileOpen}>
+      <aside className={`side-menu ${mobileOpen ? 'open' : ''}`} role="navigation" aria-hidden={menuDrawer && !mobileOpen}>
         <div className="menu-glass-panel">
           <GlassSparkles count={52} />
           <Link
@@ -442,7 +447,7 @@ export default function ClientMenu(): React.ReactNode {
           <span className="aurora-band aurora-band-4" />
         </div>
         <GlassSparkles count={36} />
-        {(isMobile || onBooth) && (
+        {menuDrawer && (
           <button
             type="button"
             className="mobile-menu-button"
