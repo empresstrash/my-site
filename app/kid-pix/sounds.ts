@@ -2,7 +2,11 @@ export type SoundKind =
   | "tick"
   | "soft"
   | "spray"
+  | "squeak"
+  | "chalk"
+  | "wax"
   | "boing"
+  | "honk"
   | "thwack"
   | "pour"
   | "scratch"
@@ -10,8 +14,11 @@ export type SoundKind =
   | "redo"
   | "boom"
   | "whir"
+  | "slide"
   | "van"
   | "click"
+  | "zip"
+  | "type"
   | "drop";
 
 type AudioCtor = typeof AudioContext;
@@ -75,30 +82,53 @@ function noise(dur: number, gainValue: number, freq = 800) {
 export function playSound(kind: SoundKind, enabled: boolean) {
   if (!enabled || !ctx || ctx.state !== "running") return;
   const now = performance.now();
-  if ((kind === "tick" || kind === "soft" || kind === "spray" || kind === "scratch") && now - lastNoise < 55) return;
+  if ((kind === "tick" || kind === "soft" || kind === "spray" || kind === "scratch" || kind === "chalk" || kind === "wax" || kind === "squeak") && now - lastNoise < 55) return;
   lastNoise = now;
-  if (kind === "tick") tone(640 + Math.random() * 80, 0.04, "square", 0.03);
-  else if (kind === "soft") tone(220, 0.06, "sine", 0.04);
-  else if (kind === "spray") noise(0.05, 0.03, 1400);
-  else if (kind === "boing") tone(520, 0.18, "sine", 0.06, 0, -280);
-  else if (kind === "thwack") {
-    noise(0.08, 0.08, 300);
-    tone(140, 0.09, "triangle", 0.08);
-  } else if (kind === "pour") tone(480, 0.2, "sawtooth", 0.03, 0, -200);
-  else if (kind === "scratch") noise(0.07, 0.04, 900);
+  if (kind === "tick") {
+    noise(0.04, 0.045, 2200);
+    tone(1500, 0.03, "square", 0.02);
+  } else if (kind === "soft") tone(170, 0.08, "sine", 0.05, 0, -50);
+  else if (kind === "spray") noise(0.07, 0.05, 2400);
+  else if (kind === "squeak") tone(1700, 0.07, "square", 0.03, 0, -700);
+  else if (kind === "chalk") noise(0.06, 0.05, 700);
+  else if (kind === "wax") {
+    noise(0.06, 0.04, 480);
+    tone(150, 0.07, "sawtooth", 0.02);
+  }   else if (kind === "boing") {
+    if (Math.random() < 0.4) {
+      tone(280, 0.1, "square", 0.04);
+      tone(360, 0.1, "square", 0.03);
+    } else tone(720, 0.22, "sine", 0.07, 0, -520);
+  } else if (kind === "honk") {
+    tone(280, 0.12, "square", 0.04);
+    tone(360, 0.12, "square", 0.03);
+  } else if (kind === "thwack") {
+    noise(0.09, 0.09, 240);
+    tone(110, 0.1, "triangle", 0.08);
+  } else if (kind === "pour") {
+    tone(260, 0.12, "sine", 0.05);
+    tone(150, 0.16, "sine", 0.05, 0.08);
+  } else if (kind === "scratch") noise(0.08, 0.045, 500);
   else if (kind === "undo") {
-    tone(392, 0.12, "triangle", 0.06);
-    tone(262, 0.16, "triangle", 0.05, 0.08);
+    tone(494, 0.1, "square", 0.04);
+    tone(247, 0.16, "square", 0.04, 0.08);
   } else if (kind === "redo") {
-    tone(262, 0.1, "triangle", 0.05);
-    tone(392, 0.14, "triangle", 0.05, 0.08);
+    tone(247, 0.08, "square", 0.04);
+    tone(494, 0.14, "square", 0.04, 0.07);
   } else if (kind === "boom") {
-    noise(0.35, 0.12, 180);
-    tone(90, 0.32, "sine", 0.1);
-  } else if (kind === "whir") tone(180, 0.22, "sawtooth", 0.03, 0, 220);
-  else if (kind === "van") tone(90, 0.12, "square", 0.04);
-  else if (kind === "drop") tone(880, 0.05, "sine", 0.04);
-  else tone(520, 0.04, "square", 0.035);
+    tone(880, 0.08, "square", 0.03, 0, -400);
+    noise(0.42, 0.14, 140);
+    tone(70, 0.36, "sine", 0.1, 0.06);
+  } else if (kind === "whir") tone(140, 0.28, "sawtooth", 0.035, 0, 380);
+  else if (kind === "slide") tone(860, 0.26, "sine", 0.05, 0, -620);
+  else if (kind === "van") {
+    tone(196, 0.16, "square", 0.045);
+    tone(247, 0.16, "square", 0.03);
+  } else if (kind === "zip") tone(240, 0.09, "square", 0.04, 0, 700);
+  else if (kind === "type") tone(1800, 0.03, "square", 0.03);
+  else if (kind === "drop") tone(980, 0.05, "square", 0.04);
+  else if (kind === "click") tone(520, 0.08, "sine", 0.06, 0, -260);
+  else tone(440, 0.05, "square", 0.04);
 }
 
 function loopBuffer(): AudioBuffer | null {
@@ -114,7 +144,8 @@ function loopBuffer(): AudioBuffer | null {
     const dur = Math.floor(rate * 0.16);
     for (let n = 0; n < dur && start + n < data.length; n++) {
       const env = Math.sin((Math.PI * n) / dur);
-      data[start + n] += Math.sin((2 * Math.PI * freq * n) / rate) * env * 0.18;
+      const wave = Math.sin((2 * Math.PI * freq * n) / rate);
+      data[start + n] += Math.sign(wave) * env * 0.12 + wave * env * 0.05;
     }
   });
   musicBuffer = buffer;

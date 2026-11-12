@@ -37,8 +37,9 @@ import {
   type Tool,
   type WackyMode,
 } from "./engine";
-import { COLOR_MES, drawMoopies, MOOPIE_MOTIONS, paintColorMe, paintSlide, type Moopie } from "./deluxe";
+import { COLOR_MES, drawMoopies, MOOPIE_MOTIONS, paintColorMe, type Moopie } from "./deluxe";
 import { playSound, setMusic, stopMusic, unlockAudio, type SoundKind } from "./sounds";
+import { ToolIcon } from "./icons";
 import { forgetSheet, loadBook, saveBook } from "./store";
 
 type Hist = { undo: boolean; redo: boolean };
@@ -124,13 +125,15 @@ export default function Studio() {
   const [flash, setFlash] = useState(false);
   const [savedNote, setSavedNote] = useState("on this device");
   const [moves, setMoves] = useState(false);
+  const [mash, setMash] = useState(false);
+  const [letterStyle, setLetterStyle] = useState<"plain" | "bubble" | "skinny">("plain");
   const [polyCount, setPolyCount] = useState(0);
   const [pageCount, setPageCount] = useState({ index: 0, total: 1 });
   const [show, setShow] = useState(false);
   const [moving, setMoving] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const live = useRef({ tool, drawMode, wacky, shape, filled, stamp, color, paper, pattern, symmetry, size, pixel, sound });
+  const live = useRef({ tool, drawMode, wacky, shape, filled, stamp, color, paper, pattern, symmetry, size, pixel, sound, mash, letter: letterStyle });
   const actions = useRef({
     undo: () => {},
     redo: () => {},
@@ -359,7 +362,7 @@ export default function Studio() {
       }
     }
     pair.ctx.restore();
-    playSound(cur.tool === "line" ? "tick" : "click", cur.sound);
+    playSound(cur.tool === "line" ? "zip" : "click", cur.sound);
     scheduleSave();
   }
 
@@ -583,25 +586,38 @@ export default function Studio() {
     const pair = inkContext();
     if (!pair) return;
     remember();
+    const cur = live.current;
+    const ids = STAMPS.map((item) => item.id);
+    const buddy = ids[(ids.indexOf(cur.stamp) + 1) % ids.length];
+    const spots = mirrorPoint(at, cur.symmetry, pair.canvas.width, pair.canvas.height);
     if (movesRef.current) {
-      moopieSeq.current += 1;
-      const id = moopieSeq.current;
-      moopiesRef.current = [
-        ...moopiesRef.current,
-        {
-          id,
-          stamp: live.current.stamp,
-          x: at.x / pair.canvas.width,
-          y: at.y / pair.canvas.height,
-          size: Math.max(0.05, live.current.size / 180),
-          color: live.current.color,
-          motion: MOOPIE_MOTIONS[id % MOOPIE_MOTIONS.length],
-          phase: id * 0.7,
-        },
-      ];
+      const add = (stamp: StampId, dx: number, dy: number) => {
+        moopieSeq.current += 1;
+        const id = moopieSeq.current;
+        moopiesRef.current = [
+          ...moopiesRef.current,
+          {
+            id,
+            stamp,
+            x: Math.min(0.96, Math.max(0.04, (at.x + dx) / pair.canvas.width)),
+            y: Math.min(0.96, Math.max(0.04, (at.y + dy) / pair.canvas.height)),
+            size: Math.max(0.05, cur.size / 180),
+            color: cur.color,
+            motion: MOOPIE_MOTIONS[id % MOOPIE_MOTIONS.length],
+            phase: id * 0.7,
+          },
+        ];
+      };
+      add(cur.stamp, 0, 0);
+      if (cur.mash) add(buddy, cur.size * 1.6, cur.size * 0.5);
       setMoving(true);
-    } else dab(pair.ctx, at, "stamp");
-    playSound("thwack", live.current.sound);
+    } else {
+      dab(pair.ctx, at, "stamp");
+      if (cur.mash) {
+        for (const spot of spots) drawStamp(pair.ctx, buddy, spot.x + cur.size * 1.6, spot.y + cur.size * 0.5, Math.max(36, cur.size * 3.2), cur.color);
+      }
+    }
+    playSound(cur.mash ? "honk" : "thwack", cur.sound);
     scheduleSave();
   }
 
@@ -696,8 +712,13 @@ export default function Studio() {
     const cur = live.current;
     if (cur.tool === "eraser") return "scratch";
     if (cur.tool === "wacky") return "boing";
-    if (cur.tool === "draw" && (cur.drawMode === "spray" || cur.drawMode === "chalk" || cur.drawMode === "crayon")) return cur.drawMode === "spray" ? "spray" : "soft";
-    if (cur.tool === "draw" && cur.drawMode === "brush") return "soft";
+    if (cur.tool === "draw") {
+      if (cur.drawMode === "brush") return "soft";
+      if (cur.drawMode === "marker") return "squeak";
+      if (cur.drawMode === "spray") return "spray";
+      if (cur.drawMode === "chalk") return "chalk";
+      if (cur.drawMode === "crayon") return "wax";
+    }
     return "tick";
   }
 
@@ -971,14 +992,20 @@ export default function Studio() {
     if (!pair) return;
     remember();
     const fontSize = Math.max(22, live.current.size * 3);
+    const style = live.current.letter;
     pair.ctx.save();
     pair.ctx.fillStyle = live.current.color;
-    pair.ctx.font = `700 ${fontSize}px "Special Elite", "Courier New", monospace`;
+    pair.ctx.font =
+      style === "bubble"
+        ? `800 ${fontSize * 1.15}px "Trebuchet MS", "Arial Rounded MT Bold", sans-serif`
+        : style === "skinny"
+          ? `700 ${fontSize}px "Arial Narrow", Impact, sans-serif`
+          : `700 ${fontSize}px "Special Elite", "Courier New", monospace`;
     pair.ctx.textBaseline = "top";
     const spots = mirrorPoint(current.at, live.current.symmetry, pair.canvas.width, pair.canvas.height);
     for (const spot of spots) pair.ctx.fillText(trimmed, spot.x, spot.y);
     pair.ctx.restore();
-    playSound("tick", live.current.sound);
+    playSound("type", live.current.sound);
     scheduleSave();
   }
 
@@ -1122,7 +1149,7 @@ export default function Studio() {
   }, []);
 
   useLayoutEffect(() => {
-    live.current = { tool, drawMode, wacky, shape, filled, stamp, color, paper, pattern, symmetry, size, pixel, sound };
+    live.current = { tool, drawMode, wacky, shape, filled, stamp, color, paper, pattern, symmetry, size, pixel, sound, mash, letter: letterStyle };
     movesRef.current = moves;
     actions.current = { undo, redo, savePng };
   });
@@ -1188,11 +1215,27 @@ export default function Studio() {
     if (!ctx) return;
     const pages = pagesRef.current.filter((slot) => slot);
     let index = pageIndexRef.current % Math.max(1, pages.length);
+    let from = index;
+    let started = 0;
     let frame = 0;
     const draw = (time: number) => {
       const slot = pages[index];
       if (!slot) return;
-      paintSlide(ctx, slot.ink, slot.moopies, live.current.paper, live.current.pattern, time);
+      const prev = pages[from];
+      const fade = started ? Math.min(1, (time - started) / 420) : 1;
+      paintPaper(ctx, live.current.paper, live.current.pattern);
+      if (prev && fade < 1) {
+        ctx.save();
+        ctx.globalAlpha = 1 - fade;
+        ctx.drawImage(prev.ink, 0, 0, canvas.width, canvas.height);
+        drawMoopies(ctx, prev.moopies, time, false);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.globalAlpha = fade;
+      ctx.drawImage(slot.ink, 0, 0, canvas.width, canvas.height);
+      drawMoopies(ctx, slot.moopies, time, false);
+      ctx.restore();
     };
     const loop = (time: number) => {
       draw(time);
@@ -1200,8 +1243,10 @@ export default function Studio() {
     };
     frame = window.requestAnimationFrame(loop);
     const timer = window.setInterval(() => {
+      from = index;
       index = (index + 1) % Math.max(1, pages.length);
-      playSound("whir", live.current.sound);
+      started = performance.now();
+      playSound("slide", live.current.sound);
     }, 1800);
     return () => {
       window.cancelAnimationFrame(frame);
@@ -1210,55 +1255,39 @@ export default function Studio() {
   }, [show]);
 
   const symmetryLabel = symmetry === "off" ? "solo" : symmetry === "lr" ? "mirror" : symmetry;
+  const iconChip = (id: string, label: string, on: boolean, click: () => void) => (
+    <button key={id} type="button" className={on ? "kp-chip is-on" : "kp-chip"} aria-pressed={on} onClick={click}>
+      <ToolIcon name={id} />
+      <span className="sr">{label}</span>
+    </button>
+  );
   const optionRow =
     tool === "draw" ? (
-      DRAW_MODES.map((item) => (
-        <button key={item.id} type="button" className={drawMode === item.id ? "kp-chip is-on" : "kp-chip"} onClick={() => setDrawMode(item.id)}>
-          {item.label}
-        </button>
-      ))
+      DRAW_MODES.map((item) => iconChip(item.id, item.label, drawMode === item.id, () => setDrawMode(item.id)))
     ) : tool === "wacky" ? (
-      WACKY_MODES.map((item) => (
-        <button key={item.id} type="button" className={wacky === item.id ? "kp-chip is-on" : "kp-chip"} onClick={() => setWacky(item.id)}>
-          {item.label}
-        </button>
-      ))
+      WACKY_MODES.map((item) => iconChip(item.id, item.label, wacky === item.id, () => setWacky(item.id)))
     ) : tool === "shape" ? (
       <>
-        {SHAPES.map((item) => (
-          <button key={item.id} type="button" className={shape === item.id ? "kp-chip is-on" : "kp-chip"} onClick={() => setShape(item.id)}>
-            {item.label}
-          </button>
-        ))}
-        <button type="button" className={filled ? "kp-chip is-on" : "kp-chip"} onClick={() => setFilled((value) => !value)}>
-          {filled ? "filled" : "outline"}
-        </button>
+        {SHAPES.map((item) => iconChip(item.id, item.label, shape === item.id, () => setShape(item.id)))}
+        {iconChip(filled ? "filled" : "outline", filled ? "filled" : "outline", filled, () => setFilled((value) => !value))}
         {shape === "polygon" ? (
           <button type="button" className="kp-chip" onClick={closePoly} disabled={polyCount < 3}>
-            close
+            <ToolIcon name="close" />
+            <span className="sr">close</span>
           </button>
         ) : null}
       </>
     ) : tool === "stamp" ? (
       <>
-        <button type="button" className={moves ? "kp-chip" : "kp-chip is-on"} onClick={() => setMoves(false)}>
-          still
-        </button>
-        <button type="button" className={moves ? "kp-chip is-on" : "kp-chip"} onClick={() => setMoves(true)}>
-          moopie
-        </button>
-        {STAMPS.map((item) => (
-          <button key={item.id} type="button" className={stamp === item.id ? "kp-chip is-on" : "kp-chip"} onClick={() => setStamp(item.id)}>
-            {item.label}
-          </button>
-        ))}
+        {iconChip("still", "still", !moves, () => setMoves(false))}
+        {iconChip("moopie", "moopie", moves, () => setMoves(true))}
+        {iconChip("mash", "mash", mash, () => setMash((value) => !value))}
+        {STAMPS.map((item) => iconChip(item.id, item.label, stamp === item.id, () => setStamp(item.id)))}
       </>
     ) : tool === "mix" ? (
-      MIXES.map((item) => (
-        <button key={item.id} type="button" className="kp-chip" onClick={() => runMix(item.id)}>
-          {item.label}
-        </button>
-      ))
+      MIXES.map((item) => iconChip(item.id, item.label, false, () => runMix(item.id)))
+    ) : tool === "letter" ? (
+      (["plain", "bubble", "skinny"] as const).map((item) => iconChip(item, item, letterStyle === item, () => setLetterStyle(item)))
     ) : null;
 
   return (
@@ -1355,7 +1384,7 @@ export default function Studio() {
               }}
             >
               <span className="kp-glyph" aria-hidden="true">
-                {item.glyph}
+                <ToolIcon name={item.id} />
               </span>
               <span className="kp-name">{item.label}</span>
             </button>
@@ -1495,12 +1524,12 @@ export default function Studio() {
           <div className="kp-help-card">
             <h2 id="kp-help-title">kid pix</h2>
             <p>
-              A drawing toy for a finger, a pencil, or a headset. Chalk, crayon, curves, polygons, coloring pictures, moving stamps, and a slideshow are in here as original tools. The pictures and sounds are not from the Kid Pix discs.
+              A homemade drawing toy with the same kinds of tools as the later paint programs: chalk, crayon, curves, polygons, coloring pictures, moving stamps, a masher, a toy TV mixer, and a fading slideshow. The pictures, icons, and sounds are original. The sounds are cheap synthesized toys, not recordings from a disc.
             </p>
             <p>Pictures stay in this browser. Save shares a PNG from the device. Nothing is uploaded.</p>
             <ul>
-              <li>Draw adds chalk and crayon. Wacky includes a tree. Mixer can blur, fade, or drip.</li>
-              <li>Stamps can sit still or move. Color drops a picture to fill. Photo places a picture from this device.</li>
+              <li>Draw adds chalk and crayon. Wacky includes a tree. Mixer can blur, fade, drip, or turn the page into a toy TV.</li>
+              <li>Stamps can sit still, move, or mash with the next picture. Letters can be plain, round, or skinny.</li>
               <li>+ page adds a slide. The page count moves between them. Play runs the show.</li>
               <li>Mirror, quad, and radial copy a stroke. Boom clears the page. Undo brings it back.</li>
             </ul>

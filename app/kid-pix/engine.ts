@@ -14,7 +14,7 @@ export type Tool =
 
 export type DrawMode = "pencil" | "brush" | "marker" | "spray" | "chalk" | "crayon";
 export type WackyMode = "rainbow" | "dots" | "zigzag" | "spark" | "bubbles" | "confetti" | "drip" | "boxes" | "vine" | "tree";
-export type ShapeKind = "rect" | "oval" | "triangle" | "star" | "curve" | "polygon";
+export type ShapeKind = "rect" | "oval" | "circle" | "triangle" | "star" | "curve" | "polygon" | "round";
 export type StampId =
   | "star"
   | "heart"
@@ -28,7 +28,7 @@ export type StampId =
   | "fish"
   | "crown"
   | "ghost";
-export type MixId = "mirror" | "flip" | "invert" | "pop" | "melt" | "swirl" | "pixel" | "smear" | "kaleid" | "glitch" | "blur" | "fade" | "drip";
+export type MixId = "mirror" | "flip" | "invert" | "pop" | "melt" | "swirl" | "pixel" | "smear" | "kaleid" | "glitch" | "blur" | "fade" | "drip" | "tv";
 export type Symmetry = "off" | "lr" | "quad" | "radial";
 export type PaperPattern = "plain" | "dots" | "grid" | "ruled" | "stars";
 
@@ -76,7 +76,9 @@ export const WACKY_MODES: { id: WackyMode; label: string }[] = [
 
 export const SHAPES: { id: ShapeKind; label: string }[] = [
   { id: "rect", label: "box" },
+  { id: "round", label: "round" },
   { id: "oval", label: "oval" },
+  { id: "circle", label: "circle" },
   { id: "triangle", label: "triangle" },
   { id: "star", label: "star" },
   { id: "curve", label: "curve" },
@@ -112,6 +114,7 @@ export const MIXES: { id: MixId; label: string }[] = [
   { id: "blur", label: "blur" },
   { id: "fade", label: "fade" },
   { id: "drip", label: "drip" },
+  { id: "tv", label: "tv" },
 ];
 
 export const PATTERNS: { id: PaperPattern; label: string }[] = [
@@ -388,6 +391,21 @@ export function mixPixels(image: ImageData, kind: MixId) {
     return;
   }
 
+  if (kind === "tv") {
+    const step = (n: number) => Math.round(n / 64) * 64;
+    for (let y = 0; y < height; y++) {
+      const dim = y % 3 === 0 ? 0.55 : 1;
+      for (let x = 0; x < width; x++) {
+        const i = at(x, y);
+        if (src[i + 3] === 0) continue;
+        dst[i] = Math.round(step(src[i]) * dim);
+        dst[i + 1] = Math.round(step(src[i + 1]) * dim);
+        dst[i + 2] = Math.round(step(src[i + 2]) * dim);
+      }
+    }
+    return;
+  }
+
   if (kind === "glitch") {
     const shift = Math.max(4, Math.round(width / 80));
     for (let y = 0; y < height; y++) {
@@ -508,6 +526,11 @@ export function traceShape(ctx: CanvasRenderingContext2D, kind: ShapeKind, a: Po
     ctx.rect(x, y, w, h);
   } else if (kind === "oval") {
     ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  } else if (kind === "circle") {
+    const radius = Math.max(w, h) / 2;
+    ctx.arc((a.x + b.x) / 2, (a.y + b.y) / 2, radius, 0, Math.PI * 2);
+  } else if (kind === "round") {
+    ctx.roundRect(x, y, w, h, Math.min(28, Math.min(w, h) * 0.35));
   } else if (kind === "triangle") {
     ctx.moveTo(x + w / 2, y);
     ctx.lineTo(x + w, y + h);

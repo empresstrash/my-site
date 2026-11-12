@@ -163,6 +163,25 @@ html.vr-booth:has(.kp) .centered-logo img {
   line-height: 1;
 }
 
+.kp-icon {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.kp-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0 0.45rem;
+}
+
+.kp-chip .kp-icon {
+  width: 22px;
+  height: 22px;
+}
+
 .kp-name {
   font-size: 0.62rem;
   font-weight: 700;
@@ -511,6 +530,11 @@ html.vr-booth:has(.kp) .centered-logo img {
 
 .kp-vr .kp-tool {
   width: 84px;
+}
+
+.kp-vr .kp-icon {
+  width: 32px;
+  height: 32px;
 }
 
 .kp-vr .kp-swatch,
