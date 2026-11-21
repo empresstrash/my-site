@@ -38,15 +38,21 @@ function init_mods() {
     if (box) box.classList.toggle("is-grabbing", grabbed);
   }
 
+  // Step 69 draws a stamp three canvas-widths across. The steps below that
+  // are even slices of that size. The number on the bar is the step.
+  var sizeSteps = 69;
+  var sizeAtTop = (3 * 1920) / 64;
+
   function setSize(value) {
-    var next = Math.min(20, Math.max(1, Math.round(Number(value) || 1)));
-    KiddoPaint.Current.toolScale = next;
-    KiddoPaint.Current.stampScale = next;
-    KiddoPaint.Current.scaling = next;
+    var step = Math.min(sizeSteps, Math.max(1, Math.round(Number(value) || 1)));
+    var scale = (step * sizeAtTop) / sizeSteps;
+    KiddoPaint.Current.toolScale = scale;
+    KiddoPaint.Current.stampScale = scale;
+    KiddoPaint.Current.scaling = scale;
     var input = document.getElementById("kp-size");
-    if (input && Number(input.value) !== next) input.value = String(next);
+    if (input && Number(input.value) !== step) input.value = String(step);
     var shown = document.getElementById("kp-size-value");
-    if (shown) shown.textContent = String(next);
+    if (shown) shown.textContent = String(step);
   }
 
   window.kpView = {
@@ -73,10 +79,14 @@ function init_mods() {
   };
 
   function setAngle(value) {
-    var next = Math.round(Number(value) || 0);
-    KiddoPaint.Current.toolAngle = next;
+    var raw = Math.round(Number(value) || 0);
+    var next = ((raw % 360) + 360) % 360;
+    if (raw === 360) next = 360;
+    KiddoPaint.Current.toolAngle = next % 360;
     var shown = document.getElementById("kp-angle-value");
     if (shown) shown.textContent = next + "°";
+    var input = document.getElementById("kp-angle");
+    if (input && Number(input.value) !== next) input.value = String(next);
   }
 
   setSize(1);

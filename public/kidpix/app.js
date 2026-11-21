@@ -439,7 +439,7 @@ function init_alphabet_bar(alphabetgroup) {
     var alphabettoolbar = KiddoPaint.Alphabet.english[alphabetgroup].letters;
     KiddoPaint.Tools.Stamp.stamp = alphabettoolbar[0];
     for (var i = 0; i < alphabettoolbar.length; i++) {
-        var buttonValue = '<h1>' + alphabettoolbar[i] + '</h1>';
+        var buttonValue = '<h1>' + alphabettoolbar[i].replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</h1>';
         document.getElementById('xal' + i).innerHTML = buttonValue;
     }
 }
@@ -12259,7 +12259,7 @@ KiddoPaint.Alphabet.english = {
         letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     },
     character2: {
-        letters: ['!', '?', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '<', '>', '$', '%', '^', '&', '@', '*', '(', ')', '~', '|']
+        letters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '/', '\\', '?', '+', '-', '=']
     }
 }
 

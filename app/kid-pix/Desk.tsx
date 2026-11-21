@@ -190,7 +190,7 @@ export default function Desk() {
                 id="kp-size"
                 type="range"
                 min={1}
-                max={20}
+                max={69}
                 step={1}
                 defaultValue={1}
                 aria-label="size"
@@ -205,6 +205,16 @@ export default function Desk() {
               <button type="button" aria-label="rotate right" onClick={() => window.kpView?.nudgeAngle(1)}>
                 ↻
               </button>
+              <input
+                id="kp-angle"
+                type="range"
+                min={0}
+                max={360}
+                step={1}
+                defaultValue={0}
+                aria-label="rotation"
+                onInput={(event) => window.kpView?.setAngle(Number(event.currentTarget.value))}
+              />
               <button type="button" aria-label="reset orientation" onClick={() => window.kpView?.setAngle(0)}>
                 reset
               </button>
