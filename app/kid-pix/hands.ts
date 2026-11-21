@@ -3,6 +3,8 @@ export type HandsApi = {
   panBy: (dx: number, dy: number) => void;
   nudgeSize: (delta: number) => void;
   setGrabbed: (on: boolean) => void;
+  nudgeAngle: (delta: number) => void;
+  setAngle: (value: number) => void;
 };
 
 const DEAD = 0.28;

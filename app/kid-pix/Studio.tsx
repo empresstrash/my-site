@@ -1409,6 +1409,8 @@ export default function Studio({
           setTool(next);
         }
       },
+      nudgeAngle() {},
+      setAngle() {},
     };
     handsRef.current = api;
     return () => {

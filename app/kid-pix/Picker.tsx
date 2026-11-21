@@ -150,6 +150,8 @@ function ClassicFrame({ handsRef }: { handsRef: RefObject<HandsApi | null> }) {
       panBy() {},
       nudgeSize() {},
       setGrabbed() {},
+      nudgeAngle() {},
+      setAngle() {},
     };
     handsRef.current = api;
     return () => {

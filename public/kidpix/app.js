@@ -462,8 +462,9 @@ function init_alphabet_subtoolbar() {
         var alphaButton = alphaselect[i];
         alphaButton.addEventListener('mousedown', function(ev) {
             reset_ranges();
-            src = ev.srcElement || ev.target;
-            KiddoPaint.Tools.Stamp.stamp = src.firstChild.nodeValue;
+            var src = ev.target || ev.srcElement || alphaButton;
+            var host = src.closest ? src.closest('[id^="xal"]') : alphaButton;
+            KiddoPaint.Tools.Stamp.stamp = (host ? host.textContent : "").trim();
             KiddoPaint.Sounds.Library.playKey(KiddoPaint.Tools.Stamp.stamp);
         });
     }
@@ -885,6 +886,7 @@ KiddoPaint.Display.clearAll = function() {
     KiddoPaint.Display.clearPreview();
     KiddoPaint.Display.clearTmp();
     KiddoPaint.Display.clearMain();
+    KiddoPaint.Display.layWhite();
     KiddoPaint.Display.clearLocalStorage();
 }
 
@@ -926,6 +928,7 @@ KiddoPaint.Display.saveMainGco = function(op) {
         KiddoPaint.Display.main_context.globalCompositeOperation = op;
         KiddoPaint.Display.main_context.drawImage(KiddoPaint.Display.canvas, 0, 0);
         KiddoPaint.Display.main_context.globalCompositeOperation = prevGco;
+        if (op === "destination-out") KiddoPaint.Display.layWhite();
         KiddoPaint.Display.clearTmp();
         KiddoPaint.Display.saveToLocalStorage();
     }
@@ -936,6 +939,7 @@ KiddoPaint.Display.saveMainGcoSkipUndo = function(op) {
     KiddoPaint.Display.main_context.globalCompositeOperation = op;
     KiddoPaint.Display.main_context.drawImage(KiddoPaint.Display.canvas, 0, 0);
     KiddoPaint.Display.main_context.globalCompositeOperation = prevGco;
+    if (op === "destination-out") KiddoPaint.Display.layWhite();
     KiddoPaint.Display.clearTmp();
     KiddoPaint.Display.saveToLocalStorage();
 }
@@ -6576,6 +6580,7 @@ KiddoPaint.Tools.Toolbox.Placer = function() {
         // https://stackoverflow.com/a/37388113
         function drawImageff(img, x, y, width, height, flip, flop, center) {
             ctx.save();
+            try {
             if (typeof width === "undefined") width = img.width;
             if (typeof height === "undefined") height = img.height;
             if (typeof center === "undefined") center = false;
@@ -6598,7 +6603,9 @@ KiddoPaint.Tools.Toolbox.Placer = function() {
 
             // Draw the image    
             ctx.drawImage(img, -width / 2, -height / 2);
+            } finally {
             ctx.restore();
+            }
         }
 
         if (KiddoPaint.Current.modifiedRange != 0) {
@@ -7194,6 +7201,7 @@ KiddoPaint.Tools.Toolbox.SpritePlacer = function() {
         // https://stackoverflow.com/a/37388113
         function drawImageff(img, x, y, width, height, flip, flop, center) {
             ctx.save();
+            try {
             ctx.imageSmoothingEnabled = false;
 
             // kidpix supported 3 different sizes of stamps
@@ -7221,8 +7229,9 @@ KiddoPaint.Tools.Toolbox.SpritePlacer = function() {
 
             // Draw the image    
             ctx.drawImage(img, -width / 2, -height / 2);
-
+            } finally {
             ctx.restore();
+            }
         }
 
         if (tool.isDown) {
@@ -7391,10 +7400,13 @@ function drawTurned(ctx, img, x, y) {
         return;
     }
     ctx.save();
+    try {
     ctx.translate(x + img.width / 2, y + img.height / 2);
     ctx.rotate(angle);
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    } finally {
     ctx.restore();
+    }
 }
 KiddoPaint.Tools.Stamp = new KiddoPaint.Tools.Toolbox.Stamp();
 ;
