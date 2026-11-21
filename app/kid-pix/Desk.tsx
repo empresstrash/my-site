@@ -4,6 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { readHands, type HandsApi } from "./hands";
 
+const FONTS = [
+  ["sans-serif", "plain"],
+  ["serif", "serif"],
+  ["monospace", "type"],
+  ["cursive", "script"],
+  ["fantasy", "wild"],
+  ['"Comic Sans MS", "Comic Sans", cursive', "comic"],
+  ['"Marker Felt", "Chalkboard SE", fantasy', "marker"],
+  ['Impact, "Arial Black", fantasy', "block"],
+  ['Georgia, "Times New Roman", serif', "book"],
+  ["var(--font-menu)", "menu"],
+] as const;
+
 const TOOLS = [
   ["save", "Save", "kp-m_27.png"],
   ["pencil", "Wacky Pencil", "kp-m_28.png"],
@@ -25,6 +38,10 @@ declare global {
     init_kiddo_paint?: () => void;
     init_mods?: () => void;
     kpView?: HandsApi & { setSize: (value: number) => void };
+    KiddoPaint?: {
+      Alphabet: { english: { face: string } };
+      Stamps: { currentFace: string };
+    };
     __kpBooted?: boolean;
     __kpModQueued?: boolean;
   }
@@ -91,6 +108,20 @@ export default function Desk() {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  function chooseFont(value: string) {
+    const probe = document.createElement("span");
+    probe.style.fontFamily = value;
+    document.body.appendChild(probe);
+    const face = getComputedStyle(probe).fontFamily || value;
+    probe.remove();
+    if (window.KiddoPaint) {
+      window.KiddoPaint.Alphabet.english.face = face;
+      window.KiddoPaint.Stamps.currentFace = face;
+    }
+    const bar = document.getElementById("alphabettoolbar");
+    if (bar) bar.style.fontFamily = value;
+  }
+
   function toggleGrab() {
     grabRef.current = !grabRef.current;
     setGrab(grabRef.current);
@@ -115,12 +146,21 @@ export default function Desk() {
           <div id="subtoolbars" className="subtoolbar">
             <div id="genericsubmenu" className="hidden" />
             <div id="alphabettoolbar" className="hidden">
-              {Array.from({ length: 26 }, (_, index) => (
-                <button key={index} className="tool alphabet" id={`xal${index}`} type="button" />
-              ))}
+              <label className="kp-font">
+                <select id="kp-font" aria-label="font" defaultValue="sans-serif" onChange={(event) => chooseFont(event.target.value)}>
+                  {FONTS.map(([value, label]) => (
+                    <option key={label} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button className="tool alphabet" id="alnext" type="button">
                 <h1>↪</h1>
               </button>
+              {Array.from({ length: 26 }, (_, index) => (
+                <button key={index} className="tool alphabet" id={`xal${index}`} type="button" />
+              ))}
             </div>
           </div>
           <div id="zoomport">

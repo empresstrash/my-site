@@ -126,6 +126,58 @@ body:has(.kp-one) .content {
   white-space: nowrap;
 }
 
+.kp-one #alphabettoolbar:not(.hidden) {
+  display: grid !important;
+  grid-template-columns: 88px repeat(13, minmax(0, 1fr));
+  grid-template-rows: 32px 32px;
+  height: 64px !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  flex-wrap: unset !important;
+}
+
+.kp-one #alphabettoolbar .kp-font {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.kp-one #alphabettoolbar .kp-font select {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-right: 1px solid #bbb;
+  background: #fff;
+  color: #111;
+  font: 700 0.72rem/1 sans-serif;
+}
+
+.kp-one #alphabettoolbar #alnext {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.kp-one #alphabettoolbar .tool {
+  flex: unset !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.kp-one #alphabettoolbar .tool h1 {
+  margin: 0;
+  font-size: clamp(12px, 2vw, 20px);
+  font-family: inherit;
+  line-height: 32px;
+}
+
 .kp-one #subtoolbars img.sprite {
   width: 32px !important;
   height: 32px !important;
