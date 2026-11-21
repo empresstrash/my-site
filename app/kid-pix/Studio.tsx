@@ -70,7 +70,7 @@ function hypot(a: { x: number; y: number }, b: { x: number; y: number }) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-export default function Studio() {
+export default function Studio({ variant = "full" }: { variant?: "full" | "mod" }) {
   const inkRef = useRef<HTMLCanvasElement>(null);
   const paperRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLCanvasElement>(null);
@@ -106,9 +106,9 @@ export default function Studio() {
   const hueRef = useRef(20);
 
   const [tool, setTool] = useState<Tool>("draw");
-  const [drawMode, setDrawMode] = useState<DrawMode>("pencil");
+  const [drawMode, setDrawMode] = useState<DrawMode>(variant === "mod" ? "chalk" : "pencil");
   const [wacky, setWacky] = useState<WackyMode>("rainbow");
-  const [shape, setShape] = useState<ShapeKind>("rect");
+  const [shape, setShape] = useState<ShapeKind>(variant === "mod" ? "curve" : "rect");
   const [filled, setFilled] = useState(false);
   const [stamp, setStamp] = useState<StampId>("star");
   const [color, setColor] = useState(INKS[0]);
@@ -1254,7 +1254,14 @@ export default function Studio() {
     };
   }, [show]);
 
+  const mod = variant === "mod";
   const symmetryLabel = symmetry === "off" ? "solo" : symmetry === "lr" ? "mirror" : symmetry;
+  const drawModes = mod ? DRAW_MODES.filter((item) => item.id === "chalk" || item.id === "crayon" || item.id === "marker") : DRAW_MODES;
+  const shapes = mod ? SHAPES.filter((item) => item.id === "triangle" || item.id === "star" || item.id === "curve" || item.id === "polygon" || item.id === "round") : SHAPES;
+  const mixes = mod
+    ? MIXES.filter((item) => item.id === "mirror" || item.id === "flip" || item.id === "pop" || item.id === "melt" || item.id === "pixel" || item.id === "smear" || item.id === "glitch" || item.id === "blur" || item.id === "tv")
+    : MIXES;
+  const tools = mod ? TOOLS.filter((item) => item.id === "draw" || item.id === "shape" || item.id === "stamp" || item.id === "pick" || item.id === "hand" || item.id === "mix") : TOOLS;
   const iconChip = (id: string, label: string, on: boolean, click: () => void) => (
     <button key={id} type="button" className={on ? "kp-chip is-on" : "kp-chip"} aria-pressed={on} onClick={click}>
       <ToolIcon name={id} />
@@ -1263,12 +1270,12 @@ export default function Studio() {
   );
   const optionRow =
     tool === "draw" ? (
-      DRAW_MODES.map((item) => iconChip(item.id, item.label, drawMode === item.id, () => setDrawMode(item.id)))
+      drawModes.map((item) => iconChip(item.id, item.label, drawMode === item.id, () => setDrawMode(item.id)))
     ) : tool === "wacky" ? (
       WACKY_MODES.map((item) => iconChip(item.id, item.label, wacky === item.id, () => setWacky(item.id)))
     ) : tool === "shape" ? (
       <>
-        {SHAPES.map((item) => iconChip(item.id, item.label, shape === item.id, () => setShape(item.id)))}
+        {shapes.map((item) => iconChip(item.id, item.label, shape === item.id, () => setShape(item.id)))}
         {iconChip(filled ? "filled" : "outline", filled ? "filled" : "outline", filled, () => setFilled((value) => !value))}
         {shape === "polygon" ? (
           <button type="button" className="kp-chip" onClick={closePoly} disabled={polyCount < 3}>
@@ -1285,7 +1292,7 @@ export default function Studio() {
         {STAMPS.map((item) => iconChip(item.id, item.label, stamp === item.id, () => setStamp(item.id)))}
       </>
     ) : tool === "mix" ? (
-      MIXES.map((item) => iconChip(item.id, item.label, false, () => runMix(item.id)))
+      mixes.map((item) => iconChip(item.id, item.label, false, () => runMix(item.id)))
     ) : tool === "letter" ? (
       (["plain", "bubble", "skinny"] as const).map((item) => iconChip(item, item, letterStyle === item, () => setLetterStyle(item)))
     ) : null;
@@ -1367,7 +1374,7 @@ export default function Studio() {
 
       <div className="kp-body">
         <div className="kp-tools" role="toolbar" aria-label="Tools">
-          {TOOLS.map((item) => (
+          {tools.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -1472,9 +1479,9 @@ export default function Studio() {
               <input
                 type="range"
                 min={2}
-                max={48}
+                max={tool === "stamp" ? 96 : 48}
                 value={size}
-                aria-label="Size"
+                aria-label={tool === "stamp" ? "Stamp size" : "Size"}
                 onChange={(event) => setSize(Number(event.target.value))}
               />
             </label>
@@ -1524,7 +1531,7 @@ export default function Studio() {
           <div className="kp-help-card">
             <h2 id="kp-help-title">kid pix</h2>
             <p>
-              A homemade drawing toy with the same kinds of tools as the later paint programs: chalk, crayon, curves, polygons, coloring pictures, moving stamps, a masher, a toy TV mixer, and a fading slideshow. The pictures, icons, and sounds are original. The sounds are cheap synthesized toys, not recordings from a disc. The 1.0 switch opens the separate open-source Kid Pix, from kidpix.app.
+              A homemade drawing toy with the same kinds of tools as the later paint programs: chalk, crayon, curves, polygons, coloring pictures, moving stamps, a masher, a toy TV mixer, and a fading slideshow. The pictures, icons, and sounds are original. The sounds are cheap synthesized toys, not recordings from a disc. The 1.0 tab keeps those original tools fitted in the window. Mod tools are only the extras 1.0 does not already have, and stamps there have a size slider.
             </p>
             <p>Pictures stay in this browser. Save shares a PNG from the device. Nothing is uploaded.</p>
             <ul>

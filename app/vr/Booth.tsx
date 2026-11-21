@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { buildChatPieces, mentionsEmpress, parseTwitchEmoteTag, type EmoteImage, type TwitchEmoteSpan } from "@/lib/vr/chat-text";
+import { buildChatPieces, linkParts, mentionsEmpress, parseTwitchEmoteTag, type EmoteImage, type TwitchEmoteSpan } from "@/lib/vr/chat-text";
 import { startParcelGhost, type GhostStatus } from "@/lib/vr/ghost";
 import { STATIONS, stationById, type NowPlaying } from "@/lib/vr/stations";
 import { loadTwitchEmotes } from "@/lib/vr/twitch-emotes";
@@ -136,12 +136,28 @@ function ChatBody({
   return (
     <>
       {pieces.map((piece, index) => {
-        if (piece.kind === "text") return <span key={index}>{piece.text}</span>;
+        if (piece.kind === "text") return <LinkedText key={index} text={piece.text} />;
         if (piece.kind === "image") {
           return <img key={index} className="vr-photo" src={piece.src} alt={piece.alt} />;
         }
         return <EmoteImg key={index} name={piece.name} src={piece.src} fallback={piece.fallback} />;
       })}
+    </>
+  );
+}
+
+function LinkedText({ text }: { text: string }) {
+  return (
+    <>
+      {linkParts(text).map((part, index) =>
+        part.kind === "link" ? (
+          <a key={index} className="vr-link" href={part.href} target="_blank" rel="noopener noreferrer">
+            {part.text}
+          </a>
+        ) : (
+          <span key={index}>{part.text}</span>
+        ),
+      )}
     </>
   );
 }
@@ -760,7 +776,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
         >
           Images
         </button>
-        <Link href="/kid-pix?vr=1" className="vr-chip vr-draw-link">
+        <Link href="/kid-pix?vr=1&edition=classic" className="vr-chip vr-draw-link">
           kid pix
         </Link>
       </div>
@@ -819,7 +835,11 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
                     <p className="vr-text">
                       <ChatBody text={line.text} twitchEmotes={line.twitchEmotes} extras={emotes} />
                     </p>
-                    {line.translated ? <p className="vr-original">{line.translated}</p> : null}
+                    {line.translated ? (
+                      <p className="vr-original">
+                        <LinkedText text={line.translated} />
+                      </p>
+                    ) : null}
                   </article>
                 ))
               )}

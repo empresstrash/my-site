@@ -298,6 +298,19 @@ a.vr-draw-link {
   color: #fff;
 }
 
+.vr-link {
+  color: #9fd6ff;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  padding: 0.2em 0.15em;
+  border-radius: 6px;
+}
+
+.vr-link:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 .vr-original {
   margin: 0.25rem 0 0;
   font-size: 1.15rem;

@@ -48,6 +48,40 @@ export function twitchEmoteUrl(id: string, animated: boolean): string {
   return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/${format}/dark/2.0`;
 }
 
+const URL_IN_TEXT = /(?:https?:\/\/|www\.)[^\s<]+/gi;
+
+export type LinkPart = { kind: "text"; text: string } | { kind: "link"; href: string; text: string };
+
+/** Turn http(s) and www links into tappable pieces. Trailing punctuation stays text. */
+export function linkParts(text: string): LinkPart[] {
+  const parts: LinkPart[] = [];
+  let last = 0;
+  for (const match of text.matchAll(URL_IN_TEXT)) {
+    const raw = match[0];
+    const index = match.index ?? 0;
+    let core = raw;
+    let tail = "";
+    while (core.length > 0 && /[),.;!?]$/.test(core)) {
+      tail = core.slice(-1) + tail;
+      core = core.slice(0, -1);
+    }
+    if (core.endsWith(")") && (core.match(/\(/g) || []).length < (core.match(/\)/g) || []).length) {
+      tail = ")" + tail;
+      core = core.slice(0, -1);
+    }
+    if (!core) continue;
+    const href = /^www\./i.test(core) ? `https://${core}` : core;
+    if (!/^https?:\/\//i.test(href)) continue;
+    if (index > last) parts.push({ kind: "text", text: text.slice(last, index) });
+    parts.push({ kind: "link", href, text: core });
+    if (tail) parts.push({ kind: "text", text: tail });
+    last = index + raw.length;
+  }
+  if (last < text.length) parts.push({ kind: "text", text: text.slice(last) });
+  if (parts.length === 0) parts.push({ kind: "text", text });
+  return parts;
+}
+
 function isImageUrl(token: string): boolean {
   return IMAGE_URL.test(token) || MEDIA_HOST.test(token);
 }
