@@ -6574,6 +6574,7 @@ KiddoPaint.Tools.Toolbox.Placer = function() {
 
             // Set the origin to the center of the image
             ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(((KiddoPaint.Current.toolAngle || 0) * Math.PI) / 180);
 
             // Rotate the canvas around the origin
             //var rad = 2 * Math.PI - deg * Math.PI / 180;    
@@ -7196,6 +7197,7 @@ KiddoPaint.Tools.Toolbox.SpritePlacer = function() {
 
             // Set the origin to the center of the image
             ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(((KiddoPaint.Current.toolAngle || 0) * Math.PI) / 180);
 
             // Rotate the canvas around the origin
             //var rad = 2 * Math.PI - deg * Math.PI / 180;    
@@ -7322,12 +7324,12 @@ KiddoPaint.Tools.Toolbox.Stamp = function() {
 
         KiddoPaint.Display.context.fillStyle = tool.useColor ? KiddoPaint.Current.color : null;
         var brushFill = tool.texture();
-        KiddoPaint.Display.context.drawImage(brushFill, Math.round(ev._x), Math.round(ev._y - tool.size));
+        drawTurned(KiddoPaint.Display.context, brushFill, Math.round(ev._x), Math.round(ev._y - tool.size));
         if (KiddoPaint.Current.multiplier > 1) {
             for (var i = 0; i < 2 * KiddoPaint.Current.multiplier; i++) {
                 var x = Math.round(ev._x + (1000 * rng.next() - 500));
                 var y = Math.round(ev._y + (20 * rng.next() - 10) - tool.size);
-                KiddoPaint.Display.context.drawImage(brushFill, x, y);
+                drawTurned(KiddoPaint.Display.context, brushFill, x, y);
             }
         }
     };
@@ -7352,12 +7354,12 @@ KiddoPaint.Tools.Toolbox.Stamp = function() {
         if (!tool.isDown) {
             KiddoPaint.Display.previewContext.fillStyle = tool.useColor ? KiddoPaint.Current.color : null;
             var brushFill = tool.texture();
-            KiddoPaint.Display.previewContext.drawImage(brushFill, Math.round(ev._x), Math.round(ev._y - tool.size));
+            drawTurned(KiddoPaint.Display.previewContext, brushFill, Math.round(ev._x), Math.round(ev._y - tool.size));
             if (KiddoPaint.Current.multiplier > 1) {
                 for (var i = 0; i < 2 * KiddoPaint.Current.multiplier; i++) {
                     var x = Math.round(ev._x + (1000 * rng.next() - 500));
                     var y = Math.round(ev._y + (20 * rng.next() - 10) - tool.size);
-                    KiddoPaint.Display.previewContext.drawImage(brushFill, x, y);
+                    drawTurned(KiddoPaint.Display.previewContext, brushFill, x, y);
                 }
             }
         }
@@ -7369,6 +7371,18 @@ KiddoPaint.Tools.Toolbox.Stamp = function() {
         KiddoPaint.Display.saveMain();
     };
 };
+function drawTurned(ctx, img, x, y) {
+    var angle = ((KiddoPaint.Current.toolAngle || 0) * Math.PI) / 180;
+    if (!angle) {
+        ctx.drawImage(img, x, y);
+        return;
+    }
+    ctx.save();
+    ctx.translate(x + img.width / 2, y + img.height / 2);
+    ctx.rotate(angle);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    ctx.restore();
+}
 KiddoPaint.Tools.Stamp = new KiddoPaint.Tools.Toolbox.Stamp();
 ;
 KiddoPaint.Tools.Toolbox.ThreeDBrush = function() {

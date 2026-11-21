@@ -63,7 +63,18 @@ function init_mods() {
     },
     setGrabbed: setGrabbed,
     setSize: setSize,
+    nudgeAngle: function (delta) {
+      setAngle((KiddoPaint.Current.toolAngle || 0) + delta);
+    },
+    setAngle: setAngle,
   };
+
+  function setAngle(value) {
+    var next = Math.round(Number(value) || 0);
+    KiddoPaint.Current.toolAngle = next;
+    var shown = document.getElementById("kp-angle-value");
+    if (shown) shown.textContent = next + "°";
+  }
 
   setSize(1);
   applyView();

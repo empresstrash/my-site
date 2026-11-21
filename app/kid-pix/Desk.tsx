@@ -197,6 +197,18 @@ export default function Desk() {
                 onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
               />
             </div>
+            <div className="kp-turn">
+              <button type="button" aria-label="rotate left" onClick={() => window.kpView?.nudgeAngle(-1)}>
+                ↺
+              </button>
+              <output id="kp-angle-value">0°</output>
+              <button type="button" aria-label="rotate right" onClick={() => window.kpView?.nudgeAngle(1)}>
+                ↻
+              </button>
+              <button type="button" aria-label="reset orientation" onClick={() => window.kpView?.setAngle(0)}>
+                reset
+              </button>
+            </div>
             <div id="modtools" />
           </div>
         </div>

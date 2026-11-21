@@ -196,23 +196,29 @@ body:has(.kp-one) .content {
   align-items: stretch;
   width: 100%;
   padding: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
   background: #161616;
 }
 
-.kp-one #modbar > button,
+.kp-one #modbar::-webkit-scrollbar {
+  display: none;
+}
+
+.kp-one #modbar button,
 .kp-one #modtools .tool {
   flex: 0 0 auto;
   min-width: 0;
   min-height: 0;
   height: 32px !important;
-  padding: 0 8px;
+  padding: 0 4px;
   color: #fff;
   background: #222;
   border: 0;
   border-right: 1px solid #444;
   border-radius: 0;
-  font: 700 0.72rem/1 sans-serif;
+  font: 700 0.68rem/1 sans-serif;
 }
 
 .kp-one #modtools {
@@ -242,9 +248,22 @@ body:has(.kp-one) .content {
 }
 
 .kp-one #modbar .kp-size input {
-  width: 72px;
+  width: 48px;
   height: 16px;
   margin: 0;
+}
+
+.kp-one #modbar .kp-turn {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.kp-one #modbar .kp-turn output {
+  min-width: 2.6em;
+  text-align: center;
+  color: #fff;
+  font: 700 0.68rem/1 sans-serif;
 }
 
 .kp-one #colorbar {
