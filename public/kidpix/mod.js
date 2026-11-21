@@ -82,6 +82,7 @@ function init_mods() {
       setAngle((KiddoPaint.Current.toolAngle || 0) + delta);
     },
     setAngle: setAngle,
+    nudgeCurve: nudgeCurve,
   };
 
   function setOpacity(value) {
@@ -227,10 +228,13 @@ function init_mods() {
       menu: function () {
         var shapes = ["triangle", "star", "curve", "round", "polygon"].map(function (name) {
           return {
-            name: name,
+            name: name === "curve"
+              ? "Drag the line and let go. Move to bend it, then tap to keep it. On a headset, the right stick bends it."
+              : name,
             text: name,
             handler: function () {
               shapeKind = name;
+              if (name !== "curve") cancelCurve();
             },
           };
         });
@@ -393,13 +397,10 @@ function init_mods() {
       return true;
     }
     if (shapeKind === "curve") {
-      var mx = (a._x + b._x) / 2;
-      var my = (a._y + b._y) / 2;
-      var dx = b._x - a._x;
-      var dy = b._y - a._y;
+      var bend = curveControl(a, b, 0.35);
       ctx.beginPath();
       ctx.moveTo(a._x, a._y);
-      ctx.quadraticCurveTo(mx - dy * 0.35, my + dx * 0.35, b._x, b._y);
+      ctx.quadraticCurveTo(bend._x, bend._y, b._x, b._y);
       return false;
     }
     if (shapeKind === "round") {
@@ -440,13 +441,71 @@ function init_mods() {
     return true;
   }
 
+  var curveWait = null;
+
+  function curveControl(a, b, bulge) {
+    var mx = (a._x + b._x) / 2;
+    var my = (a._y + b._y) / 2;
+    var dx = b._x - a._x;
+    var dy = b._y - a._y;
+    var len = Math.hypot(dx, dy) || 1;
+    return {
+      _x: mx + (-dy / len) * len * bulge,
+      _y: my + (dx / len) * len * bulge,
+    };
+  }
+
+  function paintCurve(commit) {
+    if (!curveWait) return;
+    KiddoPaint.Display.clearTmp();
+    var ctx = KiddoPaint.Display.context;
+    ctx.save();
+    ctx.strokeStyle = KiddoPaint.Current.color;
+    ctx.lineWidth = Math.max(2, brushSize() * 0.35);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(curveWait.a._x, curveWait.a._y);
+    ctx.quadraticCurveTo(curveWait.c._x, curveWait.c._y, curveWait.b._x, curveWait.b._y);
+    ctx.stroke();
+    ctx.restore();
+    if (commit) {
+      KiddoPaint.Display.saveMain();
+      curveWait = null;
+    }
+  }
+
+  function cancelCurve() {
+    if (!curveWait) return;
+    curveWait = null;
+    KiddoPaint.Display.clearTmp();
+  }
+
+  function nudgeCurve(direction) {
+    if (!curveWait) return false;
+    curveWait.bulge = Math.max(-1.6, Math.min(1.6, curveWait.bulge + direction * 0.12));
+    curveWait.c = curveControl(curveWait.a, curveWait.b, curveWait.bulge);
+    paintCurve(false);
+    return true;
+  }
+
   function shapeTool() {
     var tool = { isDown: false, origin: null };
     tool.mousedown = function (ev) {
+      if (shapeKind === "curve" && curveWait) {
+        curveWait.c = { _x: ev._x, _y: ev._y };
+        paintCurve(true);
+        return;
+      }
       tool.isDown = true;
       tool.origin = { _x: ev._x, _y: ev._y };
     };
     tool.mousemove = function (ev) {
+      if (shapeKind === "curve" && curveWait && !tool.isDown) {
+        curveWait.c = { _x: ev._x, _y: ev._y };
+        curveWait.bulge = 0;
+        paintCurve(false);
+        return;
+      }
       if (!tool.isDown) return;
       KiddoPaint.Display.clearTmp();
       var ctx = KiddoPaint.Display.context;
@@ -461,6 +520,19 @@ function init_mods() {
     };
     tool.mouseup = function (ev) {
       if (!tool.isDown) return;
+      if (shapeKind === "curve") {
+        tool.isDown = false;
+        var end = { _x: ev._x, _y: ev._y };
+        if (Math.hypot(end._x - tool.origin._x, end._y - tool.origin._y) < 4) return;
+        curveWait = {
+          a: tool.origin,
+          b: end,
+          bulge: 0.35,
+          c: curveControl(tool.origin, end, 0.35),
+        };
+        paintCurve(false);
+        return;
+      }
       tool.mousemove(ev);
       tool.isDown = false;
       KiddoPaint.Display.saveMain();
@@ -627,5 +699,193 @@ function init_mods() {
       KiddoPaint.Current.tool = tool;
     };
   });
+
+  var eraseToken = 0;
+
+  function shotOfMain() {
+    var main = KiddoPaint.Display.main_canvas;
+    var copy = document.createElement("canvas");
+    copy.width = main.width;
+    copy.height = main.height;
+    copy.getContext("2d").drawImage(main, 0, 0);
+    return copy;
+  }
+
+  function blankSheet() {
+    KiddoPaint.Display.clearMain();
+    KiddoPaint.Display.layWhite();
+    KiddoPaint.Display.clearTmp();
+    KiddoPaint.Display.saveToLocalStorage();
+  }
+
+  function playErase(steps, ms, frame, done) {
+    var token = ++eraseToken;
+    var i = 0;
+    KiddoPaint.Display.saveUndo();
+    function tick() {
+      if (token !== eraseToken) return;
+      if (i >= steps) {
+        if (done) done();
+        else blankSheet();
+        return;
+      }
+      frame(i, steps);
+      i += 1;
+      setTimeout(tick, ms);
+    }
+    tick();
+  }
+
+  function paintOver(draw) {
+    var ctx = KiddoPaint.Display.main_context;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    draw(ctx);
+    ctx.restore();
+  }
+
+  function blackHole(ev) {
+    var shot = shotOfMain();
+    var w = shot.width;
+    var h = shot.height;
+    var cx = Math.max(0, Math.min(w - 1, Math.round(ev._x)));
+    var cy = Math.max(0, Math.min(h - 1, Math.round(ev._y)));
+    playErase(26, 36, function (i, n) {
+      var t = (i + 1) / n;
+      paintOver(function (ctx) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.translate(cx, cy);
+        ctx.rotate(t * Math.PI * 4);
+        var scale = Math.max(0.04, 1 - t);
+        ctx.scale(scale, scale);
+        ctx.translate(-cx, -cy);
+        ctx.drawImage(shot, 0, 0);
+      });
+    });
+  }
+
+  function countDown() {
+    var n = 5;
+    var token = ++eraseToken;
+    KiddoPaint.Display.saveUndo();
+    function tick() {
+      if (token !== eraseToken) return;
+      KiddoPaint.Display.clearAnim();
+      if (n <= 0) {
+        blankSheet();
+        return;
+      }
+      var ctx = KiddoPaint.Display.animContext;
+      ctx.save();
+      ctx.fillStyle = "#161616";
+      ctx.font = "bold 460px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(n), ctx.canvas.width / 2, ctx.canvas.height / 2);
+      ctx.restore();
+      n -= 1;
+      setTimeout(tick, 420);
+    }
+    if (KiddoPaint.Sounds.explosion) KiddoPaint.Sounds.explosion();
+    tick();
+  }
+
+  function dropOut() {
+    var shot = shotOfMain();
+    var w = shot.width;
+    var h = shot.height;
+    var strips = 18;
+    var sw = w / strips;
+    playErase(28, 32, function (i, n) {
+      var t = (i + 1) / n;
+      paintOver(function (ctx) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        for (var s = 0; s < strips; s++) {
+          var fall = t * t * h * (0.55 + ((s * 17) % 10) / 10);
+          ctx.drawImage(shot, s * sw, 0, sw + 1, h, s * sw, fall, sw + 1, h);
+        }
+      });
+    });
+  }
+
+  function sweepAway() {
+    var shot = shotOfMain();
+    var w = shot.width;
+    var h = shot.height;
+    playErase(32, 28, function (i, n) {
+      var x = Math.round((w * (i + 1)) / n);
+      paintOver(function (ctx) {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        if (x < w) ctx.drawImage(shot, x, 0, w - x, h, x, 0, w - x, h);
+        ctx.fillStyle = "#d8d8d8";
+        ctx.fillRect(Math.max(0, x - 22), 0, 22, h);
+      });
+    });
+  }
+
+  function eraserCursor(tool) {
+    KiddoPaint.Display.canvas.classList = "";
+    KiddoPaint.Display.canvas.classList.add("cursor-crosshair");
+    KiddoPaint.Current.tool = tool;
+  }
+
+  KiddoPaint.Submenu.eraser.forEach(function (item) {
+    if (item.name === "Black Hole") {
+      item.handler = function () {
+        eraserCursor(clickEffect(blackHole));
+      };
+    }
+    if (item.name === "Count Down") {
+      item.handler = function () {
+        eraserCursor(clickEffect(countDown));
+      };
+    }
+  });
+  KiddoPaint.Submenu.eraser.push(
+    {
+      name: "Drop Out",
+      imgSrc: "/kidpix/img/tool-submenu-eraser-188.png",
+      handler: function () {
+        eraserCursor(clickEffect(dropOut));
+      },
+    },
+    {
+      name: "Sweep",
+      imgSrc: "/kidpix/img/tool-submenu-eraser-191.png",
+      handler: function () {
+        eraserCursor(clickEffect(sweepAway));
+      },
+    },
+  );
+
+  var hidden = KiddoPaint.Tools.EraserHiddenPicture;
+  var hiddenReset = hidden.reset;
+  hidden.reset = function () {
+    hiddenReset.call(hidden);
+    setTimeout(function () {
+      if (hidden.hiddenPattern) return;
+      var sheet = document.createElement("canvas");
+      sheet.width = 320;
+      sheet.height = 240;
+      var g = sheet.getContext("2d");
+      g.fillStyle = "#ffffff";
+      g.fillRect(0, 0, 320, 240);
+      g.strokeStyle = "#111111";
+      g.lineWidth = 8;
+      g.strokeRect(24, 24, 272, 192);
+      g.beginPath();
+      g.arc(160, 110, 48, 0, Math.PI * 2);
+      g.moveTo(70, 190);
+      g.lineTo(160, 70);
+      g.lineTo(250, 190);
+      g.stroke();
+      hidden.hiddenPattern = KiddoPaint.Display.context.createPattern(sheet, "repeat");
+    }, 700);
+  };
 
 }

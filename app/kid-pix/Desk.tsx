@@ -44,6 +44,7 @@ declare global {
       setSize: (value: number) => void;
       setOpacity: (value: number) => void;
       nudgeOpacity: (delta: number) => void;
+      nudgeCurve?: (direction: number) => boolean;
     };
     KiddoPaint?: {
       Alphabet: { english: { face: string } };
@@ -108,7 +109,8 @@ export default function Desk() {
       if (grabRef.current && (reading.panX || reading.panY)) api.panBy(reading.panX * 14, reading.panY * 14);
       if (reading.size && now - lastSize > 280) {
         lastSize = now;
-        api.nudgeSize(reading.size > 0 ? 1 : -1);
+        const bent = api.nudgeCurve?.(reading.size > 0 ? 1 : -1);
+        if (!bent) api.nudgeSize(reading.size > 0 ? 1 : -1);
       }
     };
     frame = window.requestAnimationFrame(tick);

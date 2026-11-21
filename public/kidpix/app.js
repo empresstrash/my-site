@@ -5490,14 +5490,26 @@ KiddoPaint.Tools.Toolbox.EraserHiddenPicture = function() {
 
     this.mousedown = function(ev) {
         tool.isDown = true;
+        tool.last = null;
+        tool.mousemove(ev);
     };
 
     this.mousemove = function(ev) {
-        let currentSize = tool.size * KiddoPaint.Current.scaling;
+        let currentSize = Math.max(8, tool.size * KiddoPaint.Current.scaling);
         if (tool.isDown) {
             var ctx = KiddoPaint.Display.context;
-            ctx.fillStyle = tool.hiddenPattern;
-            ctx.fillRect(Math.round(ev._x) - (currentSize / 2.0), Math.round(ev._y) - (currentSize / 2.0), currentSize, currentSize);
+            ctx.fillStyle = tool.hiddenPattern || '#ffffff';
+            var dx = tool.last ? ev._x - tool.last._x : 0;
+            var dy = tool.last ? ev._y - tool.last._y : 0;
+            var dist = Math.hypot(dx, dy);
+            var step = Math.max(1, currentSize * 0.45);
+            var hops = Math.max(1, Math.ceil(dist / step));
+            for (var i = tool.last ? 1 : 0; i <= hops; i++) {
+                var x = tool.last ? tool.last._x + dx * (i / hops) : ev._x;
+                var y = tool.last ? tool.last._y + dy * (i / hops) : ev._y;
+                ctx.fillRect(Math.round(x) - (currentSize / 2.0), Math.round(y) - (currentSize / 2.0), currentSize, currentSize);
+            }
+            tool.last = { _x: ev._x, _y: ev._y };
         } else {
             var ctx = KiddoPaint.Display.previewContext;
             ctx.fillStyle = 'white';
@@ -5624,29 +5636,46 @@ KiddoPaint.Tools.Toolbox.Eraser = function() {
         return KiddoPaint.Textures.Solid('rgb(240, 180, 180)');
     };
 
+    this.stamp = function(ctx, x, y, currentSize) {
+        if (tool.isSquareEraser) {
+            ctx.fillRect(Math.round(x) - (currentSize / 2.0), Math.round(y) - (currentSize / 2.0), currentSize, currentSize);
+        } else {
+            ctx.beginPath();
+            ctx.arc(x, y, currentSize, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    };
+
     this.mousedown = function(ev) {
         tool.isDown = true;
+        tool.last = null;
         tool.mousemove(ev);
     };
 
     this.mousemove = function(ev) {
-        let currentSize = tool.size * KiddoPaint.Current.scaling;
+        let currentSize = Math.max(1, tool.size * KiddoPaint.Current.scaling);
         var ctx = tool.isDown ? KiddoPaint.Display.context : KiddoPaint.Display.previewContext;
         ctx.fillStyle = tool.texture();
-        if (tool.isSquareEraser) {
-            ctx.fillRect(Math.round(ev._x) - (currentSize / 2.0), Math.round(ev._y) - (currentSize / 2.0), currentSize, currentSize);
+        if (!tool.isDown || !tool.last) {
+            tool.stamp(ctx, ev._x, ev._y, currentSize);
         } else {
-            ctx.beginPath();
-            ctx.arc(ev._x, ev._y, currentSize, 0, 2 * Math.PI);
-            ctx.fill();
+            var dx = ev._x - tool.last._x;
+            var dy = ev._y - tool.last._y;
+            var dist = Math.hypot(dx, dy);
+            var step = Math.max(1, currentSize * 0.45);
+            var hops = Math.max(1, Math.ceil(dist / step));
+            for (var i = 1; i <= hops; i++) {
+                tool.stamp(ctx, tool.last._x + dx * (i / hops), tool.last._y + dy * (i / hops), currentSize);
+            }
         }
-
+        if (tool.isDown) tool.last = { _x: ev._x, _y: ev._y };
     };
 
     this.mouseup = function(ev) {
         if (tool.isDown) {
             tool.mousemove(ev);
             tool.isDown = false;
+            tool.last = null;
             KiddoPaint.Display.saveMainGco('destination-out');
         }
     };
