@@ -82,7 +82,7 @@ export default function Desk() {
       prevA = reading.grabToggle;
       if (reading.zoom) api.zoomBy(1 + reading.zoom * 0.018);
       if (grabRef.current && (reading.panX || reading.panY)) api.panBy(reading.panX * 14, reading.panY * 14);
-      if (reading.size && now - lastSize > 90) {
+      if (reading.size && now - lastSize > 280) {
         lastSize = now;
         api.nudgeSize(reading.size > 0 ? 1 : -1);
       }
@@ -111,18 +111,26 @@ export default function Desk() {
         <button type="button" className={grab ? "is-on" : ""} onClick={toggleGrab}>
           {grab ? "let go" : "grab"}
         </button>
-        <label>
-          size
+        <div className="kp-size">
+          <span>size</span>
+          <button type="button" aria-label="smaller" onClick={() => window.kpView?.nudgeSize(-1)}>
+            −
+          </button>
+          <output id="kp-size-value">1</output>
+          <button type="button" aria-label="bigger" onClick={() => window.kpView?.nudgeSize(1)}>
+            +
+          </button>
           <input
             id="kp-size"
             type="range"
-            min={0.5}
+            min={1}
             max={4}
-            step={0.05}
+            step={1}
             defaultValue={1}
+            aria-label="size"
             onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
           />
-        </label>
+        </div>
       </div>
       <div id="container">
         <div id="toolbar">

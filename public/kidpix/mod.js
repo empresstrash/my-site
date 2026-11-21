@@ -36,10 +36,12 @@ function init_mods() {
   }
 
   function setSize(value) {
-    var next = Math.min(4, Math.max(0.5, Number(value) || 1));
+    var next = Math.min(4, Math.max(1, Math.round(Number(value) || 1)));
     KiddoPaint.Current.stampScale = next;
     var input = document.getElementById("kp-size");
     if (input && Number(input.value) !== next) input.value = String(next);
+    var shown = document.getElementById("kp-size-value");
+    if (shown) shown.textContent = String(next);
   }
 
   window.kpView = {
@@ -55,7 +57,7 @@ function init_mods() {
     nudgeSize: function (delta) {
       var input = document.getElementById("kp-size");
       var current = input ? Number(input.value) : KiddoPaint.Current.stampScale || 1;
-      setSize(current + delta * 0.08);
+      setSize(current + delta);
     },
     setGrabbed: setGrabbed,
     setSize: setSize,

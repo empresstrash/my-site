@@ -235,7 +235,14 @@ body:has(.kp-one) .content {
 
 @media (max-height: 720px) {
   .kp-one #modbar {
-    flex: 0 0 48px !important;
-    height: 48px !important;
+    flex: 0 0 44px !important;
+    height: 44px !important;
   }
+}
+
+.kp-one .kp-size button {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 1.5rem;
+  line-height: 1;
 }

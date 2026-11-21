@@ -106,6 +106,26 @@ html.vr-booth:has(.kp) .centered-logo img {
   accent-color: #ff3d6e;
 }
 
+.kp-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font: 700 0.78rem/1 var(--font-menu), sans-serif;
+}
+
+.kp-size output {
+  min-width: 1.2em;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.kp-vr .kp-size button {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 1.4rem;
+}
+
 .kp-one .kp-switch {
   width: 100%;
 }
