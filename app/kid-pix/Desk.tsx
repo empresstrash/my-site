@@ -128,9 +128,7 @@ export default function Desk() {
               <canvas id="kiddopaint" className="pixelated" width={1920} height={1200} />
             </div>
           </div>
-        </div>
-        <div id="rightbar">
-          <div className="kp-switch">
+          <div id="modbar">
             <button type="button" onClick={() => window.kpView?.zoomBy(1.25)}>
               zoom in
             </button>
@@ -159,23 +157,23 @@ export default function Desk() {
                 onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
               />
             </div>
+            <div id="modtools" />
           </div>
-          <div id="modtools" />
-          <div id="colorbar">
-            <button className="currentColor" id="currentColor" type="button" />
-            <div id="colorselector">
-              {Array.from({ length: 32 }, (_, index) => (
-                <button key={index} className="color" type="button" />
-              ))}
-            </div>
-            <div>
-              <button className="colornav" id="colorprev" type="button">
-                ←
-              </button>
-              <button className="colornav" id="colornext" type="button">
-                →
-              </button>
-            </div>
+        </div>
+        <div id="colorbar">
+          <button className="currentColor" id="currentColor" type="button" />
+          <div id="colorselector">
+            {Array.from({ length: 32 }, (_, index) => (
+              <button key={index} className="color" type="button" />
+            ))}
+          </div>
+          <div>
+            <button className="colornav" id="colorprev" type="button">
+              ←
+            </button>
+            <button className="colornav" id="colornext" type="button">
+              →
+            </button>
           </div>
         </div>
       </div>

@@ -135,112 +135,87 @@ body:has(.kp-one) .content {
   object-fit: none !important;
 }
 
-/* One bar on the right: zoom, size, draw, shape, pick, and the colors. */
-.kp-one #rightbar {
-  flex: 0 0 88px;
-  width: 88px;
-  height: 100%;
-  min-height: 0;
+.kp-one #modbar {
+  flex: 0 0 32px;
+  height: 32px;
   display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
   background: #161616;
 }
 
-.kp-one #rightbar .kp-switch {
-  flex: 0 0 auto;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
-  width: 100%;
-  padding: 4px;
-  background: transparent;
-}
-
-.kp-one #rightbar .kp-switch button,
+.kp-one #modbar > button,
 .kp-one #modtools .tool {
-  min-height: 40px;
-  width: 100%;
-}
-
-.kp-one #rightbar .kp-size {
-  display: grid;
-  grid-template-columns: 36px 1fr 36px;
-  grid-template-rows: auto auto;
-  gap: 4px;
-  color: #fff;
-}
-
-.kp-one #rightbar .kp-size button {
+  flex: 0 0 auto;
   min-width: 0;
-  min-height: 36px;
-  width: 100%;
-}
-
-.kp-one #rightbar .kp-size output {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.kp-one #rightbar .kp-size button:first-child {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.kp-one #rightbar .kp-size button:nth-child(3) {
-  grid-column: 3;
-  grid-row: 1;
-}
-
-.kp-one #rightbar .kp-size input {
-  grid-column: 1 / -1;
-  width: 100%;
+  min-height: 0;
+  height: 32px !important;
+  padding: 0 8px;
+  color: #fff;
+  background: #222;
+  border: 0;
+  border-right: 1px solid #444;
+  border-radius: 0;
+  font: 700 0.72rem/1 sans-serif;
 }
 
 .kp-one #modtools {
   display: flex;
-  flex-direction: column;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   gap: 4px;
-  padding: 0 4px 4px;
+  min-width: 0;
 }
 
 .kp-one #modtools .tool {
-  flex: 0 0 auto;
-  height: 40px !important;
-  color: #fff;
-  background: #222;
-  border-color: #444;
-  font: 700 0.85rem/1 sans-serif;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
-.kp-one #modtools .tool.on {
+.kp-one #modtools .tool.on,
+.kp-one #modbar > button.is-on {
   background: #ff3d6e;
   color: #14040a;
 }
 
+.kp-one #modbar .kp-size {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+.kp-one #modbar .kp-size input {
+  width: 72px;
+  height: 16px;
+  margin: 0;
+}
+
 .kp-one #colorbar {
   float: none !important;
-  width: 100% !important;
-  height: auto !important;
+  width: 52px !important;
+  height: 100% !important;
   max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
-  flex: 0 0 auto;
-  overflow: visible !important;
+  flex: 0 0 52px;
+  overflow: hidden !important;
   background: #ececec;
 }
 
 .kp-one #colorselector {
   flex: 1 1 auto;
   min-height: 0;
-  width: 100% !important;
+  width: 52px !important;
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: column !important;
   flex-wrap: wrap !important;
   align-content: flex-start;
-  overflow: visible;
+  overflow: auto;
 }
 
 .kp-one #colorselector .color {
@@ -291,7 +266,12 @@ body:has(.kp-one) .content {
   max-height: none !important;
 }
 
-.kp-one .kp-size button {
-  font-size: 1.3rem;
+.kp-one #modbar .kp-size button {
+  min-width: 28px;
+  min-height: 0;
+  height: 32px;
+  padding: 0;
+  font-size: 1rem;
   line-height: 1;
+  border-radius: 0;
 }
