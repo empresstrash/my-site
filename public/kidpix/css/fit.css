@@ -1,0 +1,241 @@
+/* The tool bars stay in the page. Only #paint is scaled. */
+
+html:has(.kp-one),
+body:has(.kp-one) {
+  background: #000 !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+body:has(.kp-one) .content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kp-one {
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-height: 720px) {
+  .kp-one .kp-switch {
+    padding: 2px 4px 0;
+    gap: 4px;
+  }
+
+  .kp-one .kp-switch button {
+    min-height: 40px;
+    padding: 0 0.5rem;
+  }
+
+  .kp-one #modbar {
+    flex-basis: 52px;
+  }
+
+  .kp-one #subtoolbars > .subtoolbar {
+    height: 44px;
+  }
+}
+
+.kp-one #container {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch;
+}
+
+.kp-one #toolbar {
+  float: none !important;
+  width: 76px !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  flex: 0 0 76px;
+  overflow: hidden;
+  background: #ececec;
+}
+
+.kp-one #mainbar {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+}
+
+.kp-one #mainbar {
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+.kp-one #mainbar .tool {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.kp-one #mainbar .tool img {
+  width: 78% !important;
+  height: 78% !important;
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+}
+
+.kp-one #colorbar {
+  flex: 0 0 auto;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 64px !important;
+  float: none !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch;
+  overflow: hidden !important;
+  background: #ececec;
+}
+
+.kp-one #colorselector {
+  flex: 1 1 auto;
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.kp-one #colorselector .color {
+  flex: 1 1 4%;
+  width: auto;
+  height: 28px;
+}
+
+.kp-one #hcontainer {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0 !important;
+  width: auto !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  position: relative !important;
+  overflow: hidden;
+}
+
+.kp-one #subtoolbars {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  flex: 0 0 auto;
+  width: 100% !important;
+  max-height: none !important;
+  min-height: 0;
+  order: 0;
+  background: #ececec;
+}
+
+.kp-one #subtoolbars > .subtoolbar {
+  display: flex !important;
+  width: 100%;
+  height: 56px;
+  overflow: hidden;
+}
+
+.kp-one #subtoolbars > .hidden {
+  display: none !important;
+}
+
+.kp-one #subtoolbars .tool {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  height: 100% !important;
+  min-width: 0;
+}
+
+.kp-one #subtoolbars .tool img {
+  width: 80% !important;
+  height: 80% !important;
+  object-fit: contain;
+}
+
+.kp-one #zoomport {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: #b5b5b5;
+  touch-action: none;
+}
+
+.kp-one #zoomport.is-grabbing {
+  cursor: grab;
+}
+
+.kp-one #zoomport.is-grabbing #paint {
+  pointer-events: none;
+}
+
+.kp-one #paint {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 1920px !important;
+  height: 1200px !important;
+  margin: 0;
+  transform-origin: 0 0;
+  overflow: visible !important;
+}
+
+.kp-one #paint canvas {
+  border: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.kp-one #modbar {
+  flex: 0 0 64px;
+  display: flex;
+  width: 100%;
+  background: #161616;
+}
+
+.kp-one #modbar .tool {
+  flex: 1 1 0;
+  width: auto !important;
+  height: 100% !important;
+  min-width: 0;
+  color: #fff;
+  background: #222;
+  border-color: #444;
+  font: 700 0.82rem/1.05 sans-serif;
+}
+
+.kp-one #modbar .tool.on {
+  background: #ff3d6e;
+  color: #14040a;
+}
+
+@media (max-height: 720px) {
+  .kp-one #modbar {
+    flex: 0 0 48px !important;
+    height: 48px !important;
+  }
+}

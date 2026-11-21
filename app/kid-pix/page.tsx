@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { cookieIsValid, VR_COOKIE } from "@/lib/vr/gate";
 import Gate from "./Gate";
-import Picker from "./Picker";
+import Desk from "./Desk";
 import "./kid-pix.css";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default async function KidPixPage() {
   if (!open) return <Gate />;
   return (
     <Suspense fallback={null}>
-      <Picker />
+      <Desk />
     </Suspense>
   );
 }

@@ -1,0 +1,1152 @@
+:root {
+    --vh: 1vh;
+}
+
+html,
+body {
+    width: 100%;
+    margin: 0px;
+    background-color: #fff;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    height: 100%;
+    overflow: hidden;
+}
+
+#container {
+    /*
+  border: solid;
+  border-color: yellow;
+  */
+    width: 100%;
+}
+
+#toolbar,
+#subtoolbars {
+    touch-action: none;
+}
+
+#hcontainer {
+    /*
+  border: solid;
+  border-color: blue;
+    overflow: hidden;
+    white-space: nowrap;
+    */
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Default toolbar container styles */
+.toolbar-container {
+    display: contents;
+    /* Makes the container behave as if it wasn't there in normal layout */
+}
+
+#socialbar {
+    /*
+  border: solid;
+  border-color: red;
+*/
+    display: block;
+    width: 50px;
+}
+
+#mainbar {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+#mainbar::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+#colorbar {
+    /*
+  border: solid;
+  border-color: red;
+*/
+    display: block;
+    width: 50px;
+    float: left;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+#colorbar::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+#colorselector {
+    /*
+  border: solid;
+  border-color: red;
+*/
+    width: 51px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+@media (max-height: 1200px) and (min-width: 768px) {
+    #toolbar {
+        width: 100px;
+        display: flex;
+        flex-direction: row-reverse;
+        flex-wrap: wrap;
+        float: left;
+    }
+}
+
+@media (min-height: 1201px) and (min-width: 768px) {
+    #toolbar {
+        width: 50px;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        float: left;
+    }
+}
+
+/* Mobile phone portrait mode */
+@media (max-width: 767px) and (orientation: portrait) {
+    #container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .toolbar-container {
+        width: 100%;
+        order: 2;
+    }
+
+    #toolbar {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #mainbar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+
+    #colorbar {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: visible;
+        padding: 5px 0;
+    }
+
+    #hcontainer {
+        flex-direction: column;
+        height: auto;
+        min-height: 80vh;
+        order: 1;
+        display: flex;
+        position: relative;
+    }
+
+    #paint {
+        height: 70vh;
+        width: 100%;
+        /* Will be set to auto in JS to enable scrolling */
+        overflow: visible;
+        position: relative;
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scrolling for iOS */
+        order: 2;
+    }
+
+    /* Prevent canvas from scaling - keep at original dimensions */
+    #kiddopaint,
+    #tmpCanvas,
+    #previewCanvas,
+    #animCanvas,
+    #bnimCanvas {
+        /* We don't set width/height in CSS - retain original size */
+        position: absolute;
+        top: 0;
+        left: 0;
+        max-width: none;
+        max-height: none;
+    }
+
+    #subtoolbars {
+        width: 100%;
+        order: 1;
+        min-height: 30px;
+        margin-top: 3px;
+        margin-bottom: 5px;
+        background-color: rgba(240, 240, 240, 0.95);
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: block;
+        position: relative;
+        z-index: 200;
+    }
+
+    #genericsubmenu,
+    #alphabettoolbar {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+        display: flex;
+        padding: 5px 0;
+        min-height: 30px;
+        background-color: rgba(240, 240, 240, 0.95);
+        z-index: 200;
+        position: relative;
+    }
+
+    #genericsubmenu.hidden,
+    #alphabettoolbar.hidden {
+        display: none;
+    }
+
+    .tool,
+    .currentColor {
+        width: 25px;
+        height: 25px;
+        min-width: 25px;
+        min-height: 25px;
+    }
+
+    .tool img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .color-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #colorselector {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 5px;
+    }
+
+    .color {
+        width: 15px;
+        height: 15px;
+        min-width: 15px;
+    }
+
+    .colornav {
+        width: 15px;
+        height: 15px;
+        min-width: 15px;
+        padding: 1px;
+        display: none;
+        /* Hide color navigation buttons on mobile */
+    }
+
+    .subtoolbar {
+        min-height: 25px;
+    }
+
+    #kidpixlogo {
+        display: none;
+        /* Hide logo in mobile view */
+    }
+
+    .tool.alphabet h1 {
+        font-size: 14px;
+        margin: 2px;
+    }
+}
+
+/* Mobile phone landscape mode */
+@media (max-width: 900px) and (orientation: landscape) {
+    #container {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    /* Left sidebar with toolbars */
+    .toolbar-container {
+        display: flex;
+        flex-direction: row;
+        width: auto;
+        max-width: 165px;
+        height: 100vh;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        position: relative;
+        z-index: 100;
+        background-color: #f9f9f9;
+        border-right: 1px solid #ddd;
+    }
+
+    #toolbar {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+    }
+
+    #mainbar {
+        display: flex;
+        flex-direction: column;
+        width: 50px;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        border-right: 1px solid #eee;
+        padding: 0;
+        justify-content: space-between;
+    }
+
+    /* Scale tools to fit in viewport height */
+    @media (max-height: 600px) and (orientation: landscape) {
+        #mainbar .tool {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            margin: 1px auto;
+        }
+
+        #mainbar .tool img {
+            width: 34px;
+            height: 34px;
+        }
+    }
+
+    /* For very small screens, scale even more */
+    @media (max-height: 450px) and (orientation: landscape) {
+        #mainbar .tool {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            margin: 1px auto;
+        }
+
+        #mainbar .tool img {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    #mainbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    #colorbar {
+        display: flex;
+        flex-direction: column;
+        width: 50px;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        float: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 0;
+        border-right: 1px solid #eee;
+    }
+
+    #colorbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .color-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    /* Canvas area */
+    #hcontainer {
+        width: calc(100% - 165px);
+        flex-grow: 1;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    #subtoolbars {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 200;
+        width: 65px;
+        max-height: 100vh;
+        background-color: rgba(240, 240, 240, 0.95);
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+    }
+
+    #paint {
+        flex-grow: 1;
+        height: 100vh;
+        width: 100%;
+        overflow: auto;
+        position: relative;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent canvas from scaling - keep at original dimensions */
+    #kiddopaint,
+    #tmpCanvas,
+    #previewCanvas,
+    #animCanvas,
+    #bnimCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        max-width: none;
+        max-height: none;
+    }
+
+    #genericsubmenu,
+    #alphabettoolbar {
+        overflow-y: auto;
+        overflow-x: hidden;
+        white-space: normal;
+        flex-wrap: nowrap;
+        display: flex;
+        flex-direction: column;
+        padding: 5px;
+        background-color: rgba(240, 240, 240, 0.95);
+        z-index: 200;
+        position: relative;
+        max-height: 100vh;
+        width: 55px;
+    }
+
+    #genericsubmenu.hidden,
+    #alphabettoolbar.hidden {
+        display: none;
+    }
+
+    .tool,
+    .currentColor {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        margin: 2px auto;
+    }
+
+    /* Specific margins for mainbar to fit better */
+    #mainbar .tool {
+        margin: 1px auto;
+    }
+
+    .tool img {
+        width: 40px;
+        height: 40px;
+    }
+
+    #colorselector {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 50px;
+        justify-content: center;
+        overflow-y: auto;
+    }
+
+    .color {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        margin: 2px;
+    }
+
+    .colornav {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        padding: 0;
+        font-size: 12px;
+        margin: 2px auto;
+        display: none;
+        /* Hide color navigation buttons in landscape mode */
+    }
+
+    #kidpixlogo {
+        display: none;
+    }
+
+    .tool.alphabet h1 {
+        font-size: 16px;
+        margin: 2px;
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.subtoolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.subtoolbar::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+.tool {
+    width: 50px;
+    height: 50px;
+    padding: 0px 0px 0px 0px;
+    vertical-align: middle;
+    display: inline-block;
+    -webkit-border-radius: 0px;
+    -webkit-appearance: none;
+    border-radius: 0;
+    border-width: 1px;
+}
+
+.toolImg {
+    width: 36px;
+    height: 36px;
+}
+
+.currentColor {
+    width: 50px;
+    height: 50px;
+    -webkit-border-radius: 0px;
+    -webkit-appearance: none;
+    border-radius: 0;
+}
+
+.color {
+    width: 25px;
+    height: 25px;
+    margin: 0px;
+    -webkit-border-radius: 0px;
+    -webkit-appearance: none;
+    border-radius: 0;
+    border-width: 1px;
+}
+
+.colornav {
+    width: 25px;
+    height: 25px;
+    margin: 0px;
+    -webkit-border-radius: 0px;
+    -webkit-appearance: none;
+    border-radius: 0;
+    text-align: center;
+    padding: 3px 2px;
+    line-height: 1em;
+    border-width: 1px;
+}
+
+.alphabet {
+    line-height: 1em;
+    margin: 0;
+}
+
+.github {
+    width: 16px;
+}
+
+#paint {
+    display: grid;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    position: relative;
+}
+
+#kiddopaint {
+    border: 1px solid #00f;
+    cursor: crosshair;
+    grid-column: 1;
+    grid-row: 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    /* Prevents default touch actions like pull-to-refresh */
+}
+
+#tmpCanvas {
+    border: 1px solid #00f;
+    grid-column: 1;
+    grid-row: 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#previewCanvas {
+    border: 1px solid #00f;
+    grid-column: 1;
+    grid-row: 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#animCanvas {
+    border: 1px solid #00f;
+    grid-column: 1;
+    grid-row: 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#bnimCanvas {
+    border: 1px solid #00f;
+    grid-column: 1;
+    grid-row: 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+h1 {
+    font-size: 3em;
+    margin: 0.5ex;
+}
+
+emj {
+    font-family: 'Apple Color Emoji';
+    font-size: 2em;
+    height: 50px;
+}
+
+.pixelated {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.cursor-bucket {
+    cursor: url(/kidpix/img/cursor-fill-bucket.png) 14 16, auto;
+}
+
+.cursor-guy-smile {
+    cursor: url(/kidpix/img/cursor-guy-smile.png) 8 8, auto;
+}
+
+.cursor-guy-wow {
+    cursor: url(/kidpix/img/cursor-guy-wow.png) 8 8, auto;
+}
+
+.cursor-paint-brush {
+    cursor: url(/kidpix/img/cursor-paint-brush.png) 16 16, auto;
+}
+
+.cursor-pencil {
+    cursor: url(/kidpix/img/cursor-pencil.png) 7 16, auto;
+}
+
+.cursor-tnt {
+    cursor: url(/kidpix/img/cursor-tnt-anim.gif) 4 7, auto;
+}
+
+.cursor-none {
+    cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8zwQAAgYBAyKDV6YAAAAASUVORK5CYII=), default;
+}
+
+.cursor-crosshair {
+    cursor: crosshair;
+}
+
+.cursor-lollipop {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='48' viewport='0 0 100 100' style='fill:black;font-size:24px;'><text y='50%'>🍭</text></svg>") 16 0, auto;
+}
+
+.cursor-pancakes {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='48' viewport='0 0 100 100' style='fill:black;font-size:24px;'><text y='50%'>🥞</text></svg>") 16 0, auto;
+}
+
+.sprite {
+    object-fit: none;
+    width: 32px;
+    height: 32px;
+}
+
+.sprite-pos-0-0 {
+    object-position: 0px 0px;
+}
+
+.sprite-pos-0-1 {
+    object-position: 0px -32px;
+}
+
+.sprite-pos-0-2 {
+    object-position: 0px -64px;
+}
+
+.sprite-pos-0-3 {
+    object-position: 0px -96px;
+}
+
+.sprite-pos-0-4 {
+    object-position: 0px -128px;
+}
+
+.sprite-pos-0-5 {
+    object-position: 0px -160px;
+}
+
+.sprite-pos-0-6 {
+    object-position: 0px -192px;
+}
+
+.sprite-pos-0-7 {
+    object-position: 0px -224px;
+}
+
+.sprite-pos-1-0 {
+    object-position: -32px 0px;
+}
+
+.sprite-pos-1-1 {
+    object-position: -32px -32px;
+}
+
+.sprite-pos-1-2 {
+    object-position: -32px -64px;
+}
+
+.sprite-pos-1-3 {
+    object-position: -32px -96px;
+}
+
+.sprite-pos-1-4 {
+    object-position: -32px -128px;
+}
+
+.sprite-pos-1-5 {
+    object-position: -32px -160px;
+}
+
+.sprite-pos-1-6 {
+    object-position: -32px -192px;
+}
+
+.sprite-pos-1-7 {
+    object-position: -32px -224px;
+}
+
+.sprite-pos-2-0 {
+    object-position: -64px 0px;
+}
+
+.sprite-pos-2-1 {
+    object-position: -64px -32px;
+}
+
+.sprite-pos-2-2 {
+    object-position: -64px -64px;
+}
+
+.sprite-pos-2-3 {
+    object-position: -64px -96px;
+}
+
+.sprite-pos-2-4 {
+    object-position: -64px -128px;
+}
+
+.sprite-pos-2-5 {
+    object-position: -64px -160px;
+}
+
+.sprite-pos-2-6 {
+    object-position: -64px -192px;
+}
+
+.sprite-pos-2-7 {
+    object-position: -64px -224px;
+}
+
+.sprite-pos-3-0 {
+    object-position: -96px 0px;
+}
+
+.sprite-pos-3-1 {
+    object-position: -96px -32px;
+}
+
+.sprite-pos-3-2 {
+    object-position: -96px -64px;
+}
+
+.sprite-pos-3-3 {
+    object-position: -96px -96px;
+}
+
+.sprite-pos-3-4 {
+    object-position: -96px -128px;
+}
+
+.sprite-pos-3-5 {
+    object-position: -96px -160px;
+}
+
+.sprite-pos-3-6 {
+    object-position: -96px -192px;
+}
+
+.sprite-pos-3-7 {
+    object-position: -96px -224px;
+}
+
+.sprite-pos-4-0 {
+    object-position: -128px 0px;
+}
+
+.sprite-pos-4-1 {
+    object-position: -128px -32px;
+}
+
+.sprite-pos-4-2 {
+    object-position: -128px -64px;
+}
+
+.sprite-pos-4-3 {
+    object-position: -128px -96px;
+}
+
+.sprite-pos-4-4 {
+    object-position: -128px -128px;
+}
+
+.sprite-pos-4-5 {
+    object-position: -128px -160px;
+}
+
+.sprite-pos-4-6 {
+    object-position: -128px -192px;
+}
+
+.sprite-pos-4-7 {
+    object-position: -128px -224px;
+}
+
+.sprite-pos-5-0 {
+    object-position: -160px 0px;
+}
+
+.sprite-pos-5-1 {
+    object-position: -160px -32px;
+}
+
+.sprite-pos-5-2 {
+    object-position: -160px -64px;
+}
+
+.sprite-pos-5-3 {
+    object-position: -160px -96px;
+}
+
+.sprite-pos-5-4 {
+    object-position: -160px -128px;
+}
+
+.sprite-pos-5-5 {
+    object-position: -160px -160px;
+}
+
+.sprite-pos-5-6 {
+    object-position: -160px -192px;
+}
+
+.sprite-pos-5-7 {
+    object-position: -160px -224px;
+}
+
+.sprite-pos-6-0 {
+    object-position: -192px 0px;
+}
+
+.sprite-pos-6-1 {
+    object-position: -192px -32px;
+}
+
+.sprite-pos-6-2 {
+    object-position: -192px -64px;
+}
+
+.sprite-pos-6-3 {
+    object-position: -192px -96px;
+}
+
+.sprite-pos-6-4 {
+    object-position: -192px -128px;
+}
+
+.sprite-pos-6-5 {
+    object-position: -192px -160px;
+}
+
+.sprite-pos-6-6 {
+    object-position: -192px -192px;
+}
+
+.sprite-pos-6-7 {
+    object-position: -192px -224px;
+}
+
+.sprite-pos-7-0 {
+    object-position: -224px 0px;
+}
+
+.sprite-pos-7-1 {
+    object-position: -224px -32px;
+}
+
+.sprite-pos-7-2 {
+    object-position: -224px -64px;
+}
+
+.sprite-pos-7-3 {
+    object-position: -224px -96px;
+}
+
+.sprite-pos-7-4 {
+    object-position: -224px -128px;
+}
+
+.sprite-pos-7-5 {
+    object-position: -224px -160px;
+}
+
+.sprite-pos-7-6 {
+    object-position: -224px -192px;
+}
+
+.sprite-pos-7-7 {
+    object-position: -224px -224px;
+}
+
+.sprite-pos-8-0 {
+    object-position: -256px 0px;
+}
+
+.sprite-pos-8-1 {
+    object-position: -256px -32px;
+}
+
+.sprite-pos-8-2 {
+    object-position: -256px -64px;
+}
+
+.sprite-pos-8-3 {
+    object-position: -256px -96px;
+}
+
+.sprite-pos-8-4 {
+    object-position: -256px -128px;
+}
+
+.sprite-pos-8-5 {
+    object-position: -256px -160px;
+}
+
+.sprite-pos-8-6 {
+    object-position: -256px -192px;
+}
+
+.sprite-pos-8-7 {
+    object-position: -256px -224px;
+}
+
+.sprite-pos-9-0 {
+    object-position: -288px 0px;
+}
+
+.sprite-pos-9-1 {
+    object-position: -288px -32px;
+}
+
+.sprite-pos-9-2 {
+    object-position: -288px -64px;
+}
+
+.sprite-pos-9-3 {
+    object-position: -288px -96px;
+}
+
+.sprite-pos-9-4 {
+    object-position: -288px -128px;
+}
+
+.sprite-pos-9-5 {
+    object-position: -288px -160px;
+}
+
+.sprite-pos-9-6 {
+    object-position: -288px -192px;
+}
+
+.sprite-pos-9-7 {
+    object-position: -288px -224px;
+}
+
+.sprite-pos-10-0 {
+    object-position: -320px 0px;
+}
+
+.sprite-pos-10-1 {
+    object-position: -320px -32px;
+}
+
+.sprite-pos-10-2 {
+    object-position: -320px -64px;
+}
+
+.sprite-pos-10-3 {
+    object-position: -320px -96px;
+}
+
+.sprite-pos-10-4 {
+    object-position: -320px -128px;
+}
+
+.sprite-pos-10-5 {
+    object-position: -320px -160px;
+}
+
+.sprite-pos-10-6 {
+    object-position: -320px -192px;
+}
+
+.sprite-pos-10-7 {
+    object-position: -320px -224px;
+}
+
+.sprite-pos-11-0 {
+    object-position: -352px 0px;
+}
+
+.sprite-pos-11-1 {
+    object-position: -352px -32px;
+}
+
+.sprite-pos-11-2 {
+    object-position: -352px -64px;
+}
+
+.sprite-pos-11-3 {
+    object-position: -352px -96px;
+}
+
+.sprite-pos-11-4 {
+    object-position: -352px -128px;
+}
+
+.sprite-pos-11-5 {
+    object-position: -352px -160px;
+}
+
+.sprite-pos-11-6 {
+    object-position: -352px -192px;
+}
+
+.sprite-pos-11-7 {
+    object-position: -352px -224px;
+}
+
+.sprite-pos-12-0 {
+    object-position: -384px 0px;
+}
+
+.sprite-pos-12-1 {
+    object-position: -384px -32px;
+}
+
+.sprite-pos-12-2 {
+    object-position: -384px -64px;
+}
+
+.sprite-pos-12-3 {
+    object-position: -384px -96px;
+}
+
+.sprite-pos-12-4 {
+    object-position: -384px -128px;
+}
+
+.sprite-pos-12-5 {
+    object-position: -384px -160px;
+}
+
+.sprite-pos-12-6 {
+    object-position: -384px -192px;
+}
+
+.sprite-pos-12-7 {
+    object-position: -384px -224px;
+}
+
+.sprite-pos-13-0 {
+    object-position: -416px 0px;
+}
+
+.sprite-pos-13-1 {
+    object-position: -416px -32px;
+}
+
+.sprite-pos-13-2 {
+    object-position: -416px -64px;
+}
+
+.sprite-pos-13-3 {
+    object-position: -416px -96px;
+}
+
+.sprite-pos-13-4 {
+    object-position: -416px -128px;
+}
+
+.sprite-pos-13-5 {
+    object-position: -416px -160px;
+}
+
+.sprite-pos-13-6 {
+    object-position: -416px -192px;
+}
+
+.sprite-pos-13-7 {
+    object-position: -416px -224px;
+}
