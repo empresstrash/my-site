@@ -5671,8 +5671,11 @@ KiddoPaint.Tools.Toolbox.Flood = function() {
 
     this.canvasWideReplace = function(ev) {
         KiddoPaint.Sounds.flood();
-        var x = ev._x;
-        var y = ev._y;
+        var x = Math.round(ev._x);
+        var y = Math.round(ev._y);
+        if (x < 0 || y < 0 || x >= KiddoPaint.Display.canvas.width || y >= KiddoPaint.Display.canvas.height) {
+            return;
+        }
 
         var pixels = KiddoPaint.Display.main_context.getImageData(0, 0, KiddoPaint.Display.canvas.width, KiddoPaint.Display.canvas.height);
         var changedPixels = new ImageData(KiddoPaint.Display.canvas.width, KiddoPaint.Display.canvas.height);
@@ -5715,8 +5718,11 @@ KiddoPaint.Tools.Toolbox.Flood = function() {
 
     this.boundedFill = function(ev) {
         KiddoPaint.Sounds.flood();
-        var x = ev._x;
-        var y = ev._y;
+        var x = Math.round(ev._x);
+        var y = Math.round(ev._y);
+        if (x < 0 || y < 0 || x >= KiddoPaint.Display.canvas.width || y >= KiddoPaint.Display.canvas.height) {
+            return;
+        }
         var pixel_stack = [{
             x: x,
             y: y
