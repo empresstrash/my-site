@@ -16,6 +16,9 @@ body:has(.kp-one) .content {
 }
 
 .kp-one {
+  --kp-tool: 50px;
+  --kp-swatch: 25px;
+  --kp-option: 50px;
   height: 100%;
   max-height: 100%;
   min-height: 0;
@@ -34,13 +37,13 @@ body:has(.kp-one) .content {
 
 .kp-one #toolbar {
   float: none !important;
-  width: 50px !important;
+  width: var(--kp-tool) !important;
   height: 100% !important;
   max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
-  flex: 0 0 50px;
+  flex: 0 0 var(--kp-tool);
   overflow: hidden;
   background: #333;
 }
@@ -48,22 +51,31 @@ body:has(.kp-one) .content {
 .kp-one #mainbar {
   flex: 1 1 auto;
   min-height: 0;
-  width: 50px !important;
+  width: var(--kp-tool) !important;
   height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
+  overflow: hidden !important;
 }
 
 .kp-one #mainbar .tool {
-  flex: 0 0 50px !important;
-  width: 50px !important;
-  height: 50px !important;
-  min-width: 50px !important;
-  min-height: 50px !important;
+  flex: 0 0 var(--kp-tool) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: var(--kp-tool) !important;
+  height: var(--kp-tool) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   margin: 0 !important;
+  padding: 0 !important;
+}
+
+.kp-one #mainbar .tool img {
+  width: 68% !important;
+  height: 68% !important;
+  object-fit: contain !important;
 }
 
 .kp-one #hcontainer {
@@ -124,12 +136,19 @@ body:has(.kp-one) .content {
 .kp-one #subtoolbars button.tool {
   flex: 0 0 auto !important;
   width: auto !important;
-  min-width: 50px !important;
-  height: 50px !important;
-  min-height: 50px !important;
+  min-width: var(--kp-option) !important;
+  height: var(--kp-option) !important;
+  min-height: 0 !important;
   margin: 0 !important;
-  padding: 0 6px !important;
+  padding: 0 0.35em !important;
   white-space: nowrap;
+  font-size: calc(var(--kp-option) * 0.32);
+}
+
+.kp-one #subtoolbars button.tool:has(img) {
+  width: var(--kp-option) !important;
+  flex-basis: var(--kp-option) !important;
+  padding: 0 !important;
 }
 
 .kp-one #alphabettoolbar .kp-letter-nav {
@@ -146,8 +165,8 @@ body:has(.kp-one) .content {
 }
 
 .kp-one #alphabettoolbar .kp-font select {
-  width: 88px;
-  height: 50px;
+  width: calc(var(--kp-option) * 1.7);
+  height: var(--kp-option);
   margin: 0;
   padding: 0 4px;
   border: 0;
@@ -158,20 +177,20 @@ body:has(.kp-one) .content {
 }
 
 .kp-one #alphabettoolbar .tool {
-  flex: 0 0 50px !important;
-  width: 50px !important;
-  min-width: 50px !important;
-  height: 50px !important;
-  min-height: 50px !important;
+  flex: 0 0 var(--kp-option) !important;
+  width: var(--kp-option) !important;
+  min-width: 0 !important;
+  height: var(--kp-option) !important;
+  min-height: 0 !important;
   padding: 0 !important;
   font-family: inherit;
 }
 
 .kp-one #alphabettoolbar .tool h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: calc(var(--kp-option) * 0.46);
   font-family: inherit;
-  line-height: 50px;
+  line-height: var(--kp-option);
 }
 
 .kp-one #subtoolbars img.sprite {
@@ -201,11 +220,11 @@ body:has(.kp-one) .content {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  padding: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
+  padding: 0 6px;
+  overflow: hidden;
   background: #333;
 }
 
@@ -219,13 +238,13 @@ body:has(.kp-one) .content {
   min-width: 0;
   min-height: 0;
   height: 32px !important;
-  padding: 0 4px;
+  padding: 0 0.45em;
   color: #f2f2f2;
-  background: #333;
+  background: transparent;
   border: 0;
-  border-right: 1px solid #4a4a4a;
   border-radius: 0;
   font: 700 0.68rem/1 sans-serif;
+  white-space: nowrap;
 }
 
 .kp-one #modtools {
@@ -251,7 +270,8 @@ body:has(.kp-one) .content {
   align-items: center;
   gap: 4px;
   color: #f2f2f2;
-  flex: 0 0 auto;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .kp-one #modbar .kp-size output {
@@ -264,7 +284,8 @@ body:has(.kp-one) .content {
   align-items: center;
   gap: 4px;
   color: #f2f2f2;
-  flex: 0 0 auto;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .kp-one #modbar .kp-fade output {
@@ -280,7 +301,9 @@ body:has(.kp-one) .content {
 .kp-one #modbar .kp-size input,
 .kp-one #modbar .kp-fade input,
 .kp-one #modbar .kp-turn input {
-  width: 64px;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 28px;
   height: 16px;
   margin: 0;
   accent-color: #f2f2f2;
@@ -289,7 +312,9 @@ body:has(.kp-one) .content {
 .kp-one #modbar .kp-turn {
   display: flex;
   align-items: center;
-  flex: 0 0 auto;
+  flex: 1.3 1 0;
+  min-width: 0;
+  gap: 2px;
 }
 
 .kp-one #modbar .kp-turn output {
@@ -301,39 +326,54 @@ body:has(.kp-one) .content {
 
 .kp-one #colorbar {
   float: none !important;
-  width: 52px !important;
+  width: calc(var(--kp-swatch) * 2) !important;
   height: 100% !important;
   max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
-  flex: 0 0 52px;
+  flex: 0 0 calc(var(--kp-swatch) * 2);
   overflow: hidden !important;
   background: #333;
 }
 
 .kp-one #colorselector {
-  flex: 1 1 auto;
+  flex: 0 0 calc(var(--kp-swatch) * 16) !important;
+  height: calc(var(--kp-swatch) * 16) !important;
   min-height: 0;
-  width: 52px !important;
+  width: calc(var(--kp-swatch) * 2) !important;
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: wrap !important;
   align-content: flex-start;
-  overflow: auto;
+  overflow: hidden !important;
 }
 
 .kp-one #colorselector .color {
-  flex: 0 0 25px !important;
-  width: 25px !important;
-  height: 25px !important;
-  min-width: 25px !important;
-  min-height: 25px !important;
+  flex: 0 0 var(--kp-swatch) !important;
+  width: var(--kp-swatch) !important;
+  height: var(--kp-swatch) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
 }
 
 .kp-one #currentColor {
-  width: 50px !important;
-  height: 50px !important;
-  flex: 0 0 50px;
+  width: calc(var(--kp-swatch) * 2) !important;
+  height: calc(var(--kp-swatch) * 2) !important;
+  flex: 0 0 calc(var(--kp-swatch) * 2);
+}
+
+.kp-one #colorbar > div {
+  display: flex;
+  flex: 0 0 var(--kp-swatch);
+  height: var(--kp-swatch);
+}
+
+.kp-one .colornav {
+  width: var(--kp-swatch) !important;
+  height: var(--kp-swatch) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
 }
 
 .kp-one #zoomport {

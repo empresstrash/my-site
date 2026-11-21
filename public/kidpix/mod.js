@@ -108,11 +108,63 @@ function init_mods() {
 
   setSize(1);
   applyView();
+  fitChrome();
   if (window.ResizeObserver) {
-    var watcher = new ResizeObserver(applyView);
-    watcher.observe(port());
+    var watcher = new ResizeObserver(function () {
+      fitChrome();
+      applyView();
+    });
+    watcher.observe(document.getElementById("container"));
   } else {
-    window.addEventListener("resize", applyView);
+    window.addEventListener("resize", function () {
+      fitChrome();
+      applyView();
+    });
+  }
+
+  var showGeneric = window.show_generic_submenu;
+  if (showGeneric) {
+    window.show_generic_submenu = function (type) {
+      showGeneric(type);
+      fitRows();
+    };
+  }
+  var showSub = window.show_sub_toolbar;
+  if (showSub) {
+    window.show_sub_toolbar = function (name) {
+      showSub(name);
+      fitRows();
+    };
+  }
+
+  function fitChrome() {
+    var root = document.querySelector(".kp-one");
+    var main = document.getElementById("mainbar");
+    var colors = document.getElementById("colorbar");
+    if (!root || !main || !colors) return;
+    var count = main.querySelectorAll(".tool").length || 1;
+    var tool = Math.max(16, Math.min(50, Math.floor(main.clientHeight / count)));
+    root.style.setProperty("--kp-tool", tool + "px");
+    var swatch = Math.max(10, Math.min(36, Math.floor(colors.clientHeight / 19)));
+    root.style.setProperty("--kp-swatch", swatch + "px");
+    fitRows();
+  }
+
+  function fitRows() {
+    var root = document.querySelector(".kp-one");
+    var bar = document.querySelector("#genericsubmenu:not(.hidden), #alphabettoolbar:not(.hidden)");
+    if (!root || !bar || !bar.clientWidth) return;
+    var sprites = bar.querySelector("img.sprite");
+    var floor = sprites ? 32 : 22;
+    var buttons = bar.querySelectorAll("button").length || 1;
+    var select = bar.querySelector("select") ? 1.7 : 0;
+    var option = Math.floor(bar.clientWidth / (buttons + select));
+    option = Math.max(floor, Math.min(50, option));
+    root.style.setProperty("--kp-option", option + "px");
+    if (bar.scrollWidth > bar.clientWidth + 2) {
+      var next = Math.floor(option * (bar.clientWidth / bar.scrollWidth));
+      root.style.setProperty("--kp-option", Math.max(floor, next) + "px");
+    }
   }
 
   port().addEventListener("pointerdown", function (ev) {
