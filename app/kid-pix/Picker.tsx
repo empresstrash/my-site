@@ -86,13 +86,13 @@ export default function Picker() {
           mod tools
         </button>
         <div className="kp-hands" role="group" aria-label="Canvas controls">
-          <button type="button" onClick={() => handsRef.current?.zoomBy(1.25)}>
+          <button type="button" disabled={edition === "classic"} title={edition === "classic" ? "Zoom and grab are on mod tools, so the 1.0 tools stay still" : "Zoom in"} onClick={() => handsRef.current?.zoomBy(1.25)}>
             zoom in
           </button>
-          <button type="button" onClick={() => handsRef.current?.zoomBy(0.8)}>
+          <button type="button" disabled={edition === "classic"} title={edition === "classic" ? "Zoom and grab are on mod tools, so the 1.0 tools stay still" : "Zoom out"} onClick={() => handsRef.current?.zoomBy(0.8)}>
             zoom out
           </button>
-          <button type="button" aria-pressed={grab} className={grab ? "is-on" : ""} onClick={toggleGrab}>
+          <button type="button" disabled={edition === "classic"} title={edition === "classic" ? "Zoom and grab are on mod tools, so the 1.0 tools stay still" : "Grab the drawing"} aria-pressed={grab} className={grab ? "is-on" : ""} onClick={toggleGrab}>
             grab
           </button>
           <button type="button" disabled={edition === "classic"} title={edition === "classic" ? "Brush and stamp size is in mod tools" : "Bigger"} onClick={() => handsRef.current?.nudgeSize(4)}>
@@ -105,7 +105,7 @@ export default function Picker() {
       </div>
       <div className="kp-pane">
         {edition === "classic" ? (
-          <ClassicFrame handsRef={handsRef} grab={grab} />
+          <ClassicFrame handsRef={handsRef} />
         ) : (
           <Studio variant="mod" handsRef={handsRef} onGrabbed={onGrabbed} />
         )}
@@ -114,30 +114,16 @@ export default function Picker() {
   );
 }
 
-function ClassicFrame({ handsRef, grab }: { handsRef: RefObject<HandsApi | null>; grab: boolean }) {
+function ClassicFrame({ handsRef }: { handsRef: RefObject<HandsApi | null> }) {
   const clipRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const fitRef = useRef(1);
-  const viewRef = useRef({ zoom: 1, x: 0, y: 0 });
-  const drag = useRef<{ x: number; y: number } | null>(null);
 
   function applyFrame() {
     const iframe = iframeRef.current;
-    const clip = clipRef.current;
-    if (!iframe || !clip) return;
-    const zoom = viewRef.current.zoom;
-    const z = fitRef.current * zoom;
-    const width = CLASSIC_W * z;
-    const height = CLASSIC_H * z;
-    const minX = Math.min(0, clip.clientWidth - width);
-    const minY = Math.min(0, clip.clientHeight - height);
-    viewRef.current.x = Math.min(0, Math.max(minX, viewRef.current.x));
-    viewRef.current.y = Math.min(0, Math.max(minY, viewRef.current.y));
-    if (zoom === 1) {
-      viewRef.current.x = 0;
-      viewRef.current.y = 0;
-    }
-    iframe.style.transform = `translate(${viewRef.current.x}px, ${viewRef.current.y}px) scale(${z})`;
+    if (!iframe) return;
+    // The 1.0 tools and drawing are one window, so this only fits it. Zoom stays on mod tools.
+    iframe.style.transform = `scale(${fitRef.current})`;
   }
 
   useLayoutEffect(() => {
@@ -160,26 +146,8 @@ function ClassicFrame({ handsRef, grab }: { handsRef: RefObject<HandsApi | null>
 
   useLayoutEffect(() => {
     const api: HandsApi = {
-      zoomBy(factor) {
-        const prev = viewRef.current.zoom;
-        const next = Math.max(1, Math.min(4, prev * factor));
-        if (next === prev) return;
-        const clip = clipRef.current;
-        if (clip && prev > 0) {
-          const cx = clip.clientWidth / 2;
-          const cy = clip.clientHeight / 2;
-          const ratio = next / prev;
-          viewRef.current.x = cx - (cx - viewRef.current.x) * ratio;
-          viewRef.current.y = cy - (cy - viewRef.current.y) * ratio;
-        }
-        viewRef.current.zoom = next;
-        applyFrame();
-      },
-      panBy(dx, dy) {
-        viewRef.current.x += dx;
-        viewRef.current.y += dy;
-        applyFrame();
-      },
+      zoomBy() {},
+      panBy() {},
       nudgeSize() {},
       setGrabbed() {},
     };
@@ -198,24 +166,6 @@ function ClassicFrame({ handsRef, grab }: { handsRef: RefObject<HandsApi | null>
         ref={iframeRef}
         style={{ width: CLASSIC_W, height: CLASSIC_H }}
         allow="autoplay; fullscreen; clipboard-write"
-      />
-      <div
-        className={grab ? "kp-grab is-on" : "kp-grab"}
-        onPointerDown={(event) => {
-          if (!grab) return;
-          drag.current = { x: event.clientX, y: event.clientY };
-          event.currentTarget.setPointerCapture(event.pointerId);
-        }}
-        onPointerMove={(event) => {
-          if (!drag.current) return;
-          viewRef.current.x += event.clientX - drag.current.x;
-          viewRef.current.y += event.clientY - drag.current.y;
-          drag.current = { x: event.clientX, y: event.clientY };
-          applyFrame();
-        }}
-        onPointerUp={() => {
-          drag.current = null;
-        }}
       />
     </div>
   );
