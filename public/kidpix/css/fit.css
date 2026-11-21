@@ -308,7 +308,7 @@ body:has(.kp-one) .content {
   min-height: 0;
   position: relative;
   overflow: hidden;
-  background: #b5b5b5;
+  background: #fff;
   touch-action: none;
 }
 
@@ -335,6 +335,10 @@ body:has(.kp-one) .content {
   border: 0 !important;
   max-width: none !important;
   max-height: none !important;
+}
+
+.kp-one #kiddopaint {
+  background: #fff;
 }
 
 .kp-one #modbar .kp-size button {

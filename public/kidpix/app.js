@@ -1010,12 +1010,25 @@ KiddoPaint.Display.saveToLocalStorage = function() {
     }
 }
 
+KiddoPaint.Display.layWhite = function() {
+    var ctx = KiddoPaint.Display.main_context;
+    var canvas = KiddoPaint.Display.main_canvas;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+}
+
 KiddoPaint.Display.loadFromLocalStorage = function() {
+    KiddoPaint.Display.layWhite();
     var img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = function() {
         KiddoPaint.Display.clearMain();
         KiddoPaint.Display.main_context.drawImage(img, 0, 0);
+        KiddoPaint.Display.layWhite();
     }
     if (typeof(Storage) != "undefined" && localStorage.getItem("kiddopaint")) {
         img.src = localStorage.getItem("kiddopaint");
