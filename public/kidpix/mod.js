@@ -92,28 +92,100 @@ function init_mods() {
     window.addEventListener("pointerup", up);
   });
 
+  // Bottom bar. Add another entry here to add a tool.
+  // menu() fills the original top option bar. make() is the drawing tool.
+  var drawStyle = "marker";
+  var shapeKind = "triangle";
+  var shapeFill = function () {
+    return KiddoPaint.Textures.Solid(KiddoPaint.Current.color);
+  };
+  var shapeTextures = [
+    "None", "Solid", "Partial1", "Partial2", "Partial3", "PartialArtifactAlias",
+    "Speckles", "Stripes", "Thatch", "Shingles", "Bubbles", "Diamond", "Ribbon",
+    "Sand", "Brick", "Chevron", "Stairs", "Cross", "DiagBrick", "CornerStair", "Houndstooth",
+  ];
+
   var mods = [
-    ["marker", "marker"],
-    ["chalk", "chalk"],
-    ["crayon", "crayon"],
-    ["triangle", "triangle"],
-    ["star", "star"],
-    ["curve", "curve"],
-    ["round", "round"],
-    ["polygon", "polygon"],
-    ["pick", "pick"],
+    {
+      id: "draw",
+      name: "draw",
+      menu: function () {
+        return ["marker", "chalk", "crayon"].map(function (name) {
+          return {
+            name: name,
+            text: name,
+            handler: function () {
+              drawStyle = name;
+            },
+          };
+        });
+      },
+      make: function () {
+        return strokeTool(function (a, b) {
+          strokes[drawStyle](a, b);
+        });
+      },
+    },
+    {
+      id: "shape",
+      name: "shape",
+      menu: function () {
+        var shapes = ["triangle", "star", "curve", "round", "polygon"].map(function (name) {
+          return {
+            name: name,
+            text: name,
+            handler: function () {
+              shapeKind = name;
+            },
+          };
+        });
+        var textures = shapeTextures.map(function (name) {
+          return {
+            name: name,
+            imgJs: function () {
+              return makeIcon(KiddoPaint.Textures[name]);
+            },
+            handler: function () {
+              shapeFill = function () {
+                return KiddoPaint.Textures[name](KiddoPaint.Current.color);
+              };
+            },
+          };
+        });
+        textures.push({
+          name: "Rainbow",
+          imgSrc: "/kidpix/img/tool-unknown.png",
+          handler: function () {
+            shapeFill = function (a, b) {
+              return KiddoPaint.Textures.RainbowGrad(a, b);
+            };
+          },
+        });
+        return shapes.concat(textures);
+      },
+      make: function () {
+        return shapeTool();
+      },
+    },
+    {
+      id: "pick",
+      name: "pick",
+      make: function () {
+        return pick();
+      },
+    },
   ];
   var bar = document.getElementById("modbar");
-  mods.forEach(function (pair) {
+  mods.forEach(function (spec) {
     var button = document.createElement("button");
     button.type = "button";
     button.className = "tool";
-    button.id = "mod-" + pair[0];
-    button.title = pair[1];
-    button.textContent = pair[1];
+    button.id = "mod-" + spec.id;
+    button.title = spec.name;
+    button.textContent = spec.name;
     button.addEventListener("mousedown", function (ev) {
       ev.preventDefault();
-      selectMod(pair[0], button);
+      selectMod(spec, button);
     });
     bar.appendChild(button);
   });
@@ -127,15 +199,20 @@ function init_mods() {
     return Math.max(4, Math.round(18 * (KiddoPaint.Current.stampScale || 1)));
   }
 
-  function selectMod(name, button) {
+  function selectMod(spec, button) {
     var selected = bar.querySelectorAll(".tool.on");
     for (var i = 0; i < selected.length; i++) selected[i].classList.remove("on");
     button.classList.add("on");
-    KiddoPaint.Current.tool = tools[name]();
+    KiddoPaint.Current.tool = spec.make();
     KiddoPaint.Display.canvas.classList = "";
     KiddoPaint.Display.canvas.classList.add("cursor-pencil");
-    var menus = document.getElementById("subtoolbars").children;
-    for (var j = 0; j < menus.length; j++) menus[j].className = "hidden";
+    if (spec.menu) {
+      KiddoPaint.Submenu[spec.id] = spec.menu();
+      show_generic_submenu(spec.id);
+    } else {
+      var menus = document.getElementById("subtoolbars").children;
+      for (var j = 0; j < menus.length; j++) menus[j].className = "hidden";
+    }
   }
 
   function strokeTool(draw) {
@@ -168,8 +245,8 @@ function init_mods() {
     return ctx;
   }
 
-  function marker() {
-    return strokeTool(function (a, b) {
+  var strokes = {
+    marker: function (a, b) {
       var ctx = ink(KiddoPaint.Display.context, 1);
       ctx.lineWidth = brushSize();
       ctx.beginPath();
@@ -177,11 +254,8 @@ function init_mods() {
       ctx.lineTo(b._x, b._y);
       ctx.stroke();
       ctx.restore();
-    });
-  }
-
-  function chalk() {
-    return strokeTool(function (a, b) {
+    },
+    chalk: function (a, b) {
       var ctx = ink(KiddoPaint.Display.context, 1);
       var size = brushSize();
       var dist = Math.hypot(b._x - a._x, b._y - a._y);
@@ -197,11 +271,8 @@ function init_mods() {
         );
       }
       ctx.restore();
-    });
-  }
-
-  function crayon() {
-    return strokeTool(function (a, b) {
+    },
+    crayon: function (a, b) {
       var ctx = ink(KiddoPaint.Display.context, 0.45);
       ctx.lineWidth = brushSize() * 1.4;
       ctx.beginPath();
@@ -209,10 +280,76 @@ function init_mods() {
       ctx.lineTo(b._x, b._y + (Math.random() - 0.5) * 2);
       ctx.stroke();
       ctx.restore();
-    });
+    },
+  };
+
+  function traceShape(ctx, a, b) {
+    if (shapeKind === "star") {
+      var cx = (a._x + b._x) / 2;
+      var cy = (a._y + b._y) / 2;
+      var outer = Math.max(8, Math.hypot(b._x - a._x, b._y - a._y) / 2);
+      var inner = outer * 0.42;
+      ctx.beginPath();
+      for (var i = 0; i < 10; i++) {
+        var radius = i % 2 === 0 ? outer : inner;
+        var angle = -Math.PI / 2 + (i * Math.PI) / 5;
+        var x = cx + Math.cos(angle) * radius;
+        var y = cy + Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      return true;
+    }
+    if (shapeKind === "curve") {
+      var mx = (a._x + b._x) / 2;
+      var my = (a._y + b._y) / 2;
+      var dx = b._x - a._x;
+      var dy = b._y - a._y;
+      ctx.beginPath();
+      ctx.moveTo(a._x, a._y);
+      ctx.quadraticCurveTo(mx - dy * 0.35, my + dx * 0.35, b._x, b._y);
+      return false;
+    }
+    if (shapeKind === "round") {
+      var x = Math.min(a._x, b._x);
+      var y = Math.min(a._y, b._y);
+      var w = Math.abs(b._x - a._x);
+      var h = Math.abs(b._y - a._y);
+      var r = Math.min(24, w / 3, h / 3);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      return true;
+    }
+    if (shapeKind === "polygon") {
+      var pcx = (a._x + b._x) / 2;
+      var pcy = (a._y + b._y) / 2;
+      var pr = Math.max(8, Math.hypot(b._x - a._x, b._y - a._y) / 2);
+      ctx.beginPath();
+      for (var p = 0; p < 5; p++) {
+        var pa = -Math.PI / 2 + (p * 2 * Math.PI) / 5;
+        var px = pcx + Math.cos(pa) * pr;
+        var py = pcy + Math.sin(pa) * pr;
+        if (p === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      return true;
+    }
+    ctx.beginPath();
+    ctx.moveTo((a._x + b._x) / 2, a._y);
+    ctx.lineTo(b._x, b._y);
+    ctx.lineTo(a._x, b._y);
+    ctx.closePath();
+    return true;
   }
 
-  function shapeTool(render) {
+  function shapeTool() {
     var tool = { isDown: false, origin: null };
     tool.mousedown = function (ev) {
       tool.isDown = true;
@@ -220,114 +357,24 @@ function init_mods() {
     };
     tool.mousemove = function (ev) {
       if (!tool.isDown) return;
-      render(KiddoPaint.Display.previewContext, tool.origin, ev);
+      KiddoPaint.Display.clearTmp();
+      var ctx = KiddoPaint.Display.context;
+      ctx.save();
+      ctx.fillStyle = shapeFill(tool.origin, ev);
+      ctx.strokeStyle = KiddoPaint.Current.color;
+      ctx.lineWidth = Math.max(2, brushSize() * 0.35);
+      var closed = traceShape(ctx, tool.origin, ev);
+      if (closed) ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     };
     tool.mouseup = function (ev) {
       if (!tool.isDown) return;
+      tool.mousemove(ev);
       tool.isDown = false;
-      render(KiddoPaint.Display.context, tool.origin, ev);
       KiddoPaint.Display.saveMain();
     };
     return tool;
-  }
-
-  function paintShape(ctx, draw) {
-    ctx.save();
-    ctx.fillStyle = KiddoPaint.Current.color;
-    ctx.strokeStyle = KiddoPaint.Current.color;
-    ctx.lineWidth = Math.max(2, brushSize() * 0.35);
-    draw(ctx);
-    ctx.restore();
-  }
-
-  function triangle() {
-    return shapeTool(function (ctx, a, b) {
-      paintShape(ctx, function (g) {
-        g.beginPath();
-        g.moveTo((a._x + b._x) / 2, a._y);
-        g.lineTo(b._x, b._y);
-        g.lineTo(a._x, b._y);
-        g.closePath();
-        g.fill();
-      });
-    });
-  }
-
-  function star() {
-    return shapeTool(function (ctx, a, b) {
-      paintShape(ctx, function (g) {
-        var cx = (a._x + b._x) / 2;
-        var cy = (a._y + b._y) / 2;
-        var outer = Math.max(8, Math.hypot(b._x - a._x, b._y - a._y) / 2);
-        var inner = outer * 0.42;
-        g.beginPath();
-        for (var i = 0; i < 10; i++) {
-          var radius = i % 2 === 0 ? outer : inner;
-          var angle = -Math.PI / 2 + (i * Math.PI) / 5;
-          var x = cx + Math.cos(angle) * radius;
-          var y = cy + Math.sin(angle) * radius;
-          if (i === 0) g.moveTo(x, y);
-          else g.lineTo(x, y);
-        }
-        g.closePath();
-        g.fill();
-      });
-    });
-  }
-
-  function curve() {
-    return shapeTool(function (ctx, a, b) {
-      paintShape(ctx, function (g) {
-        var mx = (a._x + b._x) / 2;
-        var my = (a._y + b._y) / 2;
-        var dx = b._x - a._x;
-        var dy = b._y - a._y;
-        g.beginPath();
-        g.moveTo(a._x, a._y);
-        g.quadraticCurveTo(mx - dy * 0.35, my + dx * 0.35, b._x, b._y);
-        g.stroke();
-      });
-    });
-  }
-
-  function round() {
-    return shapeTool(function (ctx, a, b) {
-      paintShape(ctx, function (g) {
-        var x = Math.min(a._x, b._x);
-        var y = Math.min(a._y, b._y);
-        var w = Math.abs(b._x - a._x);
-        var h = Math.abs(b._y - a._y);
-        var r = Math.min(24, w / 3, h / 3);
-        g.beginPath();
-        g.moveTo(x + r, y);
-        g.arcTo(x + w, y, x + w, y + h, r);
-        g.arcTo(x + w, y + h, x, y + h, r);
-        g.arcTo(x, y + h, x, y, r);
-        g.arcTo(x, y, x + w, y, r);
-        g.closePath();
-        g.fill();
-      });
-    });
-  }
-
-  function polygon() {
-    return shapeTool(function (ctx, a, b) {
-      paintShape(ctx, function (g) {
-        var cx = (a._x + b._x) / 2;
-        var cy = (a._y + b._y) / 2;
-        var radius = Math.max(8, Math.hypot(b._x - a._x, b._y - a._y) / 2);
-        g.beginPath();
-        for (var i = 0; i < 5; i++) {
-          var angle = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-          var x = cx + Math.cos(angle) * radius;
-          var y = cy + Math.sin(angle) * radius;
-          if (i === 0) g.moveTo(x, y);
-          else g.lineTo(x, y);
-        }
-        g.closePath();
-        g.fill();
-      });
-    });
   }
 
   function pick() {
@@ -343,15 +390,4 @@ function init_mods() {
     };
   }
 
-  var tools = {
-    marker: marker,
-    chalk: chalk,
-    crayon: crayon,
-    triangle: triangle,
-    star: star,
-    curve: curve,
-    round: round,
-    polygon: polygon,
-    pick: pick,
-  };
 }

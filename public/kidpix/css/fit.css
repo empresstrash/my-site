@@ -1,4 +1,5 @@
-/* The tool bars stay in the page. Only #paint is scaled. */
+/* Page shell. The v1 tool and option buttons keep their own sizes.
+   Only the drawing is scaled. */
 
 html:has(.kp-one),
 body:has(.kp-one) {
@@ -21,26 +22,6 @@ body:has(.kp-one) .content {
   overflow: hidden;
 }
 
-@media (max-height: 720px) {
-  .kp-one .kp-switch {
-    padding: 2px 4px 0;
-    gap: 4px;
-  }
-
-  .kp-one .kp-switch button {
-    min-height: 40px;
-    padding: 0 0.5rem;
-  }
-
-  .kp-one #modbar {
-    flex-basis: 52px;
-  }
-
-  .kp-one #subtoolbars > .subtoolbar {
-    height: 44px;
-  }
-}
-
 .kp-one #container {
   flex: 1 1 auto;
   min-height: 0;
@@ -53,13 +34,13 @@ body:has(.kp-one) .content {
 
 .kp-one #toolbar {
   float: none !important;
-  width: 76px !important;
+  width: 50px !important;
   height: 100% !important;
   max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
-  flex: 0 0 76px;
+  flex: 0 0 50px;
   overflow: hidden;
   background: #ececec;
 }
@@ -67,64 +48,22 @@ body:has(.kp-one) .content {
 .kp-one #mainbar {
   flex: 1 1 auto;
   min-height: 0;
-  width: 100% !important;
+  width: 50px !important;
+  height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
-  overflow: hidden !important;
-}
-
-.kp-one #mainbar {
-  height: auto !important;
-  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
 .kp-one #mainbar .tool {
-  flex: 1 1 0 !important;
-  width: 100% !important;
-  height: auto !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
+  flex: 0 0 50px !important;
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
   margin: 0 !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-.kp-one #mainbar .tool img {
-  width: 78% !important;
-  height: 78% !important;
-  max-width: 48px;
-  max-height: 48px;
-  object-fit: contain;
-}
-
-.kp-one #colorbar {
-  flex: 0 0 auto;
-  width: 100% !important;
-  height: auto !important;
-  max-height: 64px !important;
-  float: none !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch;
-  overflow: hidden !important;
-  background: #ececec;
-}
-
-.kp-one #colorselector {
-  flex: 1 1 auto;
-  width: auto;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.kp-one #colorselector .color {
-  flex: 1 1 4%;
-  width: auto;
-  height: 28px;
 }
 
 .kp-one #hcontainer {
@@ -132,7 +71,7 @@ body:has(.kp-one) .content {
   min-width: 0;
   min-height: 0 !important;
   width: auto !important;
-  height: 100% !important;
+  height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
@@ -140,83 +79,98 @@ body:has(.kp-one) .content {
   overflow: hidden;
 }
 
-.kp-subrow {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: stretch;
-  width: 100%;
-  min-height: 56px;
-  background: #ececec;
-}
-
-.kp-subrow > button {
-  flex: 0 0 48px;
-  min-width: 48px;
-  min-height: 48px;
-  border: 2px solid #222;
-  background: #fff;
-  color: #111;
-  font: 700 1.4rem/1 sans-serif;
-  cursor: pointer;
-}
-
+/* Original option row: full-size choices, including each stamp. */
 .kp-one #subtoolbars {
   position: static !important;
   left: auto !important;
   top: auto !important;
-  flex: 1 1 auto;
-  width: auto !important;
+  flex: 0 0 auto;
+  width: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  min-width: 0;
-  min-height: 0;
-  order: 0;
   overflow: hidden;
   background: #ececec;
 }
 
-.kp-one #subtoolbars > .subtoolbar,
+.kp-one #genericsubmenu,
+.kp-one #alphabettoolbar,
 .kp-one #genericsubmenu.subtoolbar,
 .kp-one #alphabettoolbar.subtoolbar {
-  display: flex !important;
+  display: flex;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   align-items: center;
   width: 100% !important;
   max-width: none !important;
-  height: 56px !important;
+  height: auto !important;
   max-height: none !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   white-space: nowrap !important;
   position: static !important;
-  scrollbar-width: none;
 }
 
-.kp-one #subtoolbars > .hidden {
+.kp-one #genericsubmenu.hidden,
+.kp-one #alphabettoolbar.hidden {
   display: none !important;
 }
 
 .kp-one #subtoolbars button.tool {
-  flex: 0 0 52px !important;
-  width: 52px !important;
-  min-width: 52px !important;
-  height: 52px !important;
-  min-height: 52px !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 50px !important;
+  height: 50px !important;
+  min-height: 50px !important;
   margin: 0 !important;
-}
-
-.kp-one #subtoolbars button.tool img:not(.sprite) {
-  width: 80%;
-  height: 80%;
-  object-fit: contain;
+  padding: 0 6px !important;
+  white-space: nowrap;
 }
 
 .kp-one #subtoolbars img.sprite {
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
   object-fit: none !important;
+}
+
+/* Colors stay the original swatches, in a column on the right. */
+.kp-one #colorbar {
+  float: none !important;
+  width: 52px !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 0 0 52px;
+  overflow: hidden !important;
+  background: #ececec;
+}
+
+.kp-one #colorselector {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 52px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: wrap !important;
+  align-content: flex-start;
+  overflow: auto;
+}
+
+.kp-one #colorselector .color {
+  flex: 0 0 25px !important;
+  width: 25px !important;
+  height: 25px !important;
+  min-width: 25px !important;
+  min-height: 25px !important;
+}
+
+.kp-one #currentColor {
+  width: 50px !important;
+  height: 50px !important;
+  flex: 0 0 50px;
 }
 
 .kp-one #zoomport {
@@ -254,7 +208,7 @@ body:has(.kp-one) .content {
 }
 
 .kp-one #modbar {
-  flex: 0 0 64px;
+  flex: 0 0 56px;
   display: flex;
   width: 100%;
   background: #161616;
@@ -268,19 +222,12 @@ body:has(.kp-one) .content {
   color: #fff;
   background: #222;
   border-color: #444;
-  font: 700 0.82rem/1.05 sans-serif;
+  font: 700 0.9rem/1.1 sans-serif;
 }
 
 .kp-one #modbar .tool.on {
   background: #ff3d6e;
   color: #14040a;
-}
-
-@media (max-height: 720px) {
-  .kp-one #modbar {
-    flex: 0 0 44px !important;
-    height: 44px !important;
-  }
 }
 
 .kp-one .kp-size button {

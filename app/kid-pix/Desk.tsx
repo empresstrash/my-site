@@ -97,12 +97,6 @@ export default function Desk() {
     window.kpView?.setGrabbed(grabRef.current);
   }
 
-  function scrollChoices(direction: number) {
-    const bar = document.querySelector("#subtoolbars .subtoolbar");
-    if (!(bar instanceof HTMLElement)) return;
-    bar.scrollBy({ left: direction * Math.max(160, bar.clientWidth * 0.8), behavior: "smooth" });
-  }
-
   return (
     <div className={vr ? "kp kp-one kp-vr" : "kp kp-one"}>
       <link rel="stylesheet" href="/kidpix/css/kidpix.css" />
@@ -149,11 +143,7 @@ export default function Desk() {
           </div>
         </div>
         <div id="hcontainer">
-          <div className="kp-subrow">
-            <button type="button" aria-label="previous choices" onClick={() => scrollChoices(-1)}>
-              ←
-            </button>
-            <div id="subtoolbars" className="subtoolbar">
+          <div id="subtoolbars" className="subtoolbar">
             <div id="genericsubmenu" className="hidden" />
             <div id="alphabettoolbar" className="hidden">
               {Array.from({ length: 26 }, (_, index) => (
@@ -163,26 +153,6 @@ export default function Desk() {
                 <h1>↪</h1>
               </button>
             </div>
-            </div>
-            <button type="button" aria-label="more choices" onClick={() => scrollChoices(1)}>
-              →
-            </button>
-          </div>
-          <div id="colorbar">
-            <button className="currentColor" id="currentColor" type="button" />
-            <div id="colorselector">
-              {Array.from({ length: 32 }, (_, index) => (
-                <button key={index} className="color" type="button" />
-              ))}
-            </div>
-            <div>
-              <button className="colornav" id="colorprev" type="button">
-                ←
-              </button>
-              <button className="colornav" id="colornext" type="button">
-                →
-              </button>
-            </div>
           </div>
           <div id="zoomport">
             <div id="paint">
@@ -190,6 +160,22 @@ export default function Desk() {
             </div>
           </div>
           <div id="modbar" />
+        </div>
+        <div id="colorbar">
+          <button className="currentColor" id="currentColor" type="button" />
+          <div id="colorselector">
+            {Array.from({ length: 32 }, (_, index) => (
+              <button key={index} className="color" type="button" />
+            ))}
+          </div>
+          <div>
+            <button className="colornav" id="colorprev" type="button">
+              ←
+            </button>
+            <button className="colornav" id="colornext" type="button">
+              →
+            </button>
+          </div>
         </div>
       </div>
     </div>
