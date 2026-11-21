@@ -308,7 +308,7 @@ body:has(.kp-one) .content {
   min-height: 0;
   position: relative;
   overflow: hidden;
-  background: #fff;
+  background: #b5b5b5;
   touch-action: none;
 }
 
@@ -329,6 +329,7 @@ body:has(.kp-one) .content {
   margin: 0;
   transform-origin: 0 0;
   overflow: visible !important;
+  box-shadow: 0 0 0 4px #1a1a1a;
 }
 
 .kp-one #paint canvas {

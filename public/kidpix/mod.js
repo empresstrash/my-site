@@ -16,7 +16,10 @@ function init_mods() {
   function fitScale() {
     var box = port();
     if (!box || !box.clientWidth || !box.clientHeight) return 1;
-    return Math.min(box.clientWidth / 1920, box.clientHeight / 1200);
+    var frame = 8;
+    var w = Math.max(1, box.clientWidth - frame * 2);
+    var h = Math.max(1, box.clientHeight - frame * 2);
+    return Math.min(w / 1920, h / 1200);
   }
 
   function applyView() {
