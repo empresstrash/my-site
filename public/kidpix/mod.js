@@ -36,8 +36,10 @@ function init_mods() {
   }
 
   function setSize(value) {
-    var next = Math.min(4, Math.max(1, Math.round(Number(value) || 1)));
+    var next = Math.min(20, Math.max(1, Math.round(Number(value) || 1)));
+    KiddoPaint.Current.toolScale = next;
     KiddoPaint.Current.stampScale = next;
+    KiddoPaint.Current.scaling = next;
     var input = document.getElementById("kp-size");
     if (input && Number(input.value) !== next) input.value = String(next);
     var shown = document.getElementById("kp-size-value");
@@ -175,7 +177,7 @@ function init_mods() {
       },
     },
   ];
-  var bar = document.getElementById("modbar");
+  var bar = document.getElementById("modtools") || document.getElementById("modbar");
   mods.forEach(function (spec) {
     var button = document.createElement("button");
     button.type = "button";

@@ -208,13 +208,25 @@ body:has(.kp-one) .content {
 }
 
 .kp-one #modbar {
-  flex: 0 0 56px;
+  flex: 0 0 auto;
   display: flex;
+  flex-direction: column;
   width: 100%;
   background: #161616;
 }
 
-.kp-one #modbar .tool {
+.kp-one #modbar .kp-switch {
+  flex: 0 0 auto;
+  padding: 4px 6px 2px;
+  background: #000;
+}
+
+.kp-one #modtools {
+  display: flex;
+  height: 52px;
+}
+
+.kp-one #modtools .tool {
   flex: 1 1 0;
   width: auto !important;
   height: 100% !important;
@@ -225,7 +237,7 @@ body:has(.kp-one) .content {
   font: 700 0.9rem/1.1 sans-serif;
 }
 
-.kp-one #modbar .tool.on {
+.kp-one #modtools .tool.on {
   background: #ff3d6e;
   color: #14040a;
 }

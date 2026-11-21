@@ -190,7 +190,7 @@ function init_listeners(canvas) {
 
     document.onkeydown = function checkKey(e) {
         if (e.keyCode == 16) {
-            KiddoPaint.Current.scaling = 2;
+            KiddoPaint.Current.scaling = (KiddoPaint.Current.toolScale || 1) * 2;
             KiddoPaint.Current.modified = true;
         } else if (e.keyCode == 91 || e.keyCode == 93) {
             KiddoPaint.Current.modifiedCtrl = true;
@@ -234,7 +234,7 @@ function init_listeners(canvas) {
     }
     document.onkeyup = function checkKey(e) {
         if (e.keyCode == 16) {
-            KiddoPaint.Current.scaling = 1;
+            KiddoPaint.Current.scaling = KiddoPaint.Current.toolScale || 1;
             KiddoPaint.Current.modified = false;
         } else if (e.keyCode == 91 || e.keyCode == 93) {
             KiddoPaint.Current.modifiedCtrl = false;
@@ -4786,7 +4786,7 @@ KiddoPaint.Tools.Toolbox.Astroid = function() {
                 y: pt2.y + (seg2deltay * i)
             };
             KiddoPaint.Display.context.beginPath();
-            KiddoPaint.Display.context.lineWidth = tool.size;
+            KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
             KiddoPaint.Display.context.moveTo(Math.round(a1.x), Math.round(a1.y));
             KiddoPaint.Display.context.lineTo(Math.round(a2.x), Math.round(a2.y));
             if (KiddoPaint.Current.modifiedMeta) {
@@ -4817,7 +4817,7 @@ KiddoPaint.Tools.Toolbox.Astroid = function() {
             KiddoPaint.Display.context.moveTo(Math.round(tool.points[0].x), Math.round(tool.points[0].y));
             KiddoPaint.Display.context.lineTo(ev._x, ev._y);
             KiddoPaint.Display.context.strokeStyle = tool.stroke();
-            KiddoPaint.Display.context.lineWidth = tool.size;
+            KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
             KiddoPaint.Display.context.stroke();
             KiddoPaint.Display.context.closePath();
         } else if (tool.points.length == 2) {
@@ -5076,7 +5076,7 @@ KiddoPaint.Tools.Toolbox.Circle = function() {
             KiddoPaint.Display.context.beginPath();
             KiddoPaint.Display.context.fillStyle = tool.texture(tool.startEv, ev);
             KiddoPaint.Display.context.strokeStyle = tool.stroke();
-            KiddoPaint.Display.context.lineWidth = 1.5;
+            KiddoPaint.Display.context.lineWidth = 1.5 * (KiddoPaint.Current.scaling || 1);
             if (KiddoPaint.Current.modifiedMeta) {
                 KiddoPaint.Display.context.arc(tool.startEv._x, tool.startEv._y, distanceBetween(ev, {
                     _x: tool.startEv._x,
@@ -5168,7 +5168,7 @@ KiddoPaint.Tools.Toolbox.Contours = function() {
             KiddoPaint.Sounds.brushnorthern();
             KiddoPaint.Display.context.beginPath();
             KiddoPaint.Display.context.strokeStyle = tool.stroke();
-            KiddoPaint.Display.context.lineWidth = tool.size;
+            KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
             KiddoPaint.Current.modifiedAlt ? KiddoPaint.Display.context.moveTo(tool.x, ev._y) : KiddoPaint.Display.context.moveTo(ev._x, tool.y);
             KiddoPaint.Display.context.lineTo(ev._x, ev._y);
             KiddoPaint.Display.context.stroke();
@@ -5958,7 +5958,7 @@ KiddoPaint.Tools.Toolbox.Kaleidoscope = function() {
         };
         tool.origin = ev;
         KiddoPaint.Display.context.strokeStyle = tool.texture();
-        KiddoPaint.Display.context.lineWidth = tool.size;
+        KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
         KiddoPaint.Display.context.beginPath();
         KiddoPaint.Display.context.save();
         KiddoPaint.Display.context.lineJoin = KiddoPaint.Display.context.lineCap = 'round';
@@ -6166,7 +6166,7 @@ KiddoPaint.Tools.Toolbox.Line = function() {
                 KiddoPaint.Display.context.lineTo(ev._x, ev._y);
             }
             KiddoPaint.Display.context.strokeStyle = tool.texture();
-            KiddoPaint.Display.context.lineWidth = tool.size;
+            KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
             KiddoPaint.Display.context.stroke();
             KiddoPaint.Display.context.closePath();
         }
@@ -6210,7 +6210,7 @@ KiddoPaint.Tools.Toolbox.Looper = function() {
 
             KiddoPaint.Display.context.beginPath();
             KiddoPaint.Display.context.strokeStyle = tool.stroke();
-            KiddoPaint.Display.context.lineWidth = tool.size;
+            KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
             KiddoPaint.Display.context.lineCap = 'round';
             KiddoPaint.Display.context.lineJoin = 'round';
             KiddoPaint.Display.context.moveTo(tool.previousCoord.x, tool.previousCoord.y);
@@ -6479,7 +6479,7 @@ KiddoPaint.Tools.Toolbox.Pines = function() {
                     KiddoPaint.Display.context.moveTo(ev._x, ev._y);
                     KiddoPaint.Display.context.lineTo(tool.previousEv._x + jitterx, tool.previousEv._y + jittery);
                     KiddoPaint.Display.context.strokeStyle = tool.texture();
-                    KiddoPaint.Display.context.lineWidth = tool.strokeSize;
+                    KiddoPaint.Display.context.lineWidth = tool.strokeSize * (KiddoPaint.Current.scaling || 1);
                     KiddoPaint.Display.context.stroke();
                     KiddoPaint.Display.context.closePath();
                 }
@@ -6723,7 +6723,7 @@ KiddoPaint.Tools.Toolbox.Scribble = function() {
                 jittery = tool.jitter();
                 KiddoPaint.Display.context.lineTo(ev._x + (Math.random() * jitterx - jitterx / 2), ev._y + (Math.random() * jittery - jittery / 2));
                 KiddoPaint.Display.context.strokeStyle = tool.texture();
-                KiddoPaint.Display.context.lineWidth = tool.size;
+                KiddoPaint.Display.context.lineWidth = tool.size * (KiddoPaint.Current.scaling || 1);
                 KiddoPaint.Display.context.stroke();
                 tool.previousEv = ev;
             }
@@ -6841,7 +6841,7 @@ KiddoPaint.Tools.Toolbox.SmoothPen = function() {
         var fitted = fitCurve(tool.points, 75);
         if (fitted) {
             ctx.strokeStyle = tool.texture();
-            ctx.lineWidth = tool.size();
+            ctx.lineWidth = tool.size() * (KiddoPaint.Current.scaling || 1);
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
@@ -7259,7 +7259,7 @@ KiddoPaint.Tools.Toolbox.Square = function() {
 
             if (!KiddoPaint.Current.modifiedCtrl) {
                 ctx.strokeStyle = tool.stroke();
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 1.5 * (KiddoPaint.Current.scaling || 1);
                 ctx.strokeRect(tool.startEv._x, tool.startEv._y, sizex, sizey);
             }
             ctx.fillStyle = tool.texture(tool.startEv, ev);
