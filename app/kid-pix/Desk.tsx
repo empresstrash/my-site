@@ -128,55 +128,54 @@ export default function Desk() {
               <canvas id="kiddopaint" className="pixelated" width={1920} height={1200} />
             </div>
           </div>
-          <div id="modbar">
-            <div className="kp-switch">
-              <button type="button" onClick={() => window.kpView?.zoomBy(1.25)}>
-                zoom in
-              </button>
-              <button type="button" onClick={() => window.kpView?.zoomBy(0.8)}>
-                zoom out
-              </button>
-              <button type="button" className={grab ? "is-on" : ""} onClick={toggleGrab}>
-                {grab ? "let go" : "grab"}
-              </button>
-              <div className="kp-size">
-                <span>size</span>
-                <button type="button" aria-label="smaller" onClick={() => window.kpView?.nudgeSize(-1)}>
-                  −
-                </button>
-                <output id="kp-size-value">1</output>
-                <button type="button" aria-label="bigger" onClick={() => window.kpView?.nudgeSize(1)}>
-                  +
-                </button>
-                <input
-                  id="kp-size"
-                  type="range"
-                  min={1}
-                  max={20}
-                  step={1}
-                  defaultValue={1}
-                  aria-label="size"
-                  onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
-                />
-              </div>
-            </div>
-            <div id="modtools" />
-          </div>
         </div>
-        <div id="colorbar">
-          <button className="currentColor" id="currentColor" type="button" />
-          <div id="colorselector">
-            {Array.from({ length: 32 }, (_, index) => (
-              <button key={index} className="color" type="button" />
-            ))}
+        <div id="rightbar">
+          <div className="kp-switch">
+            <button type="button" onClick={() => window.kpView?.zoomBy(1.25)}>
+              zoom in
+            </button>
+            <button type="button" onClick={() => window.kpView?.zoomBy(0.8)}>
+              zoom out
+            </button>
+            <button type="button" className={grab ? "is-on" : ""} onClick={toggleGrab}>
+              {grab ? "let go" : "grab"}
+            </button>
+            <div className="kp-size">
+              <button type="button" aria-label="smaller" onClick={() => window.kpView?.nudgeSize(-1)}>
+                −
+              </button>
+              <output id="kp-size-value">1</output>
+              <button type="button" aria-label="bigger" onClick={() => window.kpView?.nudgeSize(1)}>
+                +
+              </button>
+              <input
+                id="kp-size"
+                type="range"
+                min={1}
+                max={20}
+                step={1}
+                defaultValue={1}
+                aria-label="size"
+                onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
+              />
+            </div>
           </div>
-          <div>
-            <button className="colornav" id="colorprev" type="button">
-              ←
-            </button>
-            <button className="colornav" id="colornext" type="button">
-              →
-            </button>
+          <div id="modtools" />
+          <div id="colorbar">
+            <button className="currentColor" id="currentColor" type="button" />
+            <div id="colorselector">
+              {Array.from({ length: 32 }, (_, index) => (
+                <button key={index} className="color" type="button" />
+              ))}
+            </div>
+            <div>
+              <button className="colornav" id="colorprev" type="button">
+                ←
+              </button>
+              <button className="colornav" id="colornext" type="button">
+                →
+              </button>
+            </div>
           </div>
         </div>
       </div>

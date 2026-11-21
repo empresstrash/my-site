@@ -135,28 +135,112 @@ body:has(.kp-one) .content {
   object-fit: none !important;
 }
 
-/* Colors stay the original swatches, in a column on the right. */
+/* One bar on the right: zoom, size, draw, shape, pick, and the colors. */
+.kp-one #rightbar {
+  flex: 0 0 88px;
+  width: 88px;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #161616;
+}
+
+.kp-one #rightbar .kp-switch {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  padding: 4px;
+  background: transparent;
+}
+
+.kp-one #rightbar .kp-switch button,
+.kp-one #modtools .tool {
+  min-height: 40px;
+  width: 100%;
+}
+
+.kp-one #rightbar .kp-size {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  grid-template-rows: auto auto;
+  gap: 4px;
+  color: #fff;
+}
+
+.kp-one #rightbar .kp-size button {
+  min-width: 0;
+  min-height: 36px;
+  width: 100%;
+}
+
+.kp-one #rightbar .kp-size output {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.kp-one #rightbar .kp-size button:first-child {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.kp-one #rightbar .kp-size button:nth-child(3) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.kp-one #rightbar .kp-size input {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.kp-one #modtools {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 0 4px 4px;
+}
+
+.kp-one #modtools .tool {
+  flex: 0 0 auto;
+  height: 40px !important;
+  color: #fff;
+  background: #222;
+  border-color: #444;
+  font: 700 0.85rem/1 sans-serif;
+}
+
+.kp-one #modtools .tool.on {
+  background: #ff3d6e;
+  color: #14040a;
+}
+
 .kp-one #colorbar {
   float: none !important;
-  width: 52px !important;
-  height: 100% !important;
+  width: 100% !important;
+  height: auto !important;
   max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
-  flex: 0 0 52px;
-  overflow: hidden !important;
+  flex: 0 0 auto;
+  overflow: visible !important;
   background: #ececec;
 }
 
 .kp-one #colorselector {
   flex: 1 1 auto;
   min-height: 0;
-  width: 52px !important;
+  width: 100% !important;
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
   flex-wrap: wrap !important;
   align-content: flex-start;
-  overflow: auto;
+  overflow: visible;
 }
 
 .kp-one #colorselector .color {
@@ -207,44 +291,7 @@ body:has(.kp-one) .content {
   max-height: none !important;
 }
 
-.kp-one #modbar {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  background: #161616;
-}
-
-.kp-one #modbar .kp-switch {
-  flex: 0 0 auto;
-  padding: 4px 6px 2px;
-  background: #000;
-}
-
-.kp-one #modtools {
-  display: flex;
-  height: 52px;
-}
-
-.kp-one #modtools .tool {
-  flex: 1 1 0;
-  width: auto !important;
-  height: 100% !important;
-  min-width: 0;
-  color: #fff;
-  background: #222;
-  border-color: #444;
-  font: 700 0.9rem/1.1 sans-serif;
-}
-
-.kp-one #modtools .tool.on {
-  background: #ff3d6e;
-  color: #14040a;
-}
-
 .kp-one .kp-size button {
-  min-width: 48px;
-  min-height: 48px;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   line-height: 1;
 }
