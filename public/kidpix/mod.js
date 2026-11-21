@@ -392,4 +392,151 @@ function init_mods() {
     };
   }
 
+  // The electric mixer ships five choices that only play the "not done" sound.
+  function copyMain() {
+    var main = KiddoPaint.Display.main_canvas;
+    var copy = document.createElement("canvas");
+    copy.width = main.width;
+    copy.height = main.height;
+    copy.getContext("2d").drawImage(main, 0, 0);
+    return copy;
+  }
+
+  function commitMain(draw) {
+    KiddoPaint.Display.saveUndo();
+    draw(KiddoPaint.Display.main_context, copyMain());
+    KiddoPaint.Display.clearTmp();
+    KiddoPaint.Display.saveToLocalStorage();
+  }
+
+  function clickEffect(draw) {
+    return {
+      mousedown: function (ev) {
+        draw(ev);
+      },
+      mousemove: function () {},
+      mouseup: function () {},
+    };
+  }
+
+  function clampByte(value) {
+    return Math.max(0, Math.min(255, value | 0));
+  }
+
+  var mixerFixes = {
+    "The Outliner": clickEffect(function () {
+      commitMain(function (ctx, copy) {
+        var w = copy.width;
+        var h = copy.height;
+        var src = copy.getContext("2d").getImageData(0, 0, w, h).data;
+        var out = ctx.createImageData(w, h);
+        var dest = out.data;
+        function lum(x, y) {
+          x = Math.max(0, Math.min(w - 1, x));
+          y = Math.max(0, Math.min(h - 1, y));
+          var i = (y * w + x) * 4;
+          return src[i] * 0.3 + src[i + 1] * 0.59 + src[i + 2] * 0.11;
+        }
+        for (var y = 0; y < h; y++) {
+          for (var x = 0; x < w; x++) {
+            var gx = lum(x + 1, y) - lum(x - 1, y);
+            var gy = lum(x, y + 1) - lum(x, y - 1);
+            var ink = gx * gx + gy * gy > 1600;
+            var i = (y * w + x) * 4;
+            var v = ink ? 20 : 255;
+            dest[i] = dest[i + 1] = dest[i + 2] = v;
+            dest[i + 3] = 255;
+          }
+        }
+        ctx.putImageData(out, 0, 0);
+      });
+    }),
+    "Zoom In": clickEffect(function (ev) {
+      commitMain(function (ctx, copy) {
+        var w = copy.width;
+        var h = copy.height;
+        var sw = w / 2;
+        var sh = h / 2;
+        var sx = Math.max(0, Math.min(w - sw, ev._x - sw / 2));
+        var sy = Math.max(0, Math.min(h - sh, ev._y - sh / 2));
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(copy, sx, sy, sw, sh, 0, 0, w, h);
+      });
+    }),
+    "Broken Glass": clickEffect(function () {
+      commitMain(function (ctx, copy) {
+        var w = copy.width;
+        var h = copy.height;
+        ctx.fillStyle = "#e8e8e8";
+        ctx.fillRect(0, 0, w, h);
+        var cols = 10;
+        var rows = 6;
+        var cw = w / cols;
+        var rh = h / rows;
+        function crack(x0, y0, x1, y1, x2, y2) {
+          var dx = (Math.random() - 0.5) * 36;
+          var dy = (Math.random() - 0.5) * 36;
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x0 + dx, y0 + dy);
+          ctx.lineTo(x1 + dx, y1 + dy);
+          ctx.lineTo(x2 + dx, y2 + dy);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(copy, dx, dy);
+          ctx.restore();
+          ctx.beginPath();
+          ctx.moveTo(x0 + dx, y0 + dy);
+          ctx.lineTo(x1 + dx, y1 + dy);
+          ctx.lineTo(x2 + dx, y2 + dy);
+          ctx.closePath();
+          ctx.strokeStyle = "rgba(255,255,255,0.92)";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+        for (var y = 0; y < rows; y++) {
+          for (var x = 0; x < cols; x++) {
+            var x0 = x * cw;
+            var y0 = y * rh;
+            crack(x0, y0, x0 + cw, y0, x0, y0 + rh);
+            crack(x0 + cw, y0, x0 + cw, y0 + rh, x0, y0 + rh);
+          }
+        }
+      });
+    }),
+    "The Highlighter": clickEffect(function () {
+      commitMain(function (ctx, copy) {
+        var w = copy.width;
+        var h = copy.height;
+        var image = copy.getContext("2d").getImageData(0, 0, w, h);
+        var data = image.data;
+        for (var i = 0; i < data.length; i += 4) {
+          data[i] = clampByte((data[i] - 128) * 1.7 + 150);
+          data[i + 1] = clampByte((data[i + 1] - 128) * 1.7 + 150);
+          data[i + 2] = clampByte((data[i + 2] - 128) * 1.7 + 150);
+        }
+        ctx.putImageData(image, 0, 0);
+      });
+    }),
+    "Wrap Around": clickEffect(function (ev) {
+      commitMain(function (ctx, copy) {
+        var w = copy.width;
+        var shift = Math.round(ev._x || w / 4);
+        if (shift <= 0 || shift >= w) shift = Math.round(w / 4);
+        ctx.drawImage(copy, shift, 0);
+        ctx.drawImage(copy, shift - w, 0);
+      });
+    }),
+  };
+
+  KiddoPaint.Submenu.jumble.forEach(function (item) {
+    var tool = mixerFixes[item.name];
+    if (!tool) return;
+    item.handler = function () {
+      KiddoPaint.Display.canvas.classList = "";
+      KiddoPaint.Display.canvas.classList.add("cursor-guy-smile");
+      KiddoPaint.Current.tool = tool;
+    };
+  });
+
 }
