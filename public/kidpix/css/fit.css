@@ -132,28 +132,24 @@ body:has(.kp-one) .content {
   white-space: nowrap;
 }
 
-.kp-one #alphabettoolbar:not(.hidden) {
-  display: grid !important;
-  grid-template-columns: 88px repeat(13, minmax(0, 1fr));
-  grid-template-rows: 32px 32px;
-  height: 64px !important;
-  overflow: hidden !important;
-  white-space: normal !important;
-  flex-wrap: unset !important;
+.kp-one #alphabettoolbar .kp-letter-nav {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  background: #333;
 }
 
 .kp-one #alphabettoolbar .kp-font {
-  grid-column: 1;
-  grid-row: 1;
   display: flex;
-  min-width: 0;
 }
 
 .kp-one #alphabettoolbar .kp-font select {
-  width: 100%;
-  height: 32px;
+  width: 88px;
+  height: 50px;
   margin: 0;
-  padding: 0 2px;
+  padding: 0 4px;
   border: 0;
   border-right: 1px solid #4a4a4a;
   background: #333;
@@ -161,27 +157,21 @@ body:has(.kp-one) .content {
   font: 700 0.72rem/1 sans-serif;
 }
 
-.kp-one #alphabettoolbar #alnext {
-  grid-column: 1;
-  grid-row: 2;
-}
-
 .kp-one #alphabettoolbar .tool {
-  flex: unset !important;
-  width: auto !important;
-  min-width: 0 !important;
-  height: 32px !important;
-  min-height: 0 !important;
+  flex: 0 0 50px !important;
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 50px !important;
+  min-height: 50px !important;
   padding: 0 !important;
-  overflow: hidden;
   font-family: inherit;
 }
 
 .kp-one #alphabettoolbar .tool h1 {
   margin: 0;
-  font-size: clamp(12px, 2vw, 20px);
+  font-size: 22px;
   font-family: inherit;
-  line-height: 32px;
+  line-height: 50px;
 }
 
 .kp-one #subtoolbars img.sprite {
@@ -269,7 +259,26 @@ body:has(.kp-one) .content {
   text-align: center;
 }
 
+.kp-one #modbar .kp-fade {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #f2f2f2;
+  flex: 0 0 auto;
+}
+
+.kp-one #modbar .kp-fade output {
+  min-width: 1.8em;
+  text-align: center;
+  font: 700 0.68rem/1 sans-serif;
+}
+
+.kp-one #mainbar .tool.on {
+  background: #ff3d6e !important;
+}
+
 .kp-one #modbar .kp-size input,
+.kp-one #modbar .kp-fade input,
 .kp-one #modbar .kp-turn input {
   width: 64px;
   height: 16px;
@@ -366,7 +375,8 @@ body:has(.kp-one) .content {
   background: #fff;
 }
 
-.kp-one #modbar .kp-size button {
+.kp-one #modbar .kp-size button,
+.kp-one #modbar .kp-fade button {
   min-width: 28px;
   min-height: 0;
   height: 32px;

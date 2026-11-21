@@ -30,6 +30,9 @@ const TOOLS = [
   ["alphabet", "Text", "kp-m_36.png"],
   ["stamp", "Rubber Stamps", "kp-m_37.png"],
   ["truck", "Moving Van", "kp-m_38.png"],
+  ["draw", "Draw", "mod-draw.png"],
+  ["shape", "Shape", "mod-shape.png"],
+  ["pick", "Pick", "mod-pick.png"],
   ["undo", "The Undo Guy", "kp-m_39.png"],
 ] as const;
 
@@ -37,7 +40,11 @@ declare global {
   interface Window {
     init_kiddo_paint?: () => void;
     init_mods?: () => void;
-    kpView?: HandsApi & { setSize: (value: number) => void };
+    kpView?: HandsApi & {
+      setSize: (value: number) => void;
+      setOpacity: (value: number) => void;
+      nudgeOpacity: (delta: number) => void;
+    };
     KiddoPaint?: {
       Alphabet: { english: { face: string } };
       Stamps: { currentFace: string };
@@ -146,19 +153,24 @@ export default function Desk() {
           <div id="subtoolbars" className="subtoolbar">
             <div id="genericsubmenu" className="hidden" />
             <div id="alphabettoolbar" className="hidden">
-              <label className="kp-font">
-                <select id="kp-font" aria-label="font" defaultValue="sans-serif" onChange={(event) => chooseFont(event.target.value)}>
-                  {FONTS.map(([value, label]) => (
-                    <option key={label} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button className="tool alphabet" id="alnext" type="button">
-                <h1>↪</h1>
-              </button>
-              {Array.from({ length: 26 }, (_, index) => (
+              <div className="kp-letter-nav">
+                <label className="kp-font">
+                  <select id="kp-font" aria-label="font" defaultValue="sans-serif" onChange={(event) => chooseFont(event.target.value)}>
+                    {FONTS.map(([value, label]) => (
+                      <option key={label} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button className="tool alphabet" id="alprev" type="button" aria-label="previous row">
+                  <h1>↩</h1>
+                </button>
+                <button className="tool alphabet" id="alnext" type="button" aria-label="next row">
+                  <h1>↪</h1>
+                </button>
+              </div>
+              {Array.from({ length: 13 }, (_, index) => (
                 <button key={index} className="tool alphabet" id={`xal${index}`} type="button" />
               ))}
             </div>
@@ -197,6 +209,25 @@ export default function Desk() {
                 onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
               />
             </div>
+            <div className="kp-fade">
+              <output id="kp-fade-value">100</output>
+              <button type="button" aria-label="more transparent" onClick={() => window.kpView?.nudgeOpacity(-1)}>
+                −
+              </button>
+              <input
+                id="kp-fade"
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                defaultValue={100}
+                aria-label="opacity"
+                onInput={(event) => window.kpView?.setOpacity(Number(event.currentTarget.value))}
+              />
+              <button type="button" aria-label="more solid" onClick={() => window.kpView?.nudgeOpacity(1)}>
+                +
+              </button>
+            </div>
             <div className="kp-turn">
               <button type="button" aria-label="rotate left" onClick={() => window.kpView?.nudgeAngle(-1)}>
                 ↺
@@ -219,7 +250,6 @@ export default function Desk() {
                 reset
               </button>
             </div>
-            <div id="modtools" />
           </div>
         </div>
         <div id="colorbar">

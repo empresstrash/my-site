@@ -116,6 +116,7 @@ function init_kiddo_defaults() {
     KiddoPaint.Current.modifiedTilde = false;
     KiddoPaint.Current.velToggle = false;
     KiddoPaint.Alphabet.page = 1;
+    KiddoPaint.Alphabet.row = 0;
     KiddoPaint.Stamps.page = 0;
     KiddoPaint.Sprite.page = 0;
     KiddoPaint.Current.multiplier = 1;
@@ -374,7 +375,7 @@ function init_tool_bar() {
 
     document.getElementById('alphabet').addEventListener('mousedown', function() {
         KiddoPaint.Sounds.mainmenu();
-        init_alphabet_bar('character' + KiddoPaint.Alphabet.page);
+        init_alphabet_bar();
         show_sub_toolbar('alphabettoolbar');
         KiddoPaint.Tools.Stamp.useColor = true;
         KiddoPaint.Current.tool = KiddoPaint.Tools.Stamp;
@@ -413,10 +414,16 @@ function init_tool_bar() {
         KiddoPaint.Display.undo(!KiddoPaint.Current.modifiedAlt);
     });
 
+    document.getElementById('alprev').addEventListener('mousedown', function() {
+        KiddoPaint.Sounds.submenuoption();
+        KiddoPaint.Alphabet.row -= 1;
+        init_alphabet_bar();
+    });
+
     document.getElementById('alnext').addEventListener('mousedown', function() {
         KiddoPaint.Sounds.submenuoption();
-        KiddoPaint.Alphabet.nextPage();
-        init_alphabet_bar('character' + KiddoPaint.Alphabet.page);
+        KiddoPaint.Alphabet.row += 1;
+        init_alphabet_bar();
     });
 
     //    document.getElementById('stnext').addEventListener('mousedown', function(e) {
@@ -435,12 +442,25 @@ function init_tool_bar() {
     });
 };
 
-function init_alphabet_bar(alphabetgroup) {
-    var alphabettoolbar = KiddoPaint.Alphabet.english[alphabetgroup].letters;
-    KiddoPaint.Tools.Stamp.stamp = alphabettoolbar[0];
-    for (var i = 0; i < alphabettoolbar.length; i++) {
-        var buttonValue = '<h1>' + alphabettoolbar[i].replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</h1>';
-        document.getElementById('xal' + i).innerHTML = buttonValue;
+function init_alphabet_bar() {
+    var letters = KiddoPaint.Alphabet.english.character1.letters.concat(KiddoPaint.Alphabet.english.character2.letters);
+    var size = 13;
+    var rows = Math.ceil(letters.length / size);
+    var row = KiddoPaint.Alphabet.row || 0;
+    row = ((row % rows) + rows) % rows;
+    KiddoPaint.Alphabet.row = row;
+    var slice = letters.slice(row * size, row * size + size);
+    KiddoPaint.Tools.Stamp.stamp = slice[0];
+    for (var i = 0; i < size; i++) {
+        var el = document.getElementById('xal' + i);
+        if (!el) continue;
+        if (!slice[i]) {
+            el.innerHTML = '';
+            el.style.display = 'none';
+            continue;
+        }
+        el.style.display = '';
+        el.innerHTML = '<h1>' + slice[i].replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</h1>';
     }
 }
 
@@ -498,6 +518,11 @@ function ev_canvas(ev) {
     if (ev.type === "touchend") {
         ev.type = "mouseup";
     }
+
+    var fade = KiddoPaint.Current.globalAlpha;
+    if (typeof fade !== "number") fade = 1;
+    KiddoPaint.Display.context.globalAlpha = fade;
+    KiddoPaint.Display.previewContext.globalAlpha = fade;
 
     var func = KiddoPaint.Current.tool[ev.type];
     if (func) {
@@ -6916,7 +6941,7 @@ KiddoPaint.Tools.Toolbox.Smudge = function() {
         }
 
         const line = setupLine(tool.previousEv._x, tool.previousEv._y, ev._x, ev._y);
-        KiddoPaint.Display.context.globalAlpha = 0.5;
+        KiddoPaint.Display.context.globalAlpha = 0.5 * (typeof KiddoPaint.Current.globalAlpha === "number" ? KiddoPaint.Current.globalAlpha : 1);
 
         for (let more = true; more;) {
             more = advanceLine(line);
@@ -6934,7 +6959,7 @@ KiddoPaint.Tools.Toolbox.Smudge = function() {
     this.mouseup = function(ev) {
         if (tool.isDown) {
             tool.isDown = false;
-            KiddoPaint.Display.context.globalAlpha = 1;
+            KiddoPaint.Display.context.globalAlpha = typeof KiddoPaint.Current.globalAlpha === "number" ? KiddoPaint.Current.globalAlpha : 1;
             KiddoPaint.Display.saveMain();
         }
     };

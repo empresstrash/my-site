@@ -72,11 +72,28 @@ function init_mods() {
     },
     setGrabbed: setGrabbed,
     setSize: setSize,
+    setOpacity: setOpacity,
+    nudgeOpacity: function (delta) {
+      var input = document.getElementById("kp-fade");
+      var current = input ? Number(input.value) : Math.round((KiddoPaint.Current.globalAlpha || 1) * 100);
+      setOpacity(current + delta);
+    },
     nudgeAngle: function (delta) {
       setAngle((KiddoPaint.Current.toolAngle || 0) + delta);
     },
     setAngle: setAngle,
   };
+
+  function setOpacity(value) {
+    var step = Math.min(100, Math.max(0, Math.round(Number(value) || 0)));
+    KiddoPaint.Current.globalAlpha = step / 100;
+    if (KiddoPaint.Display.context) KiddoPaint.Display.context.globalAlpha = step / 100;
+    if (KiddoPaint.Display.previewContext) KiddoPaint.Display.previewContext.globalAlpha = step / 100;
+    var input = document.getElementById("kp-fade");
+    if (input && Number(input.value) !== step) input.value = String(step);
+    var shown = document.getElementById("kp-fade-value");
+    if (shown) shown.textContent = String(step);
+  }
 
   function setAngle(value) {
     var raw = Math.round(Number(value) || 0);
@@ -201,23 +218,19 @@ function init_mods() {
       },
     },
   ];
-  var bar = document.getElementById("modtools") || document.getElementById("modbar");
   mods.forEach(function (spec) {
-    var button = document.createElement("button");
-    button.type = "button";
-    button.className = "tool";
-    button.id = "mod-" + spec.id;
-    button.title = spec.name;
-    button.textContent = spec.name;
+    var button = document.getElementById(spec.id);
+    if (!button) return;
     button.addEventListener("mousedown", function (ev) {
       ev.preventDefault();
       selectMod(spec, button);
     });
-    bar.appendChild(button);
   });
 
-  document.getElementById("mainbar").addEventListener("mousedown", function () {
-    var selected = bar.querySelectorAll(".tool.on");
+  document.getElementById("mainbar").addEventListener("mousedown", function (ev) {
+    var hit = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+    if (hit && (hit.id === "draw" || hit.id === "shape" || hit.id === "pick")) return;
+    var selected = document.querySelectorAll("#mainbar .tool.on");
     for (var i = 0; i < selected.length; i++) selected[i].classList.remove("on");
   });
 
@@ -226,7 +239,7 @@ function init_mods() {
   }
 
   function selectMod(spec, button) {
-    var selected = bar.querySelectorAll(".tool.on");
+    var selected = document.querySelectorAll("#mainbar .tool.on");
     for (var i = 0; i < selected.length; i++) selected[i].classList.remove("on");
     button.classList.add("on");
     KiddoPaint.Current.tool = spec.make();
@@ -263,7 +276,7 @@ function init_mods() {
 
   function ink(ctx, alpha) {
     ctx.save();
-    ctx.globalAlpha = alpha;
+    ctx.globalAlpha = alpha * (typeof KiddoPaint.Current.globalAlpha === "number" ? KiddoPaint.Current.globalAlpha : 1);
     ctx.strokeStyle = KiddoPaint.Current.color;
     ctx.fillStyle = KiddoPaint.Current.color;
     ctx.lineCap = "round";
@@ -288,7 +301,7 @@ function init_mods() {
       var steps = Math.max(1, Math.floor(dist / 2));
       for (var i = 0; i <= steps; i++) {
         var t = i / steps;
-        ctx.globalAlpha = 0.28 + Math.random() * 0.45;
+        ctx.globalAlpha = (0.28 + Math.random() * 0.45) * (typeof KiddoPaint.Current.globalAlpha === "number" ? KiddoPaint.Current.globalAlpha : 1);
         ctx.fillRect(
           a._x + (b._x - a._x) * t + (Math.random() - 0.5) * size,
           a._y + (b._y - a._y) * t + (Math.random() - 0.5) * size,
