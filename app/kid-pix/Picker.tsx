@@ -1,8 +1,9 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Studio from "./Studio";
+import { readHands, type HandsApi } from "./hands";
 
 type Edition = "mod" | "classic";
 
@@ -15,6 +16,9 @@ export default function Picker() {
   const router = useRouter();
   const params = useSearchParams();
   const rootRef = useRef<HTMLDivElement>(null);
+  const handsRef = useRef<HandsApi | null>(null);
+  const grabRef = useRef(false);
+  const [grab, setGrab] = useState(false);
   const raw = params.get("edition");
   const vr = params.has("vr");
   const edition: Edition = raw === "mod" || raw === "temu" ? "mod" : "classic";
@@ -26,11 +30,50 @@ export default function Picker() {
     if (/Quest|Oculus|Mobile VR/i.test(ua)) root.classList.add("kp-vr");
   }, []);
 
+  useEffect(() => {
+    let frame = 0;
+    let prevA = false;
+    let lastSize = 0;
+    const tick = (now: number) => {
+      frame = window.requestAnimationFrame(tick);
+      const reading = readHands(grabRef.current);
+      if (reading.grabToggle && !prevA) {
+        grabRef.current = !grabRef.current;
+        setGrab(grabRef.current);
+        handsRef.current?.setGrabbed(grabRef.current);
+      }
+      prevA = reading.grabToggle;
+      const api = handsRef.current;
+      if (!api) return;
+      if (reading.zoom) api.zoomBy(1 + reading.zoom * 0.018);
+      if (reading.panX || reading.panY) api.panBy(reading.panX * 10, reading.panY * 10);
+      if (reading.size && now - lastSize > 90) {
+        lastSize = now;
+        api.nudgeSize(reading.size > 0 ? 2 : -2);
+      }
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   function choose(next: Edition) {
+    grabRef.current = false;
+    setGrab(false);
     const nextParams = new URLSearchParams(params.toString());
     nextParams.set("edition", next);
     const query = nextParams.toString();
     router.replace(query ? `/kid-pix?${query}` : "/kid-pix", { scroll: false });
+  }
+
+  function toggleGrab() {
+    grabRef.current = !grabRef.current;
+    setGrab(grabRef.current);
+    handsRef.current?.setGrabbed(grabRef.current);
+  }
+
+  function onGrabbed(on: boolean) {
+    grabRef.current = on;
+    setGrab(on);
   }
 
   return (
@@ -42,15 +85,60 @@ export default function Picker() {
         <button type="button" role="tab" aria-selected={edition === "mod"} className={edition === "mod" ? "is-on" : ""} onClick={() => choose("mod")}>
           mod tools
         </button>
+        <div className="kp-hands" role="group" aria-label="Canvas controls">
+          <button type="button" onClick={() => handsRef.current?.zoomBy(1.25)}>
+            zoom in
+          </button>
+          <button type="button" onClick={() => handsRef.current?.zoomBy(0.8)}>
+            zoom out
+          </button>
+          <button type="button" aria-pressed={grab} className={grab ? "is-on" : ""} onClick={toggleGrab}>
+            grab
+          </button>
+          <button type="button" disabled={edition === "classic"} title={edition === "classic" ? "Brush and stamp size is in mod tools" : "Bigger"} onClick={() => handsRef.current?.nudgeSize(4)}>
+            bigger
+          </button>
+          <button type="button" disabled={edition === "classic"} title={edition === "classic" ? "Brush and stamp size is in mod tools" : "Smaller"} onClick={() => handsRef.current?.nudgeSize(-4)}>
+            smaller
+          </button>
+        </div>
       </div>
-      <div className="kp-pane">{edition === "classic" ? <ClassicFrame /> : <Studio variant="mod" />}</div>
+      <div className="kp-pane">
+        {edition === "classic" ? (
+          <ClassicFrame handsRef={handsRef} grab={grab} />
+        ) : (
+          <Studio variant="mod" handsRef={handsRef} onGrabbed={onGrabbed} />
+        )}
+      </div>
     </div>
   );
 }
 
-function ClassicFrame() {
+function ClassicFrame({ handsRef, grab }: { handsRef: RefObject<HandsApi | null>; grab: boolean }) {
   const clipRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const fitRef = useRef(1);
+  const viewRef = useRef({ zoom: 1, x: 0, y: 0 });
+  const drag = useRef<{ x: number; y: number } | null>(null);
+
+  function applyFrame() {
+    const iframe = iframeRef.current;
+    const clip = clipRef.current;
+    if (!iframe || !clip) return;
+    const zoom = viewRef.current.zoom;
+    const z = fitRef.current * zoom;
+    const width = CLASSIC_W * z;
+    const height = CLASSIC_H * z;
+    const minX = Math.min(0, clip.clientWidth - width);
+    const minY = Math.min(0, clip.clientHeight - height);
+    viewRef.current.x = Math.min(0, Math.max(minX, viewRef.current.x));
+    viewRef.current.y = Math.min(0, Math.max(minY, viewRef.current.y));
+    if (zoom === 1) {
+      viewRef.current.x = 0;
+      viewRef.current.y = 0;
+    }
+    iframe.style.transform = `translate(${viewRef.current.x}px, ${viewRef.current.y}px) scale(${z})`;
+  }
 
   useLayoutEffect(() => {
     const el = clipRef.current;
@@ -58,7 +146,8 @@ function ClassicFrame() {
     const fit = () => {
       const rect = el.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) return;
-      setScale(Math.min(rect.width / CLASSIC_W, rect.height / CLASSIC_H));
+      fitRef.current = Math.min(rect.width / CLASSIC_W, rect.height / CLASSIC_H);
+      applyFrame();
     };
     const observer = new ResizeObserver(fit);
     observer.observe(el);
@@ -69,14 +158,64 @@ function ClassicFrame() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    const api: HandsApi = {
+      zoomBy(factor) {
+        const prev = viewRef.current.zoom;
+        const next = Math.max(1, Math.min(4, prev * factor));
+        if (next === prev) return;
+        const clip = clipRef.current;
+        if (clip && prev > 0) {
+          const cx = clip.clientWidth / 2;
+          const cy = clip.clientHeight / 2;
+          const ratio = next / prev;
+          viewRef.current.x = cx - (cx - viewRef.current.x) * ratio;
+          viewRef.current.y = cy - (cy - viewRef.current.y) * ratio;
+        }
+        viewRef.current.zoom = next;
+        applyFrame();
+      },
+      panBy(dx, dy) {
+        viewRef.current.x += dx;
+        viewRef.current.y += dy;
+        applyFrame();
+      },
+      nudgeSize() {},
+      setGrabbed() {},
+    };
+    handsRef.current = api;
+    return () => {
+      if (handsRef.current === api) handsRef.current = null;
+    };
+  });
+
   return (
     <div className="kp-classic-clip" ref={clipRef}>
       <iframe
         className="kp-classic"
         title="Kid Pix 1.0"
         src={CLASSIC_SRC}
-        style={{ width: CLASSIC_W, height: CLASSIC_H, transform: `scale(${scale})` }}
+        ref={iframeRef}
+        style={{ width: CLASSIC_W, height: CLASSIC_H }}
         allow="autoplay; fullscreen; clipboard-write"
+      />
+      <div
+        className={grab ? "kp-grab is-on" : "kp-grab"}
+        onPointerDown={(event) => {
+          if (!grab) return;
+          drag.current = { x: event.clientX, y: event.clientY };
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          if (!drag.current) return;
+          viewRef.current.x += event.clientX - drag.current.x;
+          viewRef.current.y += event.clientY - drag.current.y;
+          drag.current = { x: event.clientX, y: event.clientY };
+          applyFrame();
+        }}
+        onPointerUp={() => {
+          drag.current = null;
+        }}
       />
     </div>
   );

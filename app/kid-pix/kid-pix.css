@@ -68,6 +68,7 @@ html.vr-booth:has(.kp) .centered-logo img {
 .kp-switch {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   flex: none;
   padding: 6px 8px 0;
@@ -87,6 +88,33 @@ html.vr-booth:has(.kp) .centered-logo img {
 .kp-vr .kp-switch button {
   min-height: 48px;
   font-size: 0.95rem;
+}
+
+.kp-hands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.kp-switch button:disabled {
+  opacity: 0.45;
+}
+
+.kp-classic-clip {
+  position: relative;
+}
+
+.kp-grab {
+  display: none;
+}
+
+.kp-grab.is-on {
+  display: block;
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
 }
 
 .kp-switch span {

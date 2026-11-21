@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import type { HandsApi } from "./hands";
 import {
   DRAW_MODES,
   INKS,
@@ -56,6 +57,7 @@ type Stroke = {
   hue: number;
   bending?: boolean;
   van?: VanGrab;
+  stamp?: "wait" | "draw";
 };
 type Snap = { ink: ImageData; moopies: Moopie[] };
 type PageSlot = { ink: HTMLCanvasElement; moopies: Moopie[] };
@@ -65,12 +67,21 @@ type Pinch = { dist: number; wx: number; wy: number; scale: number };
 
 const MAX_BITMAP = 1_400_000;
 const MAX_UNDO = 8;
+const STAMP_HOLD_MS = 320;
 
 function hypot(a: { x: number; y: number }, b: { x: number; y: number }) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-export default function Studio({ variant = "full" }: { variant?: "full" | "mod" }) {
+export default function Studio({
+  variant = "full",
+  handsRef,
+  onGrabbed,
+}: {
+  variant?: "full" | "mod";
+  handsRef?: RefObject<HandsApi | null>;
+  onGrabbed?: (on: boolean) => void;
+}) {
   const inkRef = useRef<HTMLCanvasElement>(null);
   const paperRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLCanvasElement>(null);
@@ -104,6 +115,10 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
   const textLock = useRef(false);
   const draftRef = useRef<Draft | null>(null);
   const hueRef = useRef(20);
+  const stampTimer = useRef(0);
+  const stampReady = useRef(0);
+  const grabbed = useRef(false);
+  const restoreTool = useRef<Tool | null>(null);
 
   const [tool, setTool] = useState<Tool>("draw");
   const [drawMode, setDrawMode] = useState<DrawMode>(variant === "mod" ? "chalk" : "pencil");
@@ -243,6 +258,14 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
     const ctx = preview?.getContext("2d");
     if (!preview || !ctx) return;
     ctx.clearRect(0, 0, preview.width, preview.height);
+  }
+
+  function previewStamp(at: Point) {
+    const preview = previewRef.current;
+    const ctx = preview?.getContext("2d");
+    if (!preview || !ctx) return;
+    ctx.clearRect(0, 0, preview.width, preview.height);
+    dab(ctx, at, "stamp");
   }
 
   function paintLine(ctx: CanvasRenderingContext2D, a: Point, b: Point, width: number, erase: boolean, alpha = 1) {
@@ -582,10 +605,10 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
     setPageCount({ index, total: pagesRef.current.length });
   }
 
-  function placeStamp(at: Point) {
+  function placeStamp(at: Point, commit = true) {
     const pair = inkContext();
     if (!pair) return;
-    remember();
+    if (commit) remember();
     const cur = live.current;
     const ids = STAMPS.map((item) => item.id);
     const buddy = ids[(ids.indexOf(cur.stamp) + 1) % ids.length];
@@ -617,8 +640,15 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
         for (const spot of spots) drawStamp(pair.ctx, buddy, spot.x + cur.size * 1.6, spot.y + cur.size * 0.5, Math.max(36, cur.size * 3.2), cur.color);
       }
     }
-    playSound(cur.mash ? "honk" : "thwack", cur.sound);
-    scheduleSave();
+    if (commit) {
+      playSound(cur.mash ? "honk" : "thwack", cur.sound);
+      scheduleSave();
+    }
+  }
+
+  function cancelStampWait() {
+    window.clearTimeout(stampTimer.current);
+    stampTimer.current = 0;
   }
 
   function fillAt(at: Point) {
@@ -745,7 +775,29 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
       return;
     }
     if (cur.tool === "stamp") {
-      placeStamp(at);
+      if (strokeRef.current?.tool === "stamp" || performance.now() < stampReady.current) return;
+      cancelStampWait();
+      const stroke: Stroke = {
+        tool: "stamp",
+        pointerId: event.pointerId,
+        origin: at,
+        last: at,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        hue: hueRef.current,
+        stamp: "wait",
+      };
+      strokeRef.current = stroke;
+      previewStamp(at);
+      stampTimer.current = window.setTimeout(() => {
+        const current = strokeRef.current;
+        if (!current || current !== stroke || current.stamp !== "wait") return;
+        current.stamp = "draw";
+        clearPreview();
+        remember();
+        placeStamp(current.last, false);
+        playSound(live.current.mash ? "honk" : "thwack", live.current.sound);
+      }, STAMP_HOLD_MS);
       return;
     }
     if (cur.tool === "shape" && cur.shape === "polygon") {
@@ -808,6 +860,27 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
       stroke.clientY = event.clientY;
       return;
     }
+    if (stroke.tool === "stamp") {
+      if (stroke.stamp === "wait") {
+        stroke.last = at;
+        previewStamp(at);
+        return;
+      }
+      const gap = Math.max(36, live.current.size * 2.4);
+      const dx = at.x - stroke.last.x;
+      const dy = at.y - stroke.last.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < gap) return;
+      const steps = Math.floor(dist / gap);
+      for (let i = 1; i <= steps; i++) {
+        placeStamp({ x: stroke.last.x + (dx * i) / steps, y: stroke.last.y + (dy * i) / steps }, false);
+      }
+      stroke.last = {
+        x: stroke.last.x + (dx * steps) / steps,
+        y: stroke.last.y + (dy * steps) / steps,
+      };
+      return;
+    }
     if (stroke.bending && bendRef.current) {
       bendRef.current = { ...bendRef.current, c: at };
       previewCurve(bendRef.current);
@@ -847,7 +920,16 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
     const stroke = strokeRef.current;
     if (!stroke || stroke.pointerId !== event.pointerId) return;
     strokeRef.current = null;
+    cancelStampWait();
     const at = pointFrom(event) ?? stroke.last;
+    if (stroke.tool === "stamp") {
+      clearPreview();
+      if (stroke.stamp === "wait") {
+        placeStamp(stroke.origin);
+        stampReady.current = performance.now() + 180;
+      } else scheduleSave();
+      return;
+    }
     if (stroke.bending && bendRef.current) {
       clearPreview();
       commitCurve(bendRef.current);
@@ -880,6 +962,7 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
     }
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointers.current.size >= 2) {
+      cancelStampWait();
       strokeRef.current = null;
       clearPreview();
       beginPinch();
@@ -1290,12 +1373,48 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
         {iconChip("moopie", "moopie", moves, () => setMoves(true))}
         {iconChip("mash", "mash", mash, () => setMash((value) => !value))}
         {STAMPS.map((item) => iconChip(item.id, item.label, stamp === item.id, () => setStamp(item.id)))}
+        <span className="kp-hint">tap once, hold to draw</span>
       </>
     ) : tool === "mix" ? (
       mixes.map((item) => iconChip(item.id, item.label, false, () => runMix(item.id)))
     ) : tool === "letter" ? (
       (["plain", "bubble", "skinny"] as const).map((item) => iconChip(item, item, letterStyle === item, () => setLetterStyle(item)))
     ) : null;
+
+  useLayoutEffect(() => {
+    if (!handsRef) return;
+    const api: HandsApi = {
+      zoomBy(factor) {
+        applyView({ ...viewRef.current, scale: viewRef.current.scale * factor });
+      },
+      panBy(dx, dy) {
+        applyView({ ...viewRef.current, x: viewRef.current.x + dx, y: viewRef.current.y + dy });
+      },
+      nudgeSize(delta) {
+        setSize((current) => {
+          const max = live.current.tool === "stamp" ? 96 : 48;
+          return Math.max(2, Math.min(max, current + delta));
+        });
+      },
+      setGrabbed(on) {
+        if (grabbed.current === on) return;
+        grabbed.current = on;
+        onGrabbed?.(on);
+        if (on) {
+          if (live.current.tool !== "hand") restoreTool.current = live.current.tool;
+          setTool("hand");
+        } else if (restoreTool.current) {
+          const next = restoreTool.current;
+          restoreTool.current = null;
+          setTool(next);
+        }
+      },
+    };
+    handsRef.current = api;
+    return () => {
+      if (handsRef.current === api) handsRef.current = null;
+    };
+  });
 
   return (
     <div className="kp" ref={rootRef}>
@@ -1387,6 +1506,10 @@ export default function Studio({ variant = "full" }: { variant?: "full" | "mod" 
                 setPolyCount(0);
                 clearPreview();
                 setTool(item.id);
+                if (item.id !== "hand") {
+                  grabbed.current = false;
+                  onGrabbed?.(false);
+                }
                 playSound("click", sound);
               }}
             >
