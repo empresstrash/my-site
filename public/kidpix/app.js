@@ -144,35 +144,39 @@ function init_listeners(canvas) {
     canvas.addEventListener('mouseup', ev_canvas);
 
     // Set up touch events for mobile, etc
+    function touchAsMouse(type, touch) {
+        canvas.dispatchEvent(new MouseEvent(type, {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            bubbles: true
+        }));
+    }
     canvas.addEventListener("touchstart", function(e) {
-        var touch = e.touches[0];
-        var mouseEvent = new MouseEvent("mousedown", {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        if (!e.touches[0]) return;
+        touchAsMouse("mousedown", e.touches[0]);
         e.preventDefault();
-    }, false);
+    }, { passive: false });
     canvas.addEventListener("touchend", function(e) {
-        var touch = e.changedTouches[0];
-        var mouseEvent = new MouseEvent("mouseup", {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        if (!e.changedTouches[0]) return;
+        touchAsMouse("mouseup", e.changedTouches[0]);
         e.preventDefault();
-    }, false);
+    }, { passive: false });
     canvas.addEventListener("touchmove", function(e) {
-        var touch = e.touches[0];
-        var mouseEvent = new MouseEvent("mousemove", {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        if (!e.touches[0]) return;
+        touchAsMouse("mousemove", e.touches[0]);
         e.preventDefault();
-    }, false);
+    }, { passive: false });
+    canvas.addEventListener("touchcancel", function(e) {
+        if (!e.changedTouches[0]) return;
+        touchAsMouse("mouseup", e.changedTouches[0]);
+    }, { passive: false });
 
+    var fingerDown = false;
+    canvas.addEventListener("touchstart", function() { fingerDown = true; }, { passive: true });
+    canvas.addEventListener("touchend", function() { fingerDown = false; }, { passive: true });
+    canvas.addEventListener("touchcancel", function() { fingerDown = false; }, { passive: true });
     canvas.addEventListener('mouseleave', function() {
+        if (fingerDown) return;
         // we force a mouse up - this fixes a bug with some effects in which a clearPrev wipes the whole canvas
         KiddoPaint.Current.tool.mouseup(KiddoPaint.Current.ev);
         KiddoPaint.Display.clearPreview();
@@ -426,6 +430,16 @@ function init_tool_bar() {
         init_alphabet_bar();
     });
 
+    var caseButton = document.getElementById('alcase');
+    if (caseButton) {
+        caseButton.addEventListener('mousedown', function(ev) {
+            ev.preventDefault();
+            KiddoPaint.Sounds.submenuoption();
+            KiddoPaint.Alphabet.lower = !KiddoPaint.Alphabet.lower;
+            init_alphabet_bar(true);
+        });
+    }
+
     //    document.getElementById('stnext').addEventListener('mousedown', function(e) {
     //        KiddoPaint.Sounds.submenuoption();
     //        (e.which == 1) ? KiddoPaint.Stamps.nextPage(): KiddoPaint.Stamps.prevPage(); // left click is 1, right click is 3
@@ -442,7 +456,12 @@ function init_tool_bar() {
     });
 };
 
-function init_alphabet_bar() {
+function letterShown(ch) {
+    if (KiddoPaint.Alphabet.lower && ch >= "A" && ch <= "Z") return ch.toLowerCase();
+    return ch;
+}
+
+function init_alphabet_bar(keep) {
     var letters = KiddoPaint.Alphabet.english.character1.letters.concat(KiddoPaint.Alphabet.english.character2.letters);
     var size = 13;
     var rows = Math.ceil(letters.length / size);
@@ -450,7 +469,17 @@ function init_alphabet_bar() {
     row = ((row % rows) + rows) % rows;
     KiddoPaint.Alphabet.row = row;
     var slice = letters.slice(row * size, row * size + size);
-    KiddoPaint.Tools.Stamp.stamp = slice[0];
+    if (keep && KiddoPaint.Tools.Stamp.stamp && /^[A-Za-z]$/.test(KiddoPaint.Tools.Stamp.stamp)) {
+        KiddoPaint.Tools.Stamp.stamp = letterShown(KiddoPaint.Tools.Stamp.stamp.toUpperCase());
+    } else {
+        KiddoPaint.Tools.Stamp.stamp = letterShown(slice[0]);
+    }
+    var caseButton = document.getElementById("alcase");
+    if (caseButton) {
+        caseButton.innerHTML = "<h1>" + (KiddoPaint.Alphabet.lower ? "abc" : "ABC") + "</h1>";
+        caseButton.title = KiddoPaint.Alphabet.lower ? "lowercase" : "uppercase";
+        caseButton.classList.toggle("on", !!KiddoPaint.Alphabet.lower);
+    }
     for (var i = 0; i < size; i++) {
         var el = document.getElementById('xal' + i);
         if (!el) continue;
@@ -460,7 +489,8 @@ function init_alphabet_bar() {
             continue;
         }
         el.style.display = '';
-        el.innerHTML = '<h1>' + slice[i].replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</h1>';
+        var shown = letterShown(slice[i]);
+        el.innerHTML = '<h1>' + shown.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</h1>';
     }
 }
 
@@ -655,6 +685,7 @@ function show_generic_submenu(subtoolbar) {
         var buttonDetail = KiddoPaint.Submenu[subtoolbar][i];
         var button = document.createElement('button');
         button.className = 'tool';
+        if (buttonDetail.cls) button.className += " " + buttonDetail.cls;
 
         // title on hover
         button.title = buttonDetail.name;
@@ -902,6 +933,7 @@ function getColorIndicesForCoord(x, y, width) {
 }
 ;
 KiddoPaint.Display.undoData = null;
+KiddoPaint.Display.undoStack = [];
 KiddoPaint.Display.undoOn = true;
 KiddoPaint.Display.allowClearTmp = true;
 
@@ -999,23 +1031,33 @@ KiddoPaint.Display.toggleUndo = function() {
 
 KiddoPaint.Display.saveUndo = function() {
     if (KiddoPaint.Display.undoOn) {
-        KiddoPaint.Display.undoData = KiddoPaint.Display.main_canvas.toDataURL();
+        var src = KiddoPaint.Display.main_canvas;
+        var shot = document.createElement("canvas");
+        shot.width = src.width;
+        shot.height = src.height;
+        shot.getContext("2d").drawImage(src, 0, 0);
+        KiddoPaint.Display.undoData = shot;
+        if (!KiddoPaint.Display.undoStack) KiddoPaint.Display.undoStack = [];
+        KiddoPaint.Display.undoStack.push(shot);
+        if (KiddoPaint.Display.undoStack.length > 10) {
+            var old = KiddoPaint.Display.undoStack.shift();
+            old.width = 0;
+            old.height = 0;
+        }
     }
     return KiddoPaint.Display.undoOn;
 }
 
 KiddoPaint.Display.undo = function(doClearMain) {
-    if (KiddoPaint.Display.undoData) {
-        var nextUndoData = KiddoPaint.Display.main_canvas.toDataURL();
-        var img = new Image();
-        img.src = KiddoPaint.Display.undoData;
-        img.onload = function() {
-            if (doClearMain) {
-                KiddoPaint.Display.clearMain();
-            }
-            KiddoPaint.Display.main_context.drawImage(img, 0, 0);
-        }
-        KiddoPaint.Display.undoData = nextUndoData;
+    var stack = KiddoPaint.Display.undoStack;
+    if (!stack || !stack.length) return;
+    var shot = stack.pop();
+    KiddoPaint.Display.undoData = stack.length ? stack[stack.length - 1] : null;
+    if (doClearMain) KiddoPaint.Display.clearMain();
+    if (shot && shot.getContext) {
+        KiddoPaint.Display.main_context.drawImage(shot, 0, 0);
+        shot.width = 0;
+        shot.height = 0;
     }
 }
 
@@ -1025,19 +1067,27 @@ KiddoPaint.Display.clearLocalStorage = function() {
     }
 }
 
+KiddoPaint.Display.writeLocal = function() {
+    if (typeof(Storage) == "undefined") return;
+    try {
+        localStorage.setItem("kiddopaint", KiddoPaint.Display.main_canvas.toDataURL("image/jpeg", 0.87));
+    } catch (e) {}
+};
+
 KiddoPaint.Display.saveToLocalStorage = function() {
-    if (typeof(Storage) != "undefined") {
-        try {
-            localStorage.setItem("kiddopaint", KiddoPaint.Display.main_canvas.toDataURL());
-        } catch (e) {
-            try {
-                localStorage.setItem("kiddopaint", KiddoPaint.Display.main_canvas.toDataURL('image/jpeg', 0.87));
-            } catch (e2) {
-                console.log(e2);
-            }
-        }
-    }
-}
+    if (KiddoPaint.Display._saveTimer) clearTimeout(KiddoPaint.Display._saveTimer);
+    KiddoPaint.Display._saveTimer = setTimeout(function() {
+        KiddoPaint.Display._saveTimer = 0;
+        KiddoPaint.Display.writeLocal();
+    }, 800);
+};
+
+window.addEventListener("pagehide", function() {
+    if (!KiddoPaint.Display || !KiddoPaint.Display._saveTimer) return;
+    clearTimeout(KiddoPaint.Display._saveTimer);
+    KiddoPaint.Display._saveTimer = 0;
+    KiddoPaint.Display.writeLocal();
+});
 
 KiddoPaint.Display.layWhite = function() {
     var ctx = KiddoPaint.Display.main_context;
@@ -12362,32 +12412,38 @@ KiddoPaint.Alphabet.nextWingding = function(page) {
 ;
 KiddoPaint.Stamps.stamp = function(stamp, alt, ctrl, size, shiftAmount, color) {
     stamp = stamp || '';
+    size = size || 24;
+    var face = size + 'px ' + (KiddoPaint.Stamps.currentFace || 'sans-serif');
+    var measure = document.createElement('canvas').getContext('2d');
+    measure.font = face;
+    var inkWidth = Math.ceil(measure.measureText(stamp).width);
     var canvasBrush = document.createElement('canvas');
-    canvasBrush.width = Math.max(size + (size * 0.05), 24);
-    canvasBrush.height = Math.max(size + (size * 0.05), 24);
-    canvasBrush.height += 0.15 * canvasBrush.height; // prevent clipping on bottom
+    canvasBrush.width = Math.max(size + 8, inkWidth + Math.ceil(size * 0.5), 24);
+    canvasBrush.height = Math.max(size + (size * 0.2), 24);
+    canvasBrush.height += 0.15 * canvasBrush.height;
 
     var contextBrush = canvasBrush.getContext('2d');
-    contextBrush.font = size + 'px ' + KiddoPaint.Stamps.currentFace;
+    contextBrush.font = face;
     if (color) { // chrome & safari compat hack
         contextBrush.fillStyle = color;
     }
+    var textX = Math.max(2, (canvasBrush.width - inkWidth) / 2);
 
     contextBrush.save();
     if (ctrl && alt) {
         contextBrush.scale(-1, 1);
         contextBrush.scale(1, -1);
-        contextBrush.translate(-size, -size);
-        contextBrush.fillText(stamp, 0, size - (0.15 * canvasBrush.height));
+        contextBrush.translate(-canvasBrush.width, -size);
+        contextBrush.fillText(stamp, textX, size - (0.15 * canvasBrush.height));
     } else if (ctrl) {
         contextBrush.scale(1, -1);
-        contextBrush.fillText(stamp, 0, -0.15 * canvasBrush.height);
+        contextBrush.fillText(stamp, textX, -0.15 * canvasBrush.height);
     } else if (alt) {
-        contextBrush.translate(size, size);
+        contextBrush.translate(canvasBrush.width, size);
         contextBrush.scale(-1, 1);
-        contextBrush.fillText(stamp, 0, 0);
+        contextBrush.fillText(stamp, -inkWidth - textX, 0);
     } else {
-        contextBrush.fillText(stamp, 0, size);
+        contextBrush.fillText(stamp, textX, size);
     }
     contextBrush.restore();
 
@@ -12535,8 +12591,9 @@ KiddoPaint.Sounds.Library.playRand = function(sound) {
 };
 
 KiddoPaint.Sounds.Library.playKey = function(key) {
-    if (KiddoPaint.Sounds.Library.enabled && KiddoPaint.Sounds.Library.english[key]) {
-        var s = KiddoPaint.Sounds.Library.english[key];
+    var named = key && key.length === 1 && key >= "a" && key <= "z" ? key.toUpperCase() : key;
+    if (KiddoPaint.Sounds.Library.enabled && KiddoPaint.Sounds.Library.english[named]) {
+        var s = KiddoPaint.Sounds.Library.english[named];
         if (s) {
             let a = new Audio(s);
             a.play();

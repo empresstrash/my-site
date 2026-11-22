@@ -19,19 +19,16 @@ const FONTS = [
 
 const TOOLS = [
   ["save", "Save", "kp-m_27.png"],
-  ["pencil", "Wacky Pencil", "kp-m_28.png"],
-  ["line", "Line", "kp-m_29.png"],
-  ["square", "Rectangle", "kp-m_30.png"],
-  ["circle", "Oval", "kp-m_31.png"],
+  ["draw", "Draw", "mod-draw.png"],
+  ["shape", "Shape", "mod-shape.png"],
   ["brush", "Wacky Brush", "kp-m_32.png"],
+  ["sound", "Sound", ""],
   ["jumble", "Electric Mixer", "kp-m_33.png"],
   ["flood", "Paint Can", "kp-m_34.png"],
   ["eraser", "Eraser", "kp-m_35.png"],
   ["alphabet", "Text", "kp-m_36.png"],
   ["stamp", "Rubber Stamps", "kp-m_37.png"],
   ["truck", "Moving Van", "kp-m_38.png"],
-  ["draw", "Draw", "mod-draw.png"],
-  ["shape", "Shape", "mod-shape.png"],
   ["pick", "Pick", "mod-pick.png"],
   ["undo", "The Undo Guy", "kp-m_39.png"],
 ] as const;
@@ -40,11 +37,15 @@ declare global {
   interface Window {
     init_kiddo_paint?: () => void;
     init_mods?: () => void;
+    init_sound_art?: () => void;
     kpView?: HandsApi & {
       setSize: (value: number) => void;
       setOpacity: (value: number) => void;
       nudgeOpacity: (delta: number) => void;
       nudgeCurve?: (direction: number) => boolean;
+      setPoints?: (value: number) => void;
+      nudgePoints?: (delta: number) => void;
+      resetBar?: () => void;
     };
     KiddoPaint?: {
       Alphabet: { english: { face: string } };
@@ -67,6 +68,18 @@ export default function Desk() {
       window.__kpBooted = true;
       window.init_kiddo_paint?.();
       window.init_mods?.();
+      window.init_sound_art?.();
+    };
+    const loadSound = () => {
+      if (document.getElementById("kp-sound")) {
+        boot();
+        return;
+      }
+      const sound = document.createElement("script");
+      sound.id = "kp-sound";
+      sound.src = "/kidpix/sound-art.js";
+      sound.onload = boot;
+      document.body.appendChild(sound);
     };
     const loadMod = () => {
       if (window.__kpBooted || window.__kpModQueued) return;
@@ -74,7 +87,7 @@ export default function Desk() {
       const mod = document.createElement("script");
       mod.id = "kp-mod";
       mod.src = "/kidpix/mod.js";
-      mod.onload = boot;
+      mod.onload = loadSound;
       document.body.appendChild(mod);
     };
     const existing = document.getElementById("kp-app");
@@ -146,13 +159,34 @@ export default function Desk() {
           <div id="mainbar">
             {TOOLS.map(([id, title, file]) => (
               <button key={id} className="tool" id={id} title={title} type="button">
-                <img src={`/kidpix/img/${file}`} className="pixelated" alt="" draggable={false} />
+                {file ? (
+                  <img src={`/kidpix/img/${file}`} className="pixelated" alt="" draggable={false} />
+                ) : (
+                  <span className="kp-tool-emoji" aria-hidden="true">
+                    🎤
+                  </span>
+                )}
               </button>
             ))}
+          </div>
+          <div id="kp-nested" hidden>
+            <button className="tool" id="pencil" title="Wacky Pencil" type="button" />
+            <button className="tool" id="line" title="Line" type="button" />
+            <button className="tool" id="square" title="Rectangle" type="button" />
+            <button className="tool" id="circle" title="Oval" type="button" />
           </div>
         </div>
         <div id="hcontainer">
           <div id="subtoolbars" className="subtoolbar">
+            <div id="texturebar" className="hidden">
+              <button className="tool" id="txprev" type="button" aria-label="previous textures">
+                <h1>↩</h1>
+              </button>
+              <div id="kp-texture-slots" />
+              <button className="tool" id="txnext" type="button" aria-label="next textures">
+                <h1>↪</h1>
+              </button>
+            </div>
             <div id="genericsubmenu" className="hidden" />
             <div id="alphabettoolbar" className="hidden">
               <div className="kp-letter-nav">
@@ -165,6 +199,9 @@ export default function Desk() {
                     ))}
                   </select>
                 </label>
+                <button className="tool alphabet" id="alcase" type="button" aria-label="letter case" title="uppercase">
+                  <h1>ABC</h1>
+                </button>
                 <button className="tool alphabet" id="alprev" type="button" aria-label="previous row">
                   <h1>↩</h1>
                 </button>
@@ -183,16 +220,19 @@ export default function Desk() {
             </div>
           </div>
           <div id="modbar">
-            <button type="button" onClick={() => window.kpView?.zoomBy(1.25)}>
-              zoom in
+            <button type="button" aria-label="zoom in" title="zoom in" onClick={() => window.kpView?.zoomBy(1.25)}>
+              🔎
             </button>
-            <button type="button" onClick={() => window.kpView?.zoomBy(0.8)}>
-              zoom out
+            <button type="button" aria-label="zoom out" title="zoom out" onClick={() => window.kpView?.zoomBy(0.8)}>
+              🔍
             </button>
-            <button type="button" className={grab ? "is-on" : ""} onClick={toggleGrab}>
-              {grab ? "let go" : "grab"}
+            <button type="button" className={grab ? "is-on" : ""} aria-label={grab ? "let go" : "grab"} title={grab ? "let go" : "grab"} onClick={toggleGrab}>
+              {grab ? "✊" : "✋"}
             </button>
-            <div className="kp-size">
+            <div className="kp-size" title="size">
+              <span className="kp-ico-label" aria-hidden="true">
+                ●
+              </span>
               <button type="button" aria-label="smaller" onClick={() => window.kpView?.nudgeSize(-1)}>
                 −
               </button>
@@ -211,7 +251,10 @@ export default function Desk() {
                 onInput={(event) => window.kpView?.setSize(Number(event.currentTarget.value))}
               />
             </div>
-            <div className="kp-fade">
+            <div className="kp-fade" title="opacity">
+              <span className="kp-ico-label" aria-hidden="true">
+                ◐
+              </span>
               <output id="kp-fade-value">100</output>
               <button type="button" aria-label="more transparent" onClick={() => window.kpView?.nudgeOpacity(-1)}>
                 −
@@ -230,7 +273,10 @@ export default function Desk() {
                 +
               </button>
             </div>
-            <div className="kp-turn">
+            <div className="kp-turn" title="turn">
+              <span className="kp-ico-label" aria-hidden="true">
+                ↻
+              </span>
               <button type="button" aria-label="rotate left" onClick={() => window.kpView?.nudgeAngle(-1)}>
                 ↺
               </button>
@@ -248,9 +294,87 @@ export default function Desk() {
                 aria-label="rotation"
                 onInput={(event) => window.kpView?.setAngle(Number(event.currentTarget.value))}
               />
-              <button type="button" aria-label="reset orientation" onClick={() => window.kpView?.setAngle(0)}>
-                reset
+              <button
+                type="button"
+                aria-label="reset bottom bar"
+                title="reset sliders"
+                onClick={() => {
+                  window.kpView?.resetBar?.();
+                  grabRef.current = false;
+                  setGrab(false);
+                }}
+              >
+                ✕
               </button>
+            </div>
+            <div className="kp-amp" id="kp-amp" hidden title="sound reaction">
+              <span className="kp-ico-label" aria-hidden="true">
+                🔊
+              </span>
+              <button
+                type="button"
+                aria-label="less reaction"
+                onClick={() => {
+                  const input = document.getElementById("kp-amp-range") as HTMLInputElement | null;
+                  const shown = document.getElementById("kp-amp-value");
+                  if (!input) return;
+                  const next = Math.max(-100, Math.min(100, Number(input.value) - 5));
+                  input.value = String(next);
+                  if (shown) shown.textContent = String(next);
+                }}
+              >
+                −
+              </button>
+              <output id="kp-amp-value">0</output>
+              <button
+                type="button"
+                aria-label="more reaction"
+                onClick={() => {
+                  const input = document.getElementById("kp-amp-range") as HTMLInputElement | null;
+                  const shown = document.getElementById("kp-amp-value");
+                  if (!input) return;
+                  const next = Math.max(-100, Math.min(100, Number(input.value) + 5));
+                  input.value = String(next);
+                  if (shown) shown.textContent = String(next);
+                }}
+              >
+                +
+              </button>
+              <input
+                id="kp-amp-range"
+                type="range"
+                min={-100}
+                max={100}
+                step={1}
+                defaultValue={0}
+                aria-label="sound reaction"
+                onInput={(event) => {
+                  const shown = document.getElementById("kp-amp-value");
+                  if (shown) shown.textContent = event.currentTarget.value;
+                }}
+              />
+            </div>
+            <div className="kp-points" id="kp-points" hidden title="points">
+              <span className="kp-ico-label" aria-hidden="true" id="kp-points-ico">
+                ✦
+              </span>
+              <button type="button" aria-label="fewer points" onClick={() => window.kpView?.nudgePoints?.(-1)}>
+                −
+              </button>
+              <output id="kp-points-value">5</output>
+              <button type="button" aria-label="more points" onClick={() => window.kpView?.nudgePoints?.(1)}>
+                +
+              </button>
+              <input
+                id="kp-points-range"
+                type="range"
+                min={3}
+                max={16}
+                step={1}
+                defaultValue={5}
+                aria-label="points"
+                onInput={(event) => window.kpView?.setPoints?.(Number(event.currentTarget.value))}
+              />
             </div>
           </div>
         </div>

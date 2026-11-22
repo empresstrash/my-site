@@ -35,14 +35,33 @@ body.kidpix-page-active .content > * {
 }
 
 body.kidpix-page-active .header-with-side,
-html.vr-booth:has(.kp) .header-with-side {
+html.vr-booth:has(.kp) .header-with-side,
+body:has(.kp) .header-with-side {
   max-height: 3.4rem;
   padding-top: 0.16rem;
   padding-bottom: 0.16rem;
 }
 
+html.vr-booth body.kidpix-page-active .header-with-side > .mobile-menu-button,
+body:has(.kp) .header-with-side > .mobile-menu-button {
+  position: absolute !important;
+  top: 50% !important;
+  left: max(0.4rem, env(safe-area-inset-left, 0px)) !important;
+  right: auto !important;
+  transform: translateY(-50%);
+  width: 1.9rem;
+  height: 1.9rem;
+  min-width: 1.9rem !important;
+  min-height: 1.9rem !important;
+  padding: 0 !important;
+  font-size: 0.95rem;
+  line-height: 1;
+  z-index: 5;
+}
+
 body.kidpix-page-active .centered-logo img,
-html.vr-booth:has(.kp) .centered-logo img {
+html.vr-booth:has(.kp) .centered-logo img,
+body:has(.kp) .centered-logo img {
   width: 42px;
   max-height: 2.15rem;
 }
