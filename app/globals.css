@@ -1924,7 +1924,9 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .salon-mast {
+  position: relative;
   flex-shrink: 0;
+  isolation: isolate;
   border-bottom: 1px solid rgba(255, 46, 184, 0.28);
   background: rgba(255, 0, 140, 0.1);
   animation: darkHueCycle 28s linear infinite;
@@ -1955,6 +1957,12 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 .salon-mast .salon-sub-btn {
   grid-column: 2;
   justify-self: end;
+  border-radius: 12px;
+  border-color: #ffd0ea;
+  background: #ff4db8;
+  color: #1a0612;
+  /* Parent hue-cycle plus this half-turn keeps the button on the opposite hue. */
+  filter: hue-rotate(180deg);
 }
 
 .salon-sub-btn,
