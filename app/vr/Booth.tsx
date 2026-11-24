@@ -185,7 +185,7 @@ function connectX(
         onStatus("X off");
         return;
       }
-      onStatus("X Live");
+      onStatus("X waiting");
       reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -202,13 +202,21 @@ function connectX(
             .map((row) => row.slice(5).trim())
             .join("");
           if (!data) continue;
-          const body = JSON.parse(data) as { off?: boolean; remove?: string; line?: { id: string; name: string; text: string; at: number } };
+          const body = JSON.parse(data) as {
+            off?: boolean;
+            status?: string;
+            remove?: string;
+            line?: { id: string; name: string; text: string; at: number };
+          };
           if (body.off) {
             onStatus("X off");
             return;
           }
+          if (body.status === "live") onStatus("X Live");
+          if (body.status === "waiting") onStatus("X waiting");
           if (body.remove) onRemove(body.remove);
           if (body.line?.id && body.line.text) {
+            onStatus("X Live");
             onLine({ id: body.line.id, source: "x", name: body.line.name || "X", text: body.line.text, at: body.line.at || Date.now() });
           }
         }
@@ -748,7 +756,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           </p>
           {xOn ? (
             <p className="vr-pill">
-              X <span className={xStatus.startsWith("X Live") ? "vr-hot" : ""}>{xStatus === "X Live" ? "Live" : xStatus === "X reconnecting" ? "Connecting" : "Off"}</span>
+              X <span className={xStatus.startsWith("X Live") ? "vr-hot" : ""}>{xStatus === "X Live" ? "Live" : xStatus === "X waiting" ? "Waiting" : xStatus === "X reconnecting" ? "Connecting" : "Off"}</span>
             </p>
           ) : null}
         </div>

@@ -1,90 +1,178 @@
-const TOKEN_URL = "https://api.x.com/2/oauth2/token";
-const API = "https://api.x.com/2";
-const ALLOWED = new Set(["broadcast.chat", "broadcast.chat.remove"]);
+const PROFILE = "https://x.com/EmpressTrash";
+const USER_ID = "1254946754107109377";
+const API = "https://api.x.com/1.1";
+const CHAT_ACCESS = "https://proxsee-cf.pscp.tv/api/v2/accessChatPublic";
+const BEARER =
+  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs=1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
+const UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";
 
 export type XChatLine = { id: string; name: string; text: string; at: number };
 
-type Access = { access: string; until: number };
+type Live = { id: string; mediaKey: string };
+type OpenChat = { id: string; endpoint: string; access: string };
 
-let cached: Access | null = null;
-let ensured = false;
+let guest: { token: string; until: number } | null = null;
 
 export function xChatConfigured(): boolean {
-  return Boolean(process.env.X_CLIENT_ID && process.env.X_CLIENT_SECRET && process.env.X_REFRESH_TOKEN && process.env.X_USER_ID);
-}
-
-function userId(): string {
-  return process.env.X_USER_ID || "";
-}
-
-async function accessToken(): Promise<string | null> {
-  if (cached && cached.until > Date.now() + 60_000) return cached.access;
-  const id = process.env.X_CLIENT_ID;
-  const secret = process.env.X_CLIENT_SECRET;
-  const refresh = process.env.X_REFRESH_TOKEN;
-  if (!id || !secret || !refresh) return null;
-  const response = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: {
-      authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString("base64")}`,
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: refresh, client_id: id }),
-  });
-  if (!response.ok) return null;
-  const json = (await response.json()) as { access_token?: string; expires_in?: number };
-  if (!json.access_token) return null;
-  cached = { access: json.access_token, until: Date.now() + (json.expires_in ?? 7200) * 1000 };
-  return json.access_token;
-}
-
-async function chatOnly(access: string): Promise<boolean> {
-  const owner = userId();
-  if (!owner) return false;
-  const listed = await fetch(`${API}/activity/subscriptions`, {
-    headers: { authorization: `Bearer ${access}` },
-  });
-  if (!listed.ok) return false;
-  const body = (await listed.json()) as { data?: { event_type?: string }[] | { event_type?: string } };
-  const rows = Array.isArray(body.data) ? body.data : body.data ? [body.data] : [];
-  const types = rows.map((item) => item.event_type || "").filter(Boolean);
-  if (types.some((type) => !ALLOWED.has(type))) return false;
-  for (const eventType of ALLOWED) {
-    if (types.includes(eventType)) continue;
-    await fetch(`${API}/activity/subscriptions`, {
-      method: "POST",
-      headers: { authorization: `Bearer ${access}`, "content-type": "application/json" },
-      body: JSON.stringify({ event_type: eventType, filter: { user_id: owner }, tag: "booth-chat" }),
-    });
-  }
-  ensured = true;
   return true;
 }
 
-export function parseXActivity(raw: string): { line?: XChatLine; remove?: string } | null {
-  if (raw.length > 8000) return null;
-  let json: { data?: { event_type?: string; created_at?: string; payload?: Record<string, unknown> } };
+export function liveBroadcastFromProfile(html: string): Live | null {
+  const plain = html.replace(/\\"/g, '"');
+  const pattern =
+    /"broadcast_id":"([A-Za-z0-9]{8,})"[\s\S]{0,12000}?"media_key":"(\d+_\d+)"[\s\S]{0,800}?"state":"([A-Za-z]+)"/g;
+  let best: (Live & { start: number }) | null = null;
+  for (const match of plain.matchAll(pattern)) {
+    if (match[3] !== "Running") continue;
+    const start = Number(/"start_time":(\d+)/.exec(match[0])?.[1] ?? 0);
+    if (!best || start >= best.start) best = { id: match[1], mediaKey: match[2], start };
+  }
+  return best ? { id: best.id, mediaKey: best.mediaKey } : null;
+}
+
+export function parseBroadcastChat(message: { kind?: number; payload?: string }): XChatLine | null {
+  if (message.kind !== 1 || !message.payload) return null;
+  let outer: { body?: unknown; sender?: { username?: string; display_name?: string } };
   try {
-    json = JSON.parse(raw) as typeof json;
+    outer = JSON.parse(message.payload) as typeof outer;
   } catch {
     return null;
   }
-  const event = json.data?.event_type;
-  const payload = json.data?.payload;
-  if (!payload || (event !== "broadcast.chat" && event !== "broadcast.chat.remove")) return null;
-  if (event === "broadcast.chat.remove") {
-    const removed = payload.message_id;
-    const removedId = typeof removed === "string" || typeof removed === "number" ? String(removed) : "";
-    return removedId ? { remove: `x-${removedId}` } : null;
+  let inner: {
+    body?: string;
+    timestamp?: number;
+    programDateTime?: string;
+    username?: string;
+    displayName?: string;
+    uuid?: string;
+  } = {};
+  if (typeof outer.body === "string") {
+    try {
+      inner = JSON.parse(outer.body) as typeof inner;
+    } catch {
+      return null;
+    }
+  } else if (outer.body && typeof outer.body === "object") {
+    inner = outer.body as typeof inner;
   }
-  const text = typeof payload.message === "string" ? payload.message.slice(0, 500) : "";
-  const rawId = payload.message_id;
-  const id = typeof rawId === "string" || typeof rawId === "number" ? String(rawId) : "";
-  if (!text || !id) return null;
-  const author = payload.author as { data?: { name?: string; username?: string } } | undefined;
-  const name = (author?.data?.name || author?.data?.username || "X").slice(0, 80);
-  const at = Date.parse(json.data?.created_at || "") || Date.now();
-  return { line: { id: `x-${id}`, name, text, at } };
+  const text = typeof inner.body === "string" ? inner.body.trim().slice(0, 500) : "";
+  const rawId = typeof inner.uuid === "string" ? inner.uuid : "";
+  if (!text || !rawId) return null;
+  const name = (inner.displayName || outer.sender?.display_name || inner.username || outer.sender?.username || "X").slice(0, 80);
+  const at = typeof inner.timestamp === "number" ? inner.timestamp : Date.parse(inner.programDateTime || "") || Date.now();
+  return { id: `x-${rawId}`, name, text, at };
+}
+
+async function guestToken(): Promise<string | null> {
+  if (guest && guest.until > Date.now()) return guest.token;
+  const response = await fetch(`${API}/guest/activate.json`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${BEARER}`, "user-agent": UA },
+  });
+  if (!response.ok) return null;
+  const json = (await response.json()) as { guest_token?: string };
+  if (!json.guest_token) return null;
+  guest = { token: json.guest_token, until: Date.now() + 30 * 60 * 1000 };
+  return guest.token;
+}
+
+async function xJson<T>(url: string): Promise<T | null> {
+  const token = await guestToken();
+  if (!token) return null;
+  const response = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${BEARER}`,
+      "x-guest-token": token,
+      "x-twitter-active-user": "yes",
+      "user-agent": UA,
+      accept: "application/json",
+    },
+  });
+  if (response.status === 401 || response.status === 403) guest = null;
+  if (!response.ok) return null;
+  return (await response.json()) as T;
+}
+
+async function findLive(): Promise<Live | null> {
+  const page = await fetch(PROFILE, {
+    headers: { "user-agent": UA, accept: "text/html" },
+    cache: "no-store",
+  });
+  if (!page.ok) return null;
+  const live = liveBroadcastFromProfile(await page.text());
+  if (!live) return null;
+  const shown = await xJson<{ broadcasts?: Record<string, { state?: string; twitter_user_id?: string; media_key?: string }> }>(
+    `${API}/broadcasts/show.json?ids=${encodeURIComponent(live.id)}`,
+  );
+  const row = shown?.broadcasts?.[live.id];
+  if (!row || row.state !== "RUNNING" || row.twitter_user_id !== USER_ID) return null;
+  return { id: live.id, mediaKey: row.media_key || live.mediaKey };
+}
+
+async function openChat(live: Live): Promise<OpenChat | null> {
+  const status = await xJson<{ chatToken?: string }>(
+    `${API}/live_video_stream/status/${encodeURIComponent(live.mediaKey)}?client=web&use_syndication_guest_id=false&cookie_set_host=x.com`,
+  );
+  if (!status?.chatToken) return null;
+  const response = await fetch(CHAT_ACCESS, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin: "https://x.com",
+      referer: "https://x.com/",
+      "user-agent": UA,
+      "x-periscope-user-agent": "Twitter/m5",
+    },
+    body: JSON.stringify({ chat_token: status.chatToken }),
+  });
+  if (!response.ok) return null;
+  const json = (await response.json()) as { endpoint?: string; replay_endpoint?: string; access_token?: string; replay_access_token?: string };
+  const endpoint = (json.endpoint || json.replay_endpoint || "").replace(/\/$/, "");
+  const access = json.access_token || json.replay_access_token || "";
+  if (!endpoint || !access) return null;
+  return { id: live.id, endpoint, access };
+}
+
+async function recentLines(chat: OpenChat): Promise<XChatLine[]> {
+  const response = await fetch(`${chat.endpoint}/chatapi/v1/history`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin: "https://x.com",
+      "user-agent": UA,
+      "x-periscope-user-agent": "Twitter/m5",
+    },
+    body: JSON.stringify({ access_token: chat.access, cursor: "", limit: 40, since: null, quick_get: true }),
+  });
+  if (!response.ok) return [];
+  const json = (await response.json()) as { messages?: { kind?: number; payload?: string }[] };
+  const lines = (json.messages ?? [])
+    .map((message) => parseBroadcastChat(message))
+    .filter((line): line is XChatLine => Boolean(line));
+  return lines.sort((a, b) => a.at - b.at).slice(-40);
+}
+
+function chatFrame(data: unknown): Promise<string> {
+  if (typeof data === "string") return Promise.resolve(data);
+  if (data instanceof Blob) return data.text();
+  if (data instanceof ArrayBuffer) return Promise.resolve(new TextDecoder().decode(data));
+  if (ArrayBuffer.isView(data)) return Promise.resolve(new TextDecoder().decode(data));
+  return Promise.resolve("");
+}
+
+function sleep(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
+  });
 }
 
 export async function openXChatStream(signal: AbortSignal): Promise<Response> {
@@ -93,44 +181,75 @@ export async function openXChatStream(signal: AbortSignal): Promise<Response> {
     "cache-control": "no-cache, no-transform",
     "x-accel-buffering": "no",
   };
-  const off = () => new Response(`data: ${JSON.stringify({ off: true })}\n\n`, { headers });
-  if (!xChatConfigured()) return off();
-  const access = await accessToken();
-  if (!access) return off();
-  if (!ensured && !(await chatOnly(access))) return off();
-  const upstream = await fetch(`${API}/activity/stream?backfill_minutes=5`, {
-    headers: { authorization: `Bearer ${access}` },
-    signal,
-  });
-  if (!upstream.ok || !upstream.body) return off();
   const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-  const incoming = upstream.body.getReader();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const stop = setTimeout(() => controller.close(), 50_000);
-      let buffer = "";
+      const deadline = Date.now() + 45_000;
+      const seen = new Set<string>();
+      let socket: WebSocket | null = null;
+      const send = (body: unknown) => {
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(body)}\n\n`));
+        } catch {
+          /* the headset closed the page */
+        }
+      };
+      const take = (line: XChatLine) => {
+        if (seen.has(line.id)) return;
+        seen.add(line.id);
+        send({ line });
+      };
+      const closeSocket = () => {
+        if (!socket) return;
+        socket.close();
+        socket = null;
+      };
       try {
-        while (!signal.aborted) {
-          const { done, value } = await incoming.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const rows = buffer.split("\n");
-          buffer = rows.pop() ?? "";
-          for (const row of rows) {
-            const trimmed = row.trim();
-            if (!trimmed.startsWith("{")) continue;
-            const parsed = parseXActivity(trimmed);
-            if (!parsed) continue;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(parsed)}\n\n`));
+        while (!signal.aborted && Date.now() < deadline) {
+          const live = await findLive().catch(() => null);
+          const chat = live ? await openChat(live).catch(() => null) : null;
+          if (!chat) {
+            send({ status: "waiting" });
+            await sleep(8000, signal);
+            continue;
           }
+          send({ status: "live" });
+          for (const line of await recentLines(chat).catch(() => [])) take(line);
+          closeSocket();
+          const wsUrl = `${chat.endpoint.replace(/^http/, "ws")}/chatapi/v1/chatnow`;
+          socket = new WebSocket(wsUrl);
+          const current = socket;
+          current.addEventListener("open", () => {
+            current.send(JSON.stringify({ payload: JSON.stringify({ access_token: chat.access }), kind: 3 }));
+            current.send(
+              JSON.stringify({
+                payload: JSON.stringify({ body: JSON.stringify({ room: chat.id }), kind: 1 }),
+                kind: 2,
+              }),
+            );
+          });
+          current.addEventListener("message", (event) => {
+            void chatFrame(event.data)
+              .then((raw) => {
+                if (!raw) return;
+                const msg = JSON.parse(raw) as { kind?: number; payload?: string };
+                const line = parseBroadcastChat(msg);
+                if (line) take(line);
+              })
+              .catch(() => undefined);
+          });
+          await sleep(20000, signal);
+          closeSocket();
         }
       } catch {
         /* the headset closed the page */
       } finally {
-        clearTimeout(stop);
-        controller.close();
-        await incoming.cancel().catch(() => undefined);
+        closeSocket();
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       }
     },
   });
