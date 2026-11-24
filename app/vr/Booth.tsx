@@ -170,29 +170,34 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
   let stopped = false;
   let retry: ReturnType<typeof setTimeout> | null = null;
   let broadcast = "";
+  let since = "";
 
   const run = async () => {
     if (stopped) return;
     try {
-      const response = await fetch("/api/vr/x-chat", { cache: "no-store" });
+      const response = await fetch(`/api/vr/x-chat?since=${encodeURIComponent(since)}`, { cache: "no-store" });
       if (stopped) return;
       if (!response.ok) throw new Error("x");
       const body = (await response.json()) as {
         status?: string;
         broadcast?: string;
+        cursor?: string;
         lines?: { id: string; name: string; text: string; at: number }[];
       };
       if (body.status === "live" && body.broadcast) {
         if (body.broadcast !== broadcast) {
           broadcast = body.broadcast;
+          since = "";
           onReset();
         }
+        if (body.cursor) since = body.cursor;
         onStatus("X Live");
         for (const line of body.lines ?? []) {
           if (line.id && line.text) onLine({ id: line.id, source: "x", name: line.name || "X", text: line.text, at: line.at || Date.now() });
         }
       } else {
         broadcast = "";
+        since = "";
         onReset();
         onStatus("X waiting");
       }
@@ -200,7 +205,7 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
       onStatus("X reconnecting");
     }
     if (stopped) return;
-    retry = setTimeout(() => void run(), 2000);
+    retry = setTimeout(() => void run(), 300);
   };
 
   void run();

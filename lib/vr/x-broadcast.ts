@@ -253,9 +253,9 @@ function linesFromNdjson(body: string): XChatLine[] {
     .slice(-40);
 }
 
-async function readOpenChat(url: string, token: string): Promise<string> {
+async function readOpenChat(url: string, token: string, holdMs: number): Promise<string> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3500);
+  const timer = setTimeout(() => controller.abort(), holdMs);
   let quiet: ReturnType<typeof setTimeout> | null = null;
   let text = "";
   try {
@@ -270,12 +270,12 @@ async function readOpenChat(url: string, token: string): Promise<string> {
       text += decoder.decode(value, { stream: true });
       if (text.includes("\n")) {
         if (quiet) clearTimeout(quiet);
-        quiet = setTimeout(() => controller.abort(), 200);
+        quiet = setTimeout(() => controller.abort(), 250);
       }
       if (text.length > 200000) break;
     }
   } catch {
-    /* the short read is closed once the live lines have arrived */
+    /* closed once the new lines have arrived, or the wait ran out */
   } finally {
     clearTimeout(timer);
     if (quiet) clearTimeout(quiet);
@@ -283,18 +283,24 @@ async function readOpenChat(url: string, token: string): Promise<string> {
   return text;
 }
 
-async function liveChatLines(broadcastId: string, mediaKey: string): Promise<XChatLine[] | null> {
+function lineCursor(lines: XChatLine[]): string {
+  return lines.reduce((cursor, line) => {
+    const ts = line.id.split("-")[1] || "";
+    return ts > cursor ? ts : cursor;
+  }, "");
+}
+
+async function liveChatLines(broadcastId: string, mediaKey: string, since: string): Promise<XChatLine[] | null> {
   const token = await guestToken();
   if (!token) return null;
   const status = await xJson<{ sessionId?: string }>(
     `${API}/live_video_stream/status/${encodeURIComponent(mediaKey)}?client=web&use_syndication_guest_id=false&cookie_set_host=x.com`,
   );
   if (!status?.sessionId) return null;
-  const body = await readOpenChat(
-    `${LIVE_CHAT}?broadcastId=${encodeURIComponent(broadcastId)}&sessionId=${encodeURIComponent(status.sessionId)}`,
-    token,
-  );
-  const lines = linesFromNdjson(body);
+  const params = new URLSearchParams({ broadcastId, sessionId: status.sessionId });
+  if (since) params.set("cursor", since);
+  const body = await readOpenChat(`${LIVE_CHAT}?${params.toString()}`, token, since ? 8000 : 2500);
+  const lines = linesFromNdjson(body).filter((line) => !since || (line.id.split("-")[1] || "") > since);
   if (lines.some((line) => line.name === "X")) {
     await rememberSenders(lines.filter((line) => line.name === "X").map((line) => line.id.split("-").pop() || ""));
     return lines.map((line) => ({ ...line, name: senderNames.get(line.id.split("-").pop() || "") || line.name }));
@@ -302,9 +308,10 @@ async function liveChatLines(broadcastId: string, mediaKey: string): Promise<XCh
   return lines;
 }
 
-export async function readXChat(): Promise<{ status: "live" | "waiting"; broadcast?: string; lines: XChatLine[] }> {
+export async function readXChat(since = ""): Promise<{ status: "live" | "waiting"; broadcast?: string; cursor?: string; lines: XChatLine[] }> {
   const live = await findLive().catch(() => null);
   if (!live) return { status: "waiting", lines: [] };
-  const lines = (await liveChatLines(live.id, live.mediaKey).catch(() => null)) ?? [];
-  return { status: "live", broadcast: live.id, lines };
+  const lines = (await liveChatLines(live.id, live.mediaKey, since).catch(() => null)) ?? [];
+  const cursor = lineCursor(lines) || since || undefined;
+  return { status: "live", broadcast: live.id, cursor, lines };
 }

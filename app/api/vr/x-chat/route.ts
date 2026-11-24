@@ -14,6 +14,6 @@ export async function GET(request: Request) {
   if (url.searchParams.has("probe")) {
     return Response.json({ ready: xChatConfigured() });
   }
-  const body = await readXChat();
+  const body = await readXChat(url.searchParams.get("since") || "");
   return Response.json(body, { headers: { "cache-control": "no-store" } });
 }
