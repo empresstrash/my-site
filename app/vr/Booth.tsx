@@ -333,8 +333,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     peers: 0,
   });
   const [twitchStatus, setTwitchStatus] = useState("Twitch off until the page opens");
-  const [xOn, setXOn] = useState(false);
-  const [xStatus, setXStatus] = useState("X off");
+  const [xStatus, setXStatus] = useState("X waiting");
   const [stationId, setStationId] = useState(STATIONS[0].id);
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -483,26 +482,12 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
 
   useEffect(() => {
     if (!open) return;
-    let stop = () => {};
-    let cancelled = false;
-    void fetch("/api/vr/x-chat?probe=1")
-      .then(async (response) => {
-        if (!response.ok || cancelled) return;
-        const body = (await response.json()) as { ready?: boolean };
-        if (!body.ready || cancelled) return;
-        setXOn(true);
-        stop = connectX(
-          (line) => pushLine(line),
-          (id) => setLines((current) => current.filter((item) => item.id !== id)),
-          setXStatus,
-          () => setLines((current) => current.filter((item) => item.source !== "x")),
-        );
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-      stop();
-    };
+    return connectX(
+      (line) => pushLine(line),
+      (id) => setLines((current) => current.filter((item) => item.id !== id)),
+      setXStatus,
+      () => setLines((current) => current.filter((item) => item.source !== "x")),
+    );
   }, [open]);
 
   useEffect(() => {
@@ -758,11 +743,9 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           <p className="vr-pill">
             Twitch <span className={twitchStatus.startsWith("Live") ? "vr-hot" : ""}>{twitchStatus.startsWith("Live") ? "Live" : "Connecting"}</span>
           </p>
-          {xOn ? (
-            <p className="vr-pill">
-              X <span className={xStatus.startsWith("X Live") ? "vr-hot" : ""}>{xStatus === "X Live" ? "Live" : xStatus === "X waiting" ? "Waiting" : xStatus === "X reconnecting" ? "Connecting" : "Off"}</span>
-            </p>
-          ) : null}
+          <p className="vr-pill">
+            X <span className={xStatus.startsWith("X Live") ? "vr-hot" : ""}>{xStatus === "X Live" ? "Live" : xStatus === "X waiting" ? "Waiting" : xStatus === "X reconnecting" ? "Connecting" : "Off"}</span>
+          </p>
         </div>
       </div>
       <div className="vr-tabs" role="tablist" aria-label="Booth">
@@ -796,7 +779,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
         <section className="vr-chat">
           <div className="vr-bar">
             <div className="vr-filters">
-              {(["all", "dcl", "twitch", "x"] as const).filter((item) => item !== "x" || xOn).map((item) => (
+              {(["all", "dcl", "twitch", "x"] as const).map((item) => (
                 <button
                   key={item}
                   type="button"
@@ -830,9 +813,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
             <div className="vr-stream" ref={scroller}>
               {visible.length === 0 ? (
                 <p className="vr-muted">
-                  {xOn
-                    ? "Text from people at the atelier, Twitch, and X show up here."
-                    : "Text from people at the atelier, and Twitch chat, show up here."}
+                  Text from people at the atelier, Twitch, and X show up here.
                 </p>
               ) : (
                 visible.map((line) => (
