@@ -2336,13 +2336,66 @@ a.salon-bio {
   border-radius: 12px;
 }
 
-.salon-pop-card iframe {
-  display: block;
-  width: min(480px, 100%);
-  height: 320px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
+.salon-pop-form h2 {
+  margin: 0.15rem 0 0.45rem;
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.salon-pop-blurb,
+.salon-pop-legal {
+  margin: 0;
+  font-family: var(--font-family);
+  text-align: center;
+}
+
+.salon-pop-blurb {
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.salon-pop-row {
+  display: flex;
+  gap: 0.45rem;
+  margin: 0.85rem 0 0.7rem;
+}
+
+.salon-pop-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(255, 46, 184, 0.45);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f6f1f8;
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+}
+
+.salon-pop-row input::placeholder {
+  color: rgba(236, 228, 242, 0.45);
+}
+
+.salon-pop-row button {
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #ff4db8;
+  color: #1a0612;
+  font-family: var(--font-display);
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+}
+
+.salon-pop-legal {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(236, 228, 242, 0.62);
+}
+
+.salon-pop-legal a {
+  font-size: 1em;
 }
 
 @media (max-width: 900px) {
@@ -2387,9 +2440,8 @@ a.salon-bio {
     width: min(520px, calc(100vw - 1.5rem));
   }
 
-  .salon-pop-card iframe {
-    width: 100%;
-    height: 300px;
+  .salon-pop-row {
+    flex-direction: column;
   }
 }
 
