@@ -166,77 +166,49 @@ function clock(at: number): string {
   return new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
-function connectX(
-  onLine: (line: Line) => void,
-  onRemove: (id: string) => void,
-  onStatus: (status: string) => void,
-  onReset: () => void,
-): () => void {
+function connectX(onLine: (line: Line) => void, onStatus: (status: string) => void, onReset: () => void): () => void {
   let stopped = false;
   let retry: ReturnType<typeof setTimeout> | null = null;
-  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  let broadcast = "";
 
   const run = async () => {
     if (stopped) return;
     try {
-      const response = await fetch("/api/vr/x-chat");
+      const response = await fetch("/api/vr/x-chat", { cache: "no-store" });
       if (stopped) return;
-      const type = response.headers.get("content-type") || "";
-      if (!response.ok || !response.body || !type.includes("text/event-stream")) {
-        onStatus("X reconnecting");
-      } else {
-      onStatus("X waiting");
-      reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (!stopped) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const chunks = buffer.split("\n\n");
-        buffer = chunks.pop() ?? "";
-        for (const chunk of chunks) {
-          const data = chunk
-            .split("\n")
-            .filter((row) => row.startsWith("data:"))
-            .map((row) => row.slice(5).trim())
-            .join("");
-          if (!data) continue;
-          const body = JSON.parse(data) as {
-            off?: boolean;
-            status?: string;
-            reset?: boolean;
-            remove?: string;
-            line?: { id: string; name: string; text: string; at: number };
-          };
-          if (body.off) {
-            stopped = true;
-            break;
-          }
-          if (body.reset) onReset();
-          if (body.status === "live") onStatus("X Live");
-          if (body.status === "waiting") onStatus("X waiting");
-          if (body.remove) onRemove(body.remove);
-          if (body.line?.id && body.line.text) {
-            onStatus("X Live");
-            onLine({ id: body.line.id, source: "x", name: body.line.name || "X", text: body.line.text, at: body.line.at || Date.now() });
-          }
+      if (!response.ok) throw new Error("x");
+      const body = (await response.json()) as {
+        status?: string;
+        broadcast?: string;
+        lines?: { id: string; name: string; text: string; at: number }[];
+      };
+      if (body.status === "live" && body.broadcast) {
+        if (body.broadcast !== broadcast) {
+          broadcast = body.broadcast;
+          onReset();
         }
-      }
+        onStatus("X Live");
+        for (const line of body.lines ?? []) {
+          if (line.id && line.text) onLine({ id: line.id, source: "x", name: line.name || "X", text: line.text, at: line.at || Date.now() });
+        }
+      } else {
+        if (broadcast) {
+          broadcast = "";
+          onReset();
+        }
+        onStatus("X waiting");
       }
     } catch {
-      /* retry below */
+      onStatus("X reconnecting");
     }
     if (stopped) return;
-    onStatus("X reconnecting");
-    retry = setTimeout(() => void run(), 4000);
+    retry = setTimeout(() => void run(), 2000);
   };
 
   void run();
   return () => {
     stopped = true;
     if (retry) clearTimeout(retry);
-    void reader?.cancel();
   };
 }
 
@@ -484,7 +456,6 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     if (!open) return;
     return connectX(
       (line) => pushLine(line),
-      (id) => setLines((current) => current.filter((item) => item.id !== id)),
       setXStatus,
       () => setLines((current) => current.filter((item) => item.source !== "x")),
     );

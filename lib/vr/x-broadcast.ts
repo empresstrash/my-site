@@ -98,20 +98,32 @@ async function xJson<T>(url: string): Promise<T | null> {
   return (await response.json()) as T;
 }
 
+export function broadcastIds(html: string): string[] {
+  const plain = html.replace(/\\"/g, '"');
+  const ids = [...plain.matchAll(/\/i\/broadcasts\/([A-Za-z0-9]{8,})/g)].map((match) => match[1]);
+  return [...new Set(ids)].slice(0, 4);
+}
+
 async function findLive(): Promise<Live | null> {
-  const page = await fetch(PROFILE, {
-    headers: { "user-agent": UA, accept: "text/html" },
+  const page = await fetch(`${PROFILE}?_=${Date.now()}`, {
+    headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
     cache: "no-store",
   });
   if (!page.ok) return null;
-  const live = liveBroadcastFromProfile(await page.text());
-  if (!live) return null;
-  const shown = await xJson<{ broadcasts?: Record<string, { state?: string; twitter_user_id?: string; media_key?: string }> }>(
-    `${API}/broadcasts/show.json?ids=${encodeURIComponent(live.id)}`,
+  const ids = broadcastIds(await page.text());
+  const rows = await Promise.all(
+    ids.map(async (id) => {
+      const shown = await xJson<{ broadcasts?: Record<string, { state?: string; twitter_user_id?: string | number; media_key?: string }> }>(
+        `${API}/broadcasts/show.json?ids=${encodeURIComponent(id)}`,
+      );
+      return { id, row: shown?.broadcasts?.[id] };
+    }),
   );
-  const row = shown?.broadcasts?.[live.id];
-  if (!row || row.state !== "RUNNING" || row.twitter_user_id !== USER_ID) return null;
-  return { id: live.id, mediaKey: row.media_key || live.mediaKey };
+  const live = rows.find(
+    (item) => item.row && String(item.row.state).toUpperCase() === "RUNNING" && String(item.row.twitter_user_id) === USER_ID,
+  );
+  if (!live?.row?.media_key) return null;
+  return { id: live.id, mediaKey: live.row.media_key };
 }
 
 async function openChat(live: Live): Promise<OpenChat | null> {
@@ -157,132 +169,10 @@ async function recentLines(chat: OpenChat): Promise<XChatLine[]> {
   return lines.sort((a, b) => a.at - b.at).slice(-40);
 }
 
-function chatFrame(data: unknown): Promise<string> {
-  if (typeof data === "string") return Promise.resolve(data);
-  if (data instanceof Blob) return data.text();
-  if (data instanceof ArrayBuffer) return Promise.resolve(new TextDecoder().decode(data));
-  if (ArrayBuffer.isView(data)) return Promise.resolve(new TextDecoder().decode(data));
-  return Promise.resolve("");
-}
-
-function sleep(ms: number, signal: AbortSignal): Promise<void> {
-  return new Promise((resolve) => {
-    const timer = setTimeout(resolve, ms);
-    signal.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        resolve();
-      },
-      { once: true },
-    );
-  });
-}
-
-export async function openXChatStream(signal: AbortSignal): Promise<Response> {
-  const headers = {
-    "content-type": "text/event-stream",
-    "cache-control": "no-cache, no-transform",
-    "x-accel-buffering": "no",
-  };
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const deadline = Date.now() + 45_000;
-      const seen = new Set<string>();
-      const room: { socket: WebSocket | null } = { socket: null };
-      const send = (body: unknown) => {
-        try {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(body)}\n\n`));
-        } catch {
-          /* the headset closed the page */
-        }
-      };
-      const take = (line: XChatLine) => {
-        if (seen.has(line.id)) return;
-        seen.add(line.id);
-        send({ line });
-      };
-      const closeSocket = () => {
-        room.socket?.close();
-        room.socket = null;
-      };
-      let attached = "";
-      const listen = (chat: OpenChat) => {
-        closeSocket();
-        const wsUrl = `${chat.endpoint.replace(/^http/, "ws")}/chatapi/v1/chatnow`;
-        const current = new WebSocket(wsUrl);
-        room.socket = current;
-        current.addEventListener("open", () => {
-          current.send(JSON.stringify({ payload: JSON.stringify({ access_token: chat.access }), kind: 3 }));
-          current.send(
-            JSON.stringify({
-              payload: JSON.stringify({ body: JSON.stringify({ room: chat.id }), kind: 1 }),
-              kind: 2,
-            }),
-          );
-        });
-        current.addEventListener("message", (event) => {
-          void chatFrame(event.data)
-            .then((raw) => {
-              if (!raw) return;
-              const msg = JSON.parse(raw) as { kind?: number; payload?: string };
-              const line = parseBroadcastChat(msg);
-              if (line) take(line);
-            })
-            .catch(() => undefined);
-        });
-        current.addEventListener("close", () => {
-          if (room.socket === current) room.socket = null;
-        });
-      };
-      try {
-        while (!signal.aborted && Date.now() < deadline) {
-          const live = await findLive().catch(() => null);
-          if (!live) {
-            if (attached) {
-              attached = "";
-              seen.clear();
-              closeSocket();
-              send({ status: "waiting", reset: true });
-            } else {
-              send({ status: "waiting" });
-            }
-            await sleep(4000, signal);
-            continue;
-          }
-          if (live.id === attached && room.socket?.readyState === WebSocket.OPEN) {
-            await sleep(4000, signal);
-            continue;
-          }
-          const chat = await openChat(live).catch(() => null);
-          if (!chat) {
-            send({ status: "waiting" });
-            await sleep(4000, signal);
-            continue;
-          }
-          if (chat.id !== attached) {
-            seen.clear();
-            send({ status: "live", reset: true });
-            attached = chat.id;
-            for (const line of await recentLines(chat).catch(() => [])) take(line);
-          } else {
-            send({ status: "live" });
-          }
-          listen(chat);
-          await sleep(4000, signal);
-        }
-      } catch {
-        /* the headset closed the page */
-      } finally {
-        closeSocket();
-        try {
-          controller.close();
-        } catch {
-          /* already closed */
-        }
-      }
-    },
-  });
-  return new Response(stream, { headers });
+export async function readXChat(): Promise<{ status: "live" | "waiting"; broadcast?: string; lines: XChatLine[] }> {
+  const live = await findLive().catch(() => null);
+  if (!live) return { status: "waiting", lines: [] };
+  const chat = await openChat(live).catch(() => null);
+  if (!chat) return { status: "live", broadcast: live.id, lines: [] };
+  return { status: "live", broadcast: live.id, lines: await recentLines(chat).catch(() => []) };
 }

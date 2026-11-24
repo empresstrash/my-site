@@ -1,9 +1,8 @@
 import { cookies } from "next/headers";
 import { cookieIsValid, VR_COOKIE } from "@/lib/vr/gate";
-import { openXChatStream, xChatConfigured } from "@/lib/vr/x-broadcast";
+import { readXChat, xChatConfigured } from "@/lib/vr/x-broadcast";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 
 export async function GET(request: Request) {
   const jar = await cookies();
@@ -14,5 +13,6 @@ export async function GET(request: Request) {
   if (url.searchParams.has("probe")) {
     return Response.json({ ready: xChatConfigured() });
   }
-  return openXChatStream(request.signal);
+  const body = await readXChat();
+  return Response.json(body, { headers: { "cache-control": "no-store" } });
 }
