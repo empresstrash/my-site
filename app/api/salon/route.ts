@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchArchive, type ArchiveItem } from "@/lib/substack/archive";
+import { coverThumb, fetchArchive, type ArchiveItem } from "@/lib/substack/archive";
 
 export const revalidate = 600;
 
@@ -40,7 +40,7 @@ export async function GET() {
       slug,
       date: item.post_date || "",
       url,
-      image: cover.startsWith("https://") ? cover : "",
+      image: coverThumb(cover),
     });
   }
 

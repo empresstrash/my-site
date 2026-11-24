@@ -257,12 +257,19 @@ function HomeContent() {
                   <p className="salon-status">Loading…</p>
                 ) : (
                   <ol className="salon-list">
-                    {posts.map((post) => (
+                    {posts.map((post, index) => (
                       <li key={post.slug} className="menu-glass-panel">
                         <button type="button" onClick={() => openPost(post.slug)}>
                           {post.image ? (
                             <span className="salon-thumb-frame">
-                              <img className="salon-thumb" src={post.image} alt="" />
+                              <img
+                                className="salon-thumb"
+                                src={post.image}
+                                alt=""
+                                loading={index < 2 ? "eager" : "lazy"}
+                                decoding="async"
+                                fetchPriority={index === 0 ? "high" : "low"}
+                              />
                             </span>
                           ) : null}
                           <span className="salon-copy">
@@ -289,7 +296,9 @@ function HomeContent() {
         )}
       </div>
 
-      {view === 'substack' && subscribeOpen ? <SubscribePopup onClose={() => setSubscribeOpen(false)} /> : null}
+      {view === 'substack' && subscribeOpen && (posts !== null || listFailed) ? (
+        <SubscribePopup onClose={() => setSubscribeOpen(false)} />
+      ) : null}
     </div>
   );
 }

@@ -2,8 +2,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { FaBluesky, FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6';
-import { FaYoutube, FaTumblr, FaEnvelope, FaDiscord, FaDeviantart, FaSpotify, FaTwitch } from 'react-icons/fa';
+import { FaBluesky, FaDiscord, FaDeviantart, FaEnvelope, FaInstagram, FaSpotify, FaTiktok, FaTumblr, FaTwitch, FaXTwitter, FaYoutube } from './SocialIcons';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import GlassSparkles from './GlassSparkles';

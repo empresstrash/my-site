@@ -1,3 +1,5 @@
+const IMAGE_FETCH = "https://substackcdn.com/image/fetch/";
+const THUMB = "w_960,c_limit,f_jpg,q_auto:good";
 const ARCHIVE = "https://empresstrash.substack.com/api/v1/archive";
 const PAGE_SIZE = 20;
 const MAX_PAGES = 12;
@@ -15,6 +17,32 @@ type ArchivePage = {
   posts?: ArchiveItem[];
   nextCursor?: string | null;
 };
+
+function unwrapFetch(url: string): string | null {
+  if (!url.startsWith(IMAGE_FETCH)) return null;
+  const rest = url.slice(IMAGE_FETCH.length);
+  const slash = rest.indexOf("/");
+  if (slash < 0) return null;
+  try {
+    return decodeURIComponent(rest.slice(slash + 1));
+  } catch {
+    return null;
+  }
+}
+
+function stillUpload(url: string): string | null {
+  const video = url.match(/^https:\/\/substackcdn\.com\/video\/upload\/(?:[^/]+\/)?([A-Za-z0-9_-]+)\.[a-z0-9]+$/i);
+  if (video) return `https://substackcdn.com/video/upload/${THUMB}/${video[1]}.jpg`;
+  const image = url.match(/^https:\/\/substackcdn\.com\/image\/upload\/(?:[^/]+\/)?([A-Za-z0-9_-]+)$/);
+  if (image) return `https://substackcdn.com/image/upload/${THUMB}/${image[1]}`;
+  return null;
+}
+
+export function coverThumb(url: string): string {
+  if (!url.startsWith("https://")) return "";
+  const source = unwrapFetch(url) ?? url;
+  return stillUpload(source) ?? `${IMAGE_FETCH}${THUMB}/${encodeURIComponent(source)}`;
+}
 
 export async function fetchArchive(): Promise<ArchiveItem[]> {
   const posts: ArchiveItem[] = [];
