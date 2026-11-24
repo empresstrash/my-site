@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Suspense, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 type HomeView = 'substack' | 'emporium';
@@ -36,8 +37,12 @@ function formatDate(iso: string): string {
 
 function SubscribePopup({ onClose }: { onClose: () => void }) {
   const [sent, setSent] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="salon-pop" role="dialog" aria-modal="true" aria-labelledby="salon-pop-title">
       <button type="button" className="salon-pop-scrim" aria-label="Close subscribe" onClick={onClose} />
       <div className="salon-pop-card">
@@ -83,7 +88,8 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
         )}
         <iframe name="salon-subscribe" title="Subscribe result" hidden />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
