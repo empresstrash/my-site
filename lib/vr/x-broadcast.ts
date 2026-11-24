@@ -2,7 +2,7 @@ const PROFILE = "https://x.com/EmpressTrash";
 const USER_ID = "1254946754107109377";
 const API = "https://api.x.com/1.1";
 const CHAT_ACCESS = "https://proxsee-cf.pscp.tv/api/v2/accessChatPublic";
-const LIVE_CHAT = "https://api.x.com/live-chat";
+const LIVE_CHAT = "https://x.com/i/api/live-chat";
 const SENDER_QUERY =
   "https://api.x.com/graphql/nMFTyvEHqhifo5L5KT6AMw/broadcastChatSessionSendersQuery";
 const BEARER =
@@ -230,9 +230,17 @@ async function liveChatLines(broadcastId: string): Promise<XChatLine[] | null> {
     const trimmed = row.trim();
     if (!trimmed) continue;
     try {
-      const item = JSON.parse(trimmed) as { ts?: string; chatType?: number; userId?: string; message?: string };
+      const item = JSON.parse(trimmed) as {
+        ts?: string;
+        chatType?: number;
+        userId?: string;
+        message?: string;
+        userInfo?: { displayName?: string; username?: string };
+      };
       const text = typeof item.message === "string" ? item.message.trim().slice(0, 500) : "";
       if (item.chatType !== 1 || !text || !item.ts || !item.userId) continue;
+      const named = item.userInfo?.displayName || item.userInfo?.username;
+      if (named) senderNames.set(item.userId, named.slice(0, 80));
       raw.push({ ts: item.ts, userId: item.userId, message: text });
     } catch {
       /* a blank or partial line */
