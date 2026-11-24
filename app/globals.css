@@ -2325,9 +2325,18 @@ a.salon-bio {
   margin-bottom: 0.7rem;
 }
 
+.salon-pop-bar p,
+.salon-pop-form h2,
+.salon-pop-bar button,
+.salon-pop-row button,
+.salon-pop-legal a {
+  font-family: var(--font-display);
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+}
+
 .salon-pop-bar p {
   margin: 0;
-  font-family: var(--font-display);
   font-size: 1.52rem;
   letter-spacing: 0.04em;
 }
@@ -2338,9 +2347,9 @@ a.salon-bio {
 
 .salon-pop-form h2 {
   margin: 0.15rem 0 0.45rem;
-  font-size: 1.35rem;
-  font-weight: 400;
+  font-size: 1.45rem;
   line-height: 1.15;
+  letter-spacing: 0.04em;
   text-align: center;
 }
 
@@ -2385,9 +2394,6 @@ a.salon-bio {
   border-radius: 10px;
   background: #ff4db8;
   color: #1a0612;
-  font-family: var(--font-display);
-  font-weight: 400;
-  -webkit-font-smoothing: none;
 }
 
 .salon-pop-legal {
@@ -2397,7 +2403,8 @@ a.salon-bio {
 }
 
 .salon-pop-legal a {
-  font-size: 1em;
+  font-size: 1.05em;
+  letter-spacing: 0.02em;
 }
 
 @media (max-width: 900px) {
