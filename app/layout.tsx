@@ -1,6 +1,6 @@
 import './globals.css';
 import ClientMenu from './components/ClientMenu';
-import { Barlow, Instrument_Sans, Pixelify_Sans } from 'next/font/google';
+import { Barlow, Pixelify_Sans, Roboto_Mono } from 'next/font/google';
 import { headers } from 'next/headers';
 
 /** Menu sans — loaded via next/font so it actually applies (CSS @import was easy to miss). */
@@ -18,9 +18,9 @@ const pixel = Pixelify_Sans({
   display: 'swap',
 });
 
-const reading = Instrument_Sans({
+const reading = Roboto_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500'],
   style: ['normal', 'italic'],
   variable: '--font-reading',
   display: 'swap',

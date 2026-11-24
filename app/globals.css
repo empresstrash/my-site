@@ -1,5 +1,5 @@
 :root {
-  --font-family: var(--font-reading), 'Instrument Sans', sans-serif;
+  --font-family: var(--font-reading), 'Roboto Mono', monospace;
   --font-display: var(--font-pixel), 'Pixelify Sans', sans-serif;
   /* Menu sans from next/font (--font-barlow on <html>); no system-ui fallback that hides the swap */
   --font-menu: var(--font-barlow), 'Barlow', sans-serif;
@@ -374,6 +374,7 @@ html, body {
 
 body {
   font-family: var(--font-family);
+  font-size: 0.94rem;
   background: var(--color-bg);
   color: var(--color-text);
   display: flex;
@@ -2080,7 +2081,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 .salon-bio p {
   margin: 0.25rem 0 0.45rem;
   font-family: var(--font-family);
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   line-height: 1.45;
 }
 
@@ -2190,7 +2191,7 @@ a.salon-bio {
   margin-top: 0.4rem;
   color: rgba(236, 228, 242, 0.72);
   font-family: var(--font-family);
-  font-size: 1rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -2242,8 +2243,8 @@ a.salon-bio {
 .salon-body {
   margin-top: 1.2rem;
   font-family: var(--font-family);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 0.94rem;
+  line-height: 1.65;
 }
 
 .salon-body p,
@@ -2258,7 +2259,12 @@ a.salon-bio {
   margin: 1.6rem 0 0.55rem;
   font-family: var(--font-display);
   font-weight: 400;
+  font-size: 1.35rem;
   line-height: 1.25;
+}
+
+.salon-body h3 {
+  font-size: 1.15rem;
 }
 
 .salon-body img,
