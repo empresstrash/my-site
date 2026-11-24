@@ -175,7 +175,10 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
   const run = async () => {
     if (stopped) return;
     try {
-      const response = await fetch(`/api/vr/x-chat?since=${encodeURIComponent(since)}`, { cache: "no-store" });
+      const response = await fetch(`/api/vr/x-chat?since=${encodeURIComponent(since)}`, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(6000),
+      });
       if (stopped) return;
       if (!response.ok) throw new Error("x");
       const body = (await response.json()) as {
@@ -202,7 +205,7 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
         onStatus("X waiting");
       }
     } catch {
-      onStatus("X reconnecting");
+      if (!broadcast) onStatus("X reconnecting");
     }
     if (stopped) return;
     retry = setTimeout(() => void run(), 300);

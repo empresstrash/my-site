@@ -299,7 +299,7 @@ async function liveChatLines(broadcastId: string, mediaKey: string, since: strin
   if (!status?.sessionId) return null;
   const params = new URLSearchParams({ broadcastId, sessionId: status.sessionId });
   if (since) params.set("cursor", since);
-  const body = await readOpenChat(`${LIVE_CHAT}?${params.toString()}`, token, since ? 8000 : 2500);
+  const body = await readOpenChat(`${LIVE_CHAT}?${params.toString()}`, token, 2000);
   const lines = linesFromNdjson(body).filter((line) => !since || (line.id.split("-")[1] || "") > since);
   if (lines.some((line) => line.name === "X")) {
     await rememberSenders(lines.filter((line) => line.name === "X").map((line) => line.id.split("-").pop() || ""));
