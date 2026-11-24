@@ -2,6 +2,9 @@ const PROFILE = "https://x.com/EmpressTrash";
 const USER_ID = "1254946754107109377";
 const API = "https://api.x.com/1.1";
 const CHAT_ACCESS = "https://proxsee-cf.pscp.tv/api/v2/accessChatPublic";
+const LIVE_CHAT = "https://api.x.com/live-chat";
+const SENDER_QUERY =
+  "https://api.x.com/graphql/nMFTyvEHqhifo5L5KT6AMw/broadcastChatSessionSendersQuery";
 const BEARER =
   "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs=1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
 const UA =
@@ -13,6 +16,7 @@ type Live = { id: string; mediaKey: string };
 type OpenChat = { id: string; endpoint: string; access: string };
 
 let guest: { token: string; until: number } | null = null;
+const senderNames = new Map<string, string>();
 
 export function xChatConfigured(): boolean {
   return true;
@@ -169,9 +173,88 @@ async function recentLines(chat: OpenChat): Promise<XChatLine[]> {
   return lines.sort((a, b) => a.at - b.at).slice(-40);
 }
 
+function chatMillis(ts: string): number {
+  try {
+    return Number(BigInt(ts) / BigInt(1000000));
+  } catch {
+    return Date.now();
+  }
+}
+
+async function rememberSenders(ids: string[]): Promise<void> {
+  const missing = [...new Set(ids)].filter((id) => id && !senderNames.has(id)).slice(0, 80);
+  if (!missing.length) return;
+  const token = await guestToken();
+  if (!token) return;
+  const variables = JSON.stringify({
+    userIds: missing,
+    __relay_internal__pv__xclientsfeaturesappviewerisloggedinrelayprovider: false,
+  });
+  const response = await fetch(`${SENDER_QUERY}?variables=${encodeURIComponent(variables)}`, {
+    headers: {
+      authorization: `Bearer ${BEARER}`,
+      "x-guest-token": token,
+      "user-agent": UA,
+      accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!response.ok) return;
+  const json = (await response.json()) as {
+    data?: { user_results_by_rest_ids?: { result?: { rest_id?: string; core?: { name?: string; screen_name?: string } } }[] };
+  };
+  for (const row of json.data?.user_results_by_rest_ids ?? []) {
+    const id = row.result?.rest_id;
+    const name = row.result?.core?.name || row.result?.core?.screen_name;
+    if (id && name) senderNames.set(id, name.slice(0, 80));
+  }
+}
+
+async function liveChatLines(broadcastId: string): Promise<XChatLine[] | null> {
+  const token = await guestToken();
+  if (!token) return null;
+  const response = await fetch(`${LIVE_CHAT}?broadcastId=${encodeURIComponent(broadcastId)}&replay=1`, {
+    headers: {
+      authorization: `Bearer ${BEARER}`,
+      "x-guest-token": token,
+      "x-twitter-active-user": "yes",
+      "user-agent": UA,
+      accept: "application/x-ndjson",
+    },
+    cache: "no-store",
+  });
+  if (response.status === 401 || response.status === 403) guest = null;
+  if (!response.ok) return null;
+  const raw: { ts: string; userId: string; message: string }[] = [];
+  for (const row of (await response.text()).split("\n")) {
+    const trimmed = row.trim();
+    if (!trimmed) continue;
+    try {
+      const item = JSON.parse(trimmed) as { ts?: string; chatType?: number; userId?: string; message?: string };
+      const text = typeof item.message === "string" ? item.message.trim().slice(0, 500) : "";
+      if (item.chatType !== 1 || !text || !item.ts || !item.userId) continue;
+      raw.push({ ts: item.ts, userId: item.userId, message: text });
+    } catch {
+      /* a blank or partial line */
+    }
+  }
+  await rememberSenders(raw.map((item) => item.userId));
+  return raw
+    .map((item) => ({
+      id: `x-${item.ts}-${item.userId}`,
+      name: senderNames.get(item.userId) || "X",
+      text: item.message,
+      at: chatMillis(item.ts),
+    }))
+    .sort((a, b) => a.at - b.at)
+    .slice(-40);
+}
+
 export async function readXChat(): Promise<{ status: "live" | "waiting"; broadcast?: string; lines: XChatLine[] }> {
   const live = await findLive().catch(() => null);
   if (!live) return { status: "waiting", lines: [] };
+  const lines = await liveChatLines(live.id).catch(() => null);
+  if (lines) return { status: "live", broadcast: live.id, lines };
   const chat = await openChat(live).catch(() => null);
   if (!chat) return { status: "live", broadcast: live.id, lines: [] };
   return { status: "live", broadcast: live.id, lines: await recentLines(chat).catch(() => []) };
