@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
-
 :root {
-  --font-family: 'Courier Prime', 'Courier New', Courier, monospace;
-  --font-display: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
+  --font-family: var(--font-reading), 'Roboto Mono', monospace;
+  --font-display: var(--font-pixel), 'Pixelify Sans', sans-serif;
   /* Menu sans from next/font (--font-barlow on <html>); no system-ui fallback that hides the swap */
   --font-menu: var(--font-barlow), 'Barlow', sans-serif;
   --color-bg: #000000;
@@ -376,11 +374,29 @@ html, body {
 
 body {
   font-family: var(--font-family);
+  font-size: 0.94rem;
   background: var(--color-bg);
   color: var(--color-text);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.content :is(h1, h2, h3, h4, h5, h6),
+.content a {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
+}
+
+.content :is(p, li, blockquote, figcaption) {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: auto;
+}
+
+.content :is(p, li, blockquote) a {
+  font-family: var(--font-display);
+  font-size: 1.12em;
+  -webkit-font-smoothing: none;
 }
 
 .content {
@@ -477,7 +493,10 @@ body {
   z-index: 3;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.58rem;
+  font-size: 1.82rem;
+  text-transform: uppercase;
+  white-space: normal;
+  line-height: 0.95;
   color: #ffffff;
   text-align: center;
   text-shadow:
@@ -600,10 +619,11 @@ body {
   padding: 0.82rem 1rem;
   padding-left: 1.15rem;
   padding-right: 0.85rem;
-  /* Top-level: typewriter; nested stays DM/Barlow sans */
-  font-family: var(--font-family) !important;
-  font-weight: 400;
-  font-size: 0.88rem;
+  /* Top of the menu is the largest pixel cut. Each nested level steps down. */
+  font-family: var(--font-display) !important;
+  -webkit-font-smoothing: none;
+  font-weight: 500;
+  font-size: 1.24rem;
   letter-spacing: 0.03em;
   backdrop-filter: none;
 }
@@ -787,7 +807,10 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.5),
     inset 1px 0 0 rgba(255, 255, 255, 0.03),
     inset -1px 0 0 rgba(0, 0, 0, 0.28);
-  font-size: 0.9rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+  font-size: 1.08rem;
   margin-left: 0.5rem;
   margin-bottom: 0.5rem;
   max-width: calc(100% - 0.6rem);
@@ -820,7 +843,7 @@ body {
   backdrop-filter: blur(14px) saturate(1.3) brightness(0.93);
   -webkit-backdrop-filter: blur(14px) saturate(1.3) brightness(0.93);
   border: 1px solid rgba(var(--outline-teal-top-rgb), 0.55) !important;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 /* Next.js Link uses <a class="menu-button"> — keep box look, not leaf-link look */
@@ -865,7 +888,7 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.45),
     inset 1px 0 0 rgba(255, 255, 255, 0.02),
     inset -1px 0 0 rgba(0, 0, 0, 0.22);
-  font-size: 0.85rem;
+  font-size: 0.98rem;
   margin-left: 0.75rem;
   color: rgba(255,255,255,0.94);
   max-width: calc(100% - 0.8rem);
@@ -873,9 +896,9 @@ body {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 1), 0 2px 7px rgba(0, 0, 0, 1), 0 0 16px rgba(0, 0, 0, 0.82);
 }
 
-/* Level-2 expandable headers (decentraland/substrata): lighter font, left-aligned */
+/* Level-2 expandable headers (decentraland/substrata): light pixel, left-aligned */
 .menu-submenu .menu-submenu > .menu-item > button.menu-button {
-  font-weight: 300;
+  font-weight: 400;
   text-align: left;
   border: 1px solid rgba(var(--outline-teal-low-rgb), 0.42);
 }
@@ -925,7 +948,7 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.34),
     inset 1px 0 0 rgba(255, 255, 255, 0.04),
     inset -1px 0 0 rgba(0, 0, 0, 0.14);
-  font-size: 0.83rem;
+  font-size: 0.9rem;
   margin-left: 0.75rem;
   margin-bottom: 0.35rem;
   color: rgba(255, 255, 255, 0.9);
@@ -945,7 +968,9 @@ body {
   -webkit-backdrop-filter: blur(12px) saturate(1.3) brightness(1.04);
   max-width: calc(100% - 0.8rem);
   text-align: right;
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-weight: 400;
+  -webkit-font-smoothing: none;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 1), 0 2px 8px rgba(0, 0, 0, 1), 0 0 18px rgba(0, 0, 0, 0.88);
 }
 
@@ -1201,8 +1226,8 @@ body {
 }
 
 .menu-submenu:has(> .icon-grid-item) > .menu-item > .menu-button.connect-18-header {
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 1.08rem;
+  font-weight: 400;
   padding-top: 0.4rem;
   padding-bottom: 0.4rem;
   text-align: left;
@@ -1248,7 +1273,11 @@ body {
 
 .menu-item { list-style:none; }
 .side-menu .menu-button,
-.side-menu .menu-link,
+.side-menu .menu-link {
+  font-family: var(--font-display) !important;
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+}
 .side-menu .side-menu-subtitle {
   font-family: var(--font-menu) !important;
 }
@@ -1673,7 +1702,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   }
 
   .side-menu-title span {
-    font-size: clamp(1.15rem, 5vw, 1.4rem);
+    font-size: clamp(1.32rem, 5.6vw, 1.62rem);
     letter-spacing: 0.03em;
   }
 
@@ -1690,7 +1719,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   .side-list > .menu-item > .menu-button,
   .side-list > .menu-item > .menu-link {
     padding: 0.78rem 0.85rem;
-    font-size: 0.84rem;
+    font-size: 1.12rem;
   }
 
   /* header full width — shorter bar, keep logo buffer */
@@ -1768,7 +1797,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 /* Very small phones */
 @media (max-width: 380px) {
   .side-menu-title span {
-    font-size: 1.1rem;
+    font-size: 1.28rem;
     letter-spacing: 0.025em;
   }
 
@@ -1851,8 +1880,9 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   border-radius: 0;
   text-decoration: none;
   color: rgba(220, 214, 230, 0.62);
-  font-family: var(--font-menu);
-  font-size: 1.02rem;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
+  font-size: 1.15rem;
   letter-spacing: 0.08em;
   text-transform: lowercase;
   background: transparent;
@@ -1946,8 +1976,9 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   grid-column: 1;
   margin: 0;
   color: #ff4db8;
-  font-family: var(--font-menu);
-  font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
+  font-size: clamp(1.52rem, 2.9vw, 2.05rem);
   font-weight: 400;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -1974,8 +2005,10 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   border: 1px solid rgba(255, 46, 184, 0.55);
   background: rgba(255, 0, 160, 0.14);
   color: #ff4db8;
-  font-family: var(--font-menu);
-  font-size: 0.95rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+  font-size: 1.08rem;
   letter-spacing: 0.08em;
   text-transform: lowercase;
   text-decoration: none;
@@ -2048,7 +2081,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 .salon-bio p {
   margin: 0.25rem 0 0.45rem;
   font-family: var(--font-family);
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   line-height: 1.45;
 }
 
@@ -2149,7 +2182,7 @@ a.salon-bio {
 
 .salon-title {
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.62rem;
   line-height: 1.25;
 }
 
@@ -2158,7 +2191,7 @@ a.salon-bio {
   margin-top: 0.4rem;
   color: rgba(236, 228, 242, 0.72);
   font-family: var(--font-family);
-  font-size: 1rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -2201,7 +2234,7 @@ a.salon-bio {
   margin-top: 0;
   margin-bottom: 0.45rem;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  font-size: clamp(2rem, 4.4vw, 3rem);
   font-weight: 400;
   line-height: 1.15;
   color: #fff;
@@ -2210,8 +2243,8 @@ a.salon-bio {
 .salon-body {
   margin-top: 1.2rem;
   font-family: var(--font-family);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 0.94rem;
+  line-height: 1.65;
 }
 
 .salon-body p,
@@ -2226,7 +2259,12 @@ a.salon-bio {
   margin: 1.6rem 0 0.55rem;
   font-family: var(--font-display);
   font-weight: 400;
+  font-size: 1.35rem;
   line-height: 1.25;
+}
+
+.salon-body h3 {
+  font-size: 1.15rem;
 }
 
 .salon-body img,
@@ -2254,7 +2292,7 @@ a.salon-bio {
 .salon-pop {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 4000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2271,8 +2309,8 @@ a.salon-bio {
 
 .salon-pop-card {
   position: relative;
-  width: min(520px, 100%);
-  padding: 0.85rem 0.85rem 1rem;
+  width: min(22.5rem, calc(100vw - 1.5rem));
+  padding: 1rem 1.05rem 1.15rem;
   overflow: hidden;
   border: 1px solid rgba(255, 46, 184, 0.5);
   border-radius: 18px;
@@ -2287,10 +2325,19 @@ a.salon-bio {
   margin-bottom: 0.7rem;
 }
 
+.salon-pop-bar p,
+.salon-pop-form h2,
+.salon-pop-bar button,
+.salon-pop-row button,
+.salon-pop-legal a {
+  font-family: var(--font-display);
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+}
+
 .salon-pop-bar p {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.52rem;
   letter-spacing: 0.04em;
 }
 
@@ -2298,13 +2345,66 @@ a.salon-bio {
   border-radius: 12px;
 }
 
-.salon-pop-card iframe {
-  display: block;
-  width: min(480px, 100%);
-  height: 320px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
+.salon-pop-form h2 {
+  margin: 0.15rem 0 0.45rem;
+  font-size: 1.45rem;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.salon-pop-blurb,
+.salon-pop-legal {
+  margin: 0;
+  font-family: var(--font-family);
+  text-align: center;
+}
+
+.salon-pop-blurb {
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.salon-pop-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0.75rem;
+}
+
+.salon-pop-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(255, 46, 184, 0.45);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f6f1f8;
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+}
+
+.salon-pop-row input::placeholder {
+  color: rgba(236, 228, 242, 0.45);
+}
+
+.salon-pop-row button {
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #ff4db8;
+  color: #1a0612;
+}
+
+.salon-pop-legal {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(236, 228, 242, 0.62);
+}
+
+.salon-pop-legal a {
+  font-size: 1.05em;
+  letter-spacing: 0.02em;
 }
 
 @media (max-width: 900px) {
@@ -2335,7 +2435,7 @@ a.salon-bio {
   .salon-mast h1 {
     grid-column: 1;
     grid-row: 1;
-    font-size: 1.35rem;
+    font-size: 1.52rem;
     padding-inline: 6.5rem;
   }
 
@@ -2346,12 +2446,7 @@ a.salon-bio {
   }
 
   .salon-pop-card {
-    width: min(520px, calc(100vw - 1.5rem));
-  }
-
-  .salon-pop-card iframe {
-    width: 100%;
-    height: 300px;
+    width: min(22.5rem, calc(100vw - 1.5rem));
   }
 }
 
@@ -2365,7 +2460,7 @@ a.salon-bio {
     max-width: none;
     min-height: 2.55rem;
     padding: 0.55rem 0.45rem;
-    font-size: 0.86rem;
+    font-size: 0.98rem;
     letter-spacing: 0.05em;
   }
 }

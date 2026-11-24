@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Suspense, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 type HomeView = 'substack' | 'emporium';
@@ -35,7 +36,13 @@ function formatDate(iso: string): string {
 }
 
 function SubscribePopup({ onClose }: { onClose: () => void }) {
-  return (
+  const [sent, setSent] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="salon-pop" role="dialog" aria-modal="true" aria-labelledby="salon-pop-title">
       <button type="button" className="salon-pop-scrim" aria-label="Close subscribe" onClick={onClose} />
       <div className="salon-pop-card">
@@ -43,17 +50,46 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
           <p id="salon-pop-title">subscribe</p>
           <button type="button" onClick={onClose}>close</button>
         </div>
-        <iframe
-          src="https://empresstrash.substack.com/embed?transparent=1&light=1"
-          title="Subscribe to Salon de l'Empress"
-          width={480}
-          height={320}
-          style={{ border: 0, background: 'transparent' }}
-          scrolling="no"
-          sandbox="allow-scripts allow-forms allow-same-origin"
-        />
+        {sent ? (
+          <p className="salon-pop-blurb">Check your inbox to confirm.</p>
+        ) : (
+          <form
+            className="salon-pop-form"
+            action="https://empresstrash.substack.com/api/v1/free?nojs=true"
+            method="post"
+            target="salon-subscribe"
+            onSubmit={() => setSent(true)}
+          >
+            <h2>Salon de l&apos;Empress</h2>
+            <p className="salon-pop-blurb">
+              Empress&apos;s journal and guide to art on and off the blockchain, celebrating creativity in all its wild, unfiltered forms.
+            </p>
+            <div className="salon-pop-row">
+              <input type="email" name="email" required placeholder="Type your email..." aria-label="Email" autoComplete="email" />
+              <button type="submit" className="salon-sub-btn">subscribe</button>
+            </div>
+            <input type="hidden" name="first_url" value="https://empresstrash.substack.com/" />
+            <p className="salon-pop-legal">
+              By subscribing you agree to{' '}
+              <a href="https://empresstrash.substack.com/tos" target="_blank" rel="noopener noreferrer">
+                Substack&apos;s Terms of Use
+              </a>
+              ,{' '}
+              <a href="https://empresstrash.substack.com/privacy" target="_blank" rel="noopener noreferrer">
+                our Privacy Policy
+              </a>{' '}
+              and{' '}
+              <a href="https://substack.com/ccpa#personal-data-collected" target="_blank" rel="noopener noreferrer">
+                our Information collection notice
+              </a>
+              .
+            </p>
+          </form>
+        )}
+        <iframe name="salon-subscribe" title="Subscribe result" hidden />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -257,12 +293,19 @@ function HomeContent() {
                   <p className="salon-status">Loading…</p>
                 ) : (
                   <ol className="salon-list">
-                    {posts.map((post) => (
+                    {posts.map((post, index) => (
                       <li key={post.slug} className="menu-glass-panel">
                         <button type="button" onClick={() => openPost(post.slug)}>
                           {post.image ? (
                             <span className="salon-thumb-frame">
-                              <img className="salon-thumb" src={post.image} alt="" />
+                              <img
+                                className="salon-thumb"
+                                src={post.image}
+                                alt=""
+                                loading={index < 2 ? "eager" : "lazy"}
+                                decoding="async"
+                                fetchPriority={index === 0 ? "high" : "low"}
+                              />
                             </span>
                           ) : null}
                           <span className="salon-copy">
@@ -289,7 +332,9 @@ function HomeContent() {
         )}
       </div>
 
-      {view === 'substack' && subscribeOpen ? <SubscribePopup onClose={() => setSubscribeOpen(false)} /> : null}
+      {view === 'substack' && subscribeOpen && (posts !== null || listFailed) ? (
+        <SubscribePopup onClose={() => setSubscribeOpen(false)} />
+      ) : null}
     </div>
   );
 }

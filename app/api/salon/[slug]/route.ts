@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
+import { fetchArchive } from "@/lib/substack/archive";
 
 export const revalidate = 600;
 
-const ARCHIVE = "https://empresstrash.substack.com/api/v1/archive";
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const POST_ORIGIN = "https://empresstrash.substack.com/p/";
 const MEDIA_FRAME = /^https:\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com|player\.vimeo\.com|open\.spotify\.com)\//i;
@@ -30,26 +30,18 @@ function sanitize(html: string): string {
 type KnownPost = { slug: string; url: string };
 
 async function knownPosts(): Promise<KnownPost[]> {
-  const offsets = [0, 20, 40, 60];
-  const batches = await Promise.all(
-    offsets.map(async (offset) => {
-      const response = await fetch(`${ARCHIVE}?sort=new&offset=${offset}&limit=20`, {
-        next: { revalidate: 600 },
-        headers: { Accept: "application/json", "User-Agent": "empresstrash.com" },
-      });
-      if (!response.ok) return [];
-      const payload = (await response.json()) as { slug?: string; canonical_url?: string }[];
-      return Array.isArray(payload) ? payload : [];
-    }),
-  );
+  let items: { slug?: string; canonical_url?: string }[];
+  try {
+    items = await fetchArchive();
+  } catch {
+    return [];
+  }
   const posts: KnownPost[] = [];
-  for (const batch of batches) {
-    for (const item of batch) {
-      const slug = item.slug ?? "";
-      if (!SLUG.test(slug)) continue;
-      const canonical = item.canonical_url ?? "";
-      posts.push({ slug, url: canonical.startsWith(POST_ORIGIN) ? canonical : `${POST_ORIGIN}${slug}` });
-    }
+  for (const item of items) {
+    const slug = item.slug ?? "";
+    if (!SLUG.test(slug)) continue;
+    const canonical = item.canonical_url ?? "";
+    posts.push({ slug, url: canonical.startsWith(POST_ORIGIN) ? canonical : `${POST_ORIGIN}${slug}` });
   }
   return posts;
 }

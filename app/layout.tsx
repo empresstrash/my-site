@@ -1,6 +1,6 @@
 import './globals.css';
 import ClientMenu from './components/ClientMenu';
-import { Barlow } from 'next/font/google';
+import { Barlow, Pixelify_Sans, Roboto_Mono } from 'next/font/google';
 import { headers } from 'next/headers';
 
 /** Menu sans — loaded via next/font so it actually applies (CSS @import was easy to miss). */
@@ -11,13 +11,28 @@ const menuSans = Barlow({
   display: 'swap',
 });
 
+const pixel = Pixelify_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-pixel',
+  display: 'swap',
+});
+
+const reading = Roboto_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-reading',
+  display: 'swap',
+});
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const path = (await headers()).get('x-pathname') ?? '';
   const booth = path === '/vr' || path.startsWith('/vr/');
   const kidPix = path === '/kid-pix';
 
   return (
-    <html lang="en" className={`${menuSans.variable}${booth ? ' pvr-still vr-booth' : ''}${kidPix ? ' vr-booth' : ''}`}>
+    <html lang="en" className={`${menuSans.variable} ${pixel.variable} ${reading.variable}${booth ? ' pvr-still vr-booth' : ''}${kidPix ? ' vr-booth' : ''}`}>
       <head>
         <title>empress trash's super site</title>
         <link rel="icon" href="/crown-favicon.png" type="image/png" sizes="64x64" />
