@@ -3,6 +3,7 @@ import { cookieIsValid, VR_COOKIE } from "@/lib/vr/gate";
 import { readXChat, xChatConfigured } from "@/lib/vr/x-broadcast";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 15;
 
 export async function GET(request: Request) {
   const jar = await cookies();

@@ -47,7 +47,7 @@ function loadSavedLines(): Line[] {
     const parsed = JSON.parse(raw) as { savedAt?: number; lines?: unknown };
     if (!parsed?.savedAt || Date.now() - parsed.savedAt > CHAT_KEEP_MS) return [];
     if (!Array.isArray(parsed.lines)) return [];
-    return parsed.lines.filter(isSavedLine).slice(-200);
+    return parsed.lines.filter(isSavedLine).filter((line) => line.source !== "x").slice(-200);
   } catch {
     return [];
   }
@@ -55,7 +55,7 @@ function loadSavedLines(): Line[] {
 
 function saveLines(lines: Line[]) {
   try {
-    localStorage.setItem(CHAT_KEY, JSON.stringify({ savedAt: Date.now(), lines: lines.slice(-200) }));
+    localStorage.setItem(CHAT_KEY, JSON.stringify({ savedAt: Date.now(), lines: lines.filter((line) => line.source !== "x").slice(-200) }));
   } catch {
     /* the headset can block storage; the live list still stays in the page */
   }
@@ -192,10 +192,8 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
           if (line.id && line.text) onLine({ id: line.id, source: "x", name: line.name || "X", text: line.text, at: line.at || Date.now() });
         }
       } else {
-        if (broadcast) {
-          broadcast = "";
-          onReset();
-        }
+        broadcast = "";
+        onReset();
         onStatus("X waiting");
       }
     } catch {

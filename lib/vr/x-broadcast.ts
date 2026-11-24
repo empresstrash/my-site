@@ -255,7 +255,8 @@ function linesFromNdjson(body: string): XChatLine[] {
 
 async function readOpenChat(url: string, token: string): Promise<string> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 1400);
+  const timer = setTimeout(() => controller.abort(), 3500);
+  let quiet: ReturnType<typeof setTimeout> | null = null;
   let text = "";
   try {
     const response = await fetch(url, { headers: chatHeaders(token), signal: controller.signal, cache: "no-store" });
@@ -267,12 +268,17 @@ async function readOpenChat(url: string, token: string): Promise<string> {
       const { done, value } = await reader.read();
       if (done) break;
       text += decoder.decode(value, { stream: true });
+      if (text.includes("\n")) {
+        if (quiet) clearTimeout(quiet);
+        quiet = setTimeout(() => controller.abort(), 200);
+      }
       if (text.length > 200000) break;
     }
   } catch {
-    /* the short read is closed on purpose */
+    /* the short read is closed once the live lines have arrived */
   } finally {
     clearTimeout(timer);
+    if (quiet) clearTimeout(quiet);
   }
   return text;
 }
@@ -299,9 +305,6 @@ async function liveChatLines(broadcastId: string, mediaKey: string): Promise<XCh
 export async function readXChat(): Promise<{ status: "live" | "waiting"; broadcast?: string; lines: XChatLine[] }> {
   const live = await findLive().catch(() => null);
   if (!live) return { status: "waiting", lines: [] };
-  const lines = await liveChatLines(live.id, live.mediaKey).catch(() => null);
-  if (lines) return { status: "live", broadcast: live.id, lines };
-  const chat = await openChat(live).catch(() => null);
-  if (!chat) return { status: "live", broadcast: live.id, lines: [] };
-  return { status: "live", broadcast: live.id, lines: await recentLines(chat).catch(() => []) };
+  const lines = (await liveChatLines(live.id, live.mediaKey).catch(() => null)) ?? [];
+  return { status: "live", broadcast: live.id, lines };
 }
