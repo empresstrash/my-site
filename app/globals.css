@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
-
 :root {
-  --font-family: 'Courier Prime', 'Courier New', Courier, monospace;
-  --font-display: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
+  --font-family: var(--font-reading), 'Instrument Sans', sans-serif;
+  --font-display: var(--font-pixel), 'Pixelify Sans', sans-serif;
   /* Menu sans from next/font (--font-barlow on <html>); no system-ui fallback that hides the swap */
   --font-menu: var(--font-barlow), 'Barlow', sans-serif;
   --color-bg: #000000;
@@ -383,6 +381,22 @@ body {
   overflow: hidden;
 }
 
+.content :is(h1, h2, h3, h4, h5, h6),
+.content a {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
+}
+
+.content :is(p, li, blockquote, figcaption) {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: auto;
+}
+
+.content :is(p, li, blockquote) a {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
+}
+
 .content {
   flex: 1;
   min-height: 0;
@@ -600,8 +614,9 @@ body {
   padding: 0.82rem 1rem;
   padding-left: 1.15rem;
   padding-right: 0.85rem;
-  /* Top-level: typewriter; nested stays DM/Barlow sans */
-  font-family: var(--font-family) !important;
+  /* Top-level links are pixel; nested rows stay on the menu sans. */
+  font-family: var(--font-display) !important;
+  -webkit-font-smoothing: none;
   font-weight: 400;
   font-size: 0.88rem;
   letter-spacing: 0.03em;
@@ -1851,7 +1866,8 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   border-radius: 0;
   text-decoration: none;
   color: rgba(220, 214, 230, 0.62);
-  font-family: var(--font-menu);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
   font-size: 1.02rem;
   letter-spacing: 0.08em;
   text-transform: lowercase;
@@ -1946,7 +1962,8 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   grid-column: 1;
   margin: 0;
   color: #ff4db8;
-  font-family: var(--font-menu);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: none;
   font-size: clamp(1.35rem, 2.6vw, 1.85rem);
   font-weight: 400;
   letter-spacing: 0.08em;
