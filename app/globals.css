@@ -394,6 +394,7 @@ body {
 
 .content :is(p, li, blockquote) a {
   font-family: var(--font-display);
+  font-size: 1.12em;
   -webkit-font-smoothing: none;
 }
 
@@ -491,7 +492,10 @@ body {
   z-index: 3;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.58rem;
+  font-size: 1.82rem;
+  text-transform: uppercase;
+  white-space: normal;
+  line-height: 0.95;
   color: #ffffff;
   text-align: center;
   text-shadow:
@@ -618,7 +622,7 @@ body {
   font-family: var(--font-display) !important;
   -webkit-font-smoothing: none;
   font-weight: 500;
-  font-size: 0.88rem;
+  font-size: 1rem;
   letter-spacing: 0.03em;
   backdrop-filter: none;
 }
@@ -805,7 +809,7 @@ body {
   font-family: var(--font-display);
   font-weight: 400;
   -webkit-font-smoothing: none;
-  font-size: 0.9rem;
+  font-size: 1.02rem;
   margin-left: 0.5rem;
   margin-bottom: 0.5rem;
   max-width: calc(100% - 0.6rem);
@@ -883,7 +887,7 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.45),
     inset 1px 0 0 rgba(255, 255, 255, 0.02),
     inset -1px 0 0 rgba(0, 0, 0, 0.22);
-  font-size: 0.85rem;
+  font-size: 0.96rem;
   margin-left: 0.75rem;
   color: rgba(255,255,255,0.94);
   max-width: calc(100% - 0.8rem);
@@ -943,7 +947,7 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.34),
     inset 1px 0 0 rgba(255, 255, 255, 0.04),
     inset -1px 0 0 rgba(0, 0, 0, 0.14);
-  font-size: 0.83rem;
+  font-size: 0.94rem;
   margin-left: 0.75rem;
   margin-bottom: 0.35rem;
   color: rgba(255, 255, 255, 0.9);
@@ -1221,7 +1225,7 @@ body {
 }
 
 .menu-submenu:has(> .icon-grid-item) > .menu-item > .menu-button.connect-18-header {
-  font-size: 0.9rem;
+  font-size: 1.02rem;
   font-weight: 400;
   padding-top: 0.4rem;
   padding-bottom: 0.4rem;
@@ -1697,7 +1701,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   }
 
   .side-menu-title span {
-    font-size: clamp(1.15rem, 5vw, 1.4rem);
+    font-size: clamp(1.32rem, 5.6vw, 1.62rem);
     letter-spacing: 0.03em;
   }
 
@@ -1792,7 +1796,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 /* Very small phones */
 @media (max-width: 380px) {
   .side-menu-title span {
-    font-size: 1.1rem;
+    font-size: 1.28rem;
     letter-spacing: 0.025em;
   }
 
@@ -1877,7 +1881,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   color: rgba(220, 214, 230, 0.62);
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
-  font-size: 1.02rem;
+  font-size: 1.15rem;
   letter-spacing: 0.08em;
   text-transform: lowercase;
   background: transparent;
@@ -1973,7 +1977,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   color: #ff4db8;
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
-  font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+  font-size: clamp(1.52rem, 2.9vw, 2.05rem);
   font-weight: 400;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -2003,7 +2007,7 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   font-family: var(--font-display);
   font-weight: 400;
   -webkit-font-smoothing: none;
-  font-size: 0.95rem;
+  font-size: 1.08rem;
   letter-spacing: 0.08em;
   text-transform: lowercase;
   text-decoration: none;
@@ -2177,7 +2181,7 @@ a.salon-bio {
 
 .salon-title {
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.62rem;
   line-height: 1.25;
 }
 
@@ -2229,7 +2233,7 @@ a.salon-bio {
   margin-top: 0;
   margin-bottom: 0.45rem;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  font-size: clamp(2rem, 4.4vw, 3rem);
   font-weight: 400;
   line-height: 1.15;
   color: #fff;
@@ -2318,7 +2322,7 @@ a.salon-bio {
 .salon-pop-bar p {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.52rem;
   letter-spacing: 0.04em;
 }
 
@@ -2363,7 +2367,7 @@ a.salon-bio {
   .salon-mast h1 {
     grid-column: 1;
     grid-row: 1;
-    font-size: 1.35rem;
+    font-size: 1.52rem;
     padding-inline: 6.5rem;
   }
 
@@ -2393,7 +2397,7 @@ a.salon-bio {
     max-width: none;
     min-height: 2.55rem;
     padding: 0.55rem 0.45rem;
-    font-size: 0.86rem;
+    font-size: 0.98rem;
     letter-spacing: 0.05em;
   }
 }
