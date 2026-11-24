@@ -24,11 +24,15 @@ export function liveBroadcastFromProfile(html: string): Live | null {
     /"broadcast_id":"([A-Za-z0-9]{8,})"[\s\S]{0,12000}?"media_key":"(\d+_\d+)"[\s\S]{0,800}?"state":"([A-Za-z]+)"/g;
   let best: (Live & { start: number }) | null = null;
   for (const match of plain.matchAll(pattern)) {
-    if (match[3] !== "Running") continue;
+    if (match[3].toLowerCase() !== "running") continue;
     const start = Number(/"start_time":(\d+)/.exec(match[0])?.[1] ?? 0);
     if (!best || start >= best.start) best = { id: match[1], mediaKey: match[2], start };
   }
-  return best ? { id: best.id, mediaKey: best.mediaKey } : null;
+  if (best) return { id: best.id, mediaKey: best.mediaKey };
+  const card =
+    /"string_value":"https:\/\/x\.com\/i\/broadcasts\/([A-Za-z0-9]{8,})"[\s\S]{0,500}?"broadcast_state"[\s\S]{0,200}?"string_value":"RUNNING"/;
+  const hit = card.exec(plain);
+  return hit ? { id: hit[1], mediaKey: "" } : null;
 }
 
 export function parseBroadcastChat(message: { kind?: number; payload?: string }): XChatLine | null {
@@ -186,7 +190,7 @@ export async function openXChatStream(signal: AbortSignal): Promise<Response> {
     async start(controller) {
       const deadline = Date.now() + 45_000;
       const seen = new Set<string>();
-      let socket: WebSocket | null = null;
+      const room: { socket: WebSocket | null } = { socket: null };
       const send = (body: unknown) => {
         try {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(body)}\n\n`));
@@ -200,46 +204,73 @@ export async function openXChatStream(signal: AbortSignal): Promise<Response> {
         send({ line });
       };
       const closeSocket = () => {
-        if (!socket) return;
-        socket.close();
-        socket = null;
+        room.socket?.close();
+        room.socket = null;
+      };
+      let attached = "";
+      const listen = (chat: OpenChat) => {
+        closeSocket();
+        const wsUrl = `${chat.endpoint.replace(/^http/, "ws")}/chatapi/v1/chatnow`;
+        const current = new WebSocket(wsUrl);
+        room.socket = current;
+        current.addEventListener("open", () => {
+          current.send(JSON.stringify({ payload: JSON.stringify({ access_token: chat.access }), kind: 3 }));
+          current.send(
+            JSON.stringify({
+              payload: JSON.stringify({ body: JSON.stringify({ room: chat.id }), kind: 1 }),
+              kind: 2,
+            }),
+          );
+        });
+        current.addEventListener("message", (event) => {
+          void chatFrame(event.data)
+            .then((raw) => {
+              if (!raw) return;
+              const msg = JSON.parse(raw) as { kind?: number; payload?: string };
+              const line = parseBroadcastChat(msg);
+              if (line) take(line);
+            })
+            .catch(() => undefined);
+        });
+        current.addEventListener("close", () => {
+          if (room.socket === current) room.socket = null;
+        });
       };
       try {
         while (!signal.aborted && Date.now() < deadline) {
           const live = await findLive().catch(() => null);
-          const chat = live ? await openChat(live).catch(() => null) : null;
-          if (!chat) {
-            send({ status: "waiting" });
-            await sleep(8000, signal);
+          if (!live) {
+            if (attached) {
+              attached = "";
+              seen.clear();
+              closeSocket();
+              send({ status: "waiting", reset: true });
+            } else {
+              send({ status: "waiting" });
+            }
+            await sleep(4000, signal);
             continue;
           }
-          send({ status: "live" });
-          for (const line of await recentLines(chat).catch(() => [])) take(line);
-          closeSocket();
-          const wsUrl = `${chat.endpoint.replace(/^http/, "ws")}/chatapi/v1/chatnow`;
-          socket = new WebSocket(wsUrl);
-          const current = socket;
-          current.addEventListener("open", () => {
-            current.send(JSON.stringify({ payload: JSON.stringify({ access_token: chat.access }), kind: 3 }));
-            current.send(
-              JSON.stringify({
-                payload: JSON.stringify({ body: JSON.stringify({ room: chat.id }), kind: 1 }),
-                kind: 2,
-              }),
-            );
-          });
-          current.addEventListener("message", (event) => {
-            void chatFrame(event.data)
-              .then((raw) => {
-                if (!raw) return;
-                const msg = JSON.parse(raw) as { kind?: number; payload?: string };
-                const line = parseBroadcastChat(msg);
-                if (line) take(line);
-              })
-              .catch(() => undefined);
-          });
-          await sleep(20000, signal);
-          closeSocket();
+          if (live.id === attached && room.socket?.readyState === WebSocket.OPEN) {
+            await sleep(4000, signal);
+            continue;
+          }
+          const chat = await openChat(live).catch(() => null);
+          if (!chat) {
+            send({ status: "waiting" });
+            await sleep(4000, signal);
+            continue;
+          }
+          if (chat.id !== attached) {
+            seen.clear();
+            send({ status: "live", reset: true });
+            attached = chat.id;
+            for (const line of await recentLines(chat).catch(() => [])) take(line);
+          } else {
+            send({ status: "live" });
+          }
+          listen(chat);
+          await sleep(4000, signal);
         }
       } catch {
         /* the headset closed the page */

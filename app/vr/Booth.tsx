@@ -170,6 +170,7 @@ function connectX(
   onLine: (line: Line) => void,
   onRemove: (id: string) => void,
   onStatus: (status: string) => void,
+  onReset: () => void,
 ): () => void {
   let stopped = false;
   let retry: ReturnType<typeof setTimeout> | null = null;
@@ -182,9 +183,8 @@ function connectX(
       if (stopped) return;
       const type = response.headers.get("content-type") || "";
       if (!response.ok || !response.body || !type.includes("text/event-stream")) {
-        onStatus("X off");
-        return;
-      }
+        onStatus("X reconnecting");
+      } else {
       onStatus("X waiting");
       reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -205,13 +205,15 @@ function connectX(
           const body = JSON.parse(data) as {
             off?: boolean;
             status?: string;
+            reset?: boolean;
             remove?: string;
             line?: { id: string; name: string; text: string; at: number };
           };
           if (body.off) {
-            onStatus("X off");
-            return;
+            stopped = true;
+            break;
           }
+          if (body.reset) onReset();
           if (body.status === "live") onStatus("X Live");
           if (body.status === "waiting") onStatus("X waiting");
           if (body.remove) onRemove(body.remove);
@@ -220,6 +222,7 @@ function connectX(
             onLine({ id: body.line.id, source: "x", name: body.line.name || "X", text: body.line.text, at: body.line.at || Date.now() });
           }
         }
+      }
       }
     } catch {
       /* retry below */
@@ -492,6 +495,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
           (line) => pushLine(line),
           (id) => setLines((current) => current.filter((item) => item.id !== id)),
           setXStatus,
+          () => setLines((current) => current.filter((item) => item.source !== "x")),
         );
       })
       .catch(() => undefined);
