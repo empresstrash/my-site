@@ -1976,6 +1976,8 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   grid-column: 1;
   margin: 0;
   color: #ff4db8;
+  /* The bar hue-cycles. This half-turn keeps the title on the opposite hue. */
+  filter: hue-rotate(180deg);
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
   font-size: clamp(1.52rem, 2.9vw, 2.05rem);
