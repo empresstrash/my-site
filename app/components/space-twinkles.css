@@ -52,8 +52,8 @@
   align-items: center;
   gap: clamp(0.55rem, 1.6vw, 1.15rem);
   width: min(100%, 28rem);
-  margin: 0.2rem auto;
-  padding: 1.1rem 0 0.35rem;
+  margin: 0.15rem auto 0.55rem;
+  padding: 0.2rem 0 0;
   pointer-events: none;
 }
 

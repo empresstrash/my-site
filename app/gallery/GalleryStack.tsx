@@ -401,7 +401,7 @@ export default function GalleryStack() {
         <SpaceTwinkles count={48} />
       </div>
       <div className="gallery-scroll">
-      {galleryConfig.map((config, index) => {
+      {galleryConfig.map((config) => {
         const gallery = byId[config.id];
         const fan = !gallery ? (
             <section key={config.id} className="gallery-block" aria-label={config.title}>
@@ -416,7 +416,7 @@ export default function GalleryStack() {
         );
         return (
           <Fragment key={config.id}>
-            {index > 0 ? <TwinkleRule /> : null}
+            <TwinkleRule />
             {fan}
           </Fragment>
         );
