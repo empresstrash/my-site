@@ -108,6 +108,8 @@ export function broadcastIds(html: string): string[] {
   return [...new Set(ids)].slice(0, 4);
 }
 
+let rememberedBroadcast: string | null = null;
+
 async function findLive(): Promise<Live | null> {
   const page = await fetch(`${PROFILE}?_=${Date.now()}`, {
     headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
@@ -115,6 +117,7 @@ async function findLive(): Promise<Live | null> {
   });
   if (!page.ok) return null;
   const ids = broadcastIds(await page.text());
+  if (rememberedBroadcast && !ids.includes(rememberedBroadcast)) ids.unshift(rememberedBroadcast);
   const rows = await Promise.all(
     ids.map(async (id) => {
       const shown = await xJson<{ broadcasts?: Record<string, { state?: string; twitter_user_id?: string | number; media_key?: string }> }>(
@@ -126,7 +129,11 @@ async function findLive(): Promise<Live | null> {
   const live = rows.find(
     (item) => item.row && String(item.row.state).toUpperCase() === "RUNNING" && String(item.row.twitter_user_id) === USER_ID,
   );
-  if (!live?.row?.media_key) return null;
+  if (!live?.row?.media_key) {
+    rememberedBroadcast = null;
+    return null;
+  }
+  rememberedBroadcast = live.id;
   return { id: live.id, mediaKey: live.row.media_key };
 }
 
@@ -253,11 +260,23 @@ function linesFromNdjson(body: string): XChatLine[] {
     .slice(-40);
 }
 
-async function readOpenChat(url: string, token: string, holdMs: number): Promise<string> {
+function hasNewerLine(body: string, since: string): boolean {
+  for (const row of body.split("\n")) {
+    const ts = /"ts":"(\d+)"/.exec(row)?.[1];
+    if (ts && ts > since) return true;
+  }
+  return false;
+}
+
+async function readOpenChat(url: string, token: string, since: string): Promise<string> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), holdMs);
+  const timer = setTimeout(() => controller.abort(), since ? 4000 : 2000);
   let quiet: ReturnType<typeof setTimeout> | null = null;
   let text = "";
+  const stopSoon = () => {
+    if (quiet) return;
+    quiet = setTimeout(() => controller.abort(), 300);
+  };
   try {
     const response = await fetch(url, { headers: chatHeaders(token), signal: controller.signal, cache: "no-store" });
     if (response.status === 401 || response.status === 403) guest = null;
@@ -268,14 +287,12 @@ async function readOpenChat(url: string, token: string, holdMs: number): Promise
       const { done, value } = await reader.read();
       if (done) break;
       text += decoder.decode(value, { stream: true });
-      if (text.includes("\n")) {
-        if (quiet) clearTimeout(quiet);
-        quiet = setTimeout(() => controller.abort(), 250);
-      }
+      if (!since && text.includes("\n")) stopSoon();
+      if (since && hasNewerLine(text, since)) stopSoon();
       if (text.length > 200000) break;
     }
   } catch {
-    /* closed once the new lines have arrived, or the wait ran out */
+    /* closed once the lines we need have arrived, or the wait ran out */
   } finally {
     clearTimeout(timer);
     if (quiet) clearTimeout(quiet);
@@ -299,7 +316,7 @@ async function liveChatLines(broadcastId: string, mediaKey: string, since: strin
   if (!status?.sessionId) return null;
   const params = new URLSearchParams({ broadcastId, sessionId: status.sessionId });
   if (since) params.set("cursor", since);
-  const body = await readOpenChat(`${LIVE_CHAT}?${params.toString()}`, token, 2000);
+  const body = await readOpenChat(`${LIVE_CHAT}?${params.toString()}`, token, since);
   const lines = linesFromNdjson(body).filter((line) => !since || (line.id.split("-")[1] || "") > since);
   if (lines.some((line) => line.name === "X")) {
     await rememberSenders(lines.filter((line) => line.name === "X").map((line) => line.id.split("-").pop() || ""));

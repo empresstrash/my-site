@@ -171,13 +171,14 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
   let retry: ReturnType<typeof setTimeout> | null = null;
   let broadcast = "";
   let since = "";
+  let misses = 0;
 
   const run = async () => {
     if (stopped) return;
     try {
       const response = await fetch(`/api/vr/x-chat?since=${encodeURIComponent(since)}`, {
         cache: "no-store",
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(12000),
       });
       if (stopped) return;
       if (!response.ok) throw new Error("x");
@@ -188,27 +189,31 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
         lines?: { id: string; name: string; text: string; at: number }[];
       };
       if (body.status === "live" && body.broadcast) {
-        if (body.broadcast !== broadcast) {
-          broadcast = body.broadcast;
+        misses = 0;
+        if (broadcast && body.broadcast !== broadcast) {
           since = "";
           onReset();
         }
-        if (body.cursor) since = body.cursor;
+        broadcast = body.broadcast;
+        if (body.cursor && body.cursor > since) since = body.cursor;
         onStatus("X Live");
         for (const line of body.lines ?? []) {
           if (line.id && line.text) onLine({ id: line.id, source: "x", name: line.name || "X", text: line.text, at: line.at || Date.now() });
         }
-      } else {
+      } else if (!broadcast || misses >= 2) {
+        misses += 1;
         broadcast = "";
         since = "";
         onReset();
         onStatus("X waiting");
+      } else {
+        misses += 1;
       }
     } catch {
       if (!broadcast) onStatus("X reconnecting");
     }
     if (stopped) return;
-    retry = setTimeout(() => void run(), 300);
+    retry = setTimeout(() => void run(), 400);
   };
 
   void run();
@@ -463,7 +468,12 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     return connectX(
       (line) => pushLine(line),
       setXStatus,
-      () => setLines((current) => current.filter((item) => item.source !== "x")),
+      () => {
+        for (const id of [...knownIds.current]) {
+          if (id.startsWith("x-")) knownIds.current.delete(id);
+        }
+        setLines((current) => current.filter((item) => item.source !== "x"));
+      },
     );
   }, [open]);
 
