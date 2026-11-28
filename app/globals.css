@@ -1887,8 +1887,9 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 .home-embed-tabs {
   display: flex;
   flex-shrink: 0;
-  align-items: stretch;
-  justify-content: stretch;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 0;
   margin: 0;
   padding: 0;
@@ -1905,17 +1906,17 @@ html.vr-booth .header-with-side > .mobile-menu-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   max-width: none;
-  min-height: 2.85rem;
-  padding: 0.7rem 1rem;
+  min-height: 2.15rem;
+  padding: 0.35rem 0.7rem;
   border-radius: 0;
   text-decoration: none;
   color: rgba(220, 214, 230, 0.62);
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
-  font-size: 1.15rem;
-  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   background: transparent;
   border: 0;
@@ -2548,8 +2549,8 @@ a.salon-bio {
 
   .home-embed-tab {
     max-width: none;
-    min-height: 2.55rem;
-    padding: 0.4rem 0.28rem;
+    min-height: 2.15rem;
+    padding: 0.35rem 0.45rem;
     font-size: 0.78rem;
     letter-spacing: 0.03em;
     line-height: 1.15;
