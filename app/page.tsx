@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SpaceTwinkles, { TwinkleRule } from './components/SpaceTwinkles';
@@ -67,7 +67,7 @@ function SubscribePopup({ onClose }: { onClose: () => void }) {
       <div className="salon-pop-card">
         <div className="salon-pop-bar">
           <p id="salon-pop-title">subscribe</p>
-          <button type="button" onClick={onClose}>close</button>
+          <button type="button" className="salon-sub-btn" onClick={onClose}>close</button>
         </div>
         {sent ? (
           <p className="salon-pop-blurb">Check your inbox to confirm.</p>
@@ -156,6 +156,7 @@ function HomeContent() {
   const view = parseHomeView(searchParams.get('embed'));
   const requestedPost = searchParams.get('post');
   const postSlug = requestedPost && POST_SLUG.test(requestedPost) ? requestedPost : null;
+  const salonScroll = useRef<HTMLDivElement>(null);
   const [visitedGallery, setVisitedGallery] = useState(view === 'gallery');
   const [visitedFullMoon, setVisitedFullMoon] = useState(view === 'full-moon');
   const [visitedDamsels, setVisitedDamsels] = useState(view === 'damsels');
@@ -234,6 +235,10 @@ function HomeContent() {
     };
   }, [postSlug]);
 
+  useEffect(() => {
+    salonScroll.current?.scrollTo({ top: 0 });
+  }, [postSlug]);
+
   const tabHref = (id: HomeView) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('paragraph');
@@ -296,22 +301,31 @@ function HomeContent() {
           <div className="salon-pane">
             <SpaceTwinkles count={48} />
             <header className="salon-mast">
-              {postSlug ? (
-                <div className="salon-read-bar">
-                  <button type="button" onClick={closePost}>all posts</button>
-                  <a href={article?.url ?? `https://empresstrash.substack.com/p/${postSlug}`} target="_blank" rel="noopener noreferrer">
-                    open on substack
-                  </a>
-                </div>
-              ) : null}
               <TwinkleRule />
               <h1>Salon de l&apos;Empress</h1>
-              <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
-                subscribe
-              </button>
+              <div className="salon-mast-actions">
+                {postSlug ? (
+                  <>
+                    <button type="button" className="salon-sub-btn" onClick={closePost}>
+                      all posts
+                    </button>
+                    <a
+                      className="salon-sub-btn"
+                      href={article?.url ?? `https://empresstrash.substack.com/p/${postSlug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      open on substack
+                    </a>
+                  </>
+                ) : null}
+                <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
+                  subscribe
+                </button>
+              </div>
             </header>
 
-            <div className="salon-scroll">
+            <div className="salon-scroll" ref={salonScroll}>
             {postSlug ? (
               <div className="salon-read">
                 {articleFailed ? (

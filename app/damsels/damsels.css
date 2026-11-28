@@ -188,7 +188,7 @@
   flex: 1;
   min-height: 0;
   user-select: none;
-  touch-action: none;
+  touch-action: pan-y;
   overflow: visible;
 }
 

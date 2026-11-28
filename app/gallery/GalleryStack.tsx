@@ -9,7 +9,7 @@ import "./gallery.css";
 
 const MARKET_LABEL: Record<GalleryPlatform, string> = {
   superrare: "view on superrare",
-  manifold: "view on manifold",
+  manifold: "view on opensea",
   transient: "view on transient",
   objkt: "view on objkt",
   ord: "view on ord",

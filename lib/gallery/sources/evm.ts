@@ -63,7 +63,7 @@ export function listingUrl(
   }
   if (platform === "manifold") {
     const slug = chain === "base" ? "base" : "ethereum";
-    return `https://manifold.xyz/nft/${slug}/${contract}/${tokenId}`;
+    return `https://opensea.io/item/${slug}/${contract}/${tokenId}`;
   }
   if (platform === "transient") {
     const chainId = chain === "base" ? "8453" : "1";
