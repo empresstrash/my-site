@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { Suspense, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
+import GalleryStack from './gallery/GalleryStack';
 
-type HomeView = 'substack' | 'emporium';
+type HomeView = 'gallery' | 'substack' | 'emporium';
 
 type SalonPost = {
   title: string;
@@ -21,7 +22,9 @@ type SalonArticle = SalonPost & { html: string };
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function parseHomeView(value: string | null): HomeView {
-  return value === 'emporium' ? 'emporium' : 'substack';
+  if (value === 'emporium') return 'emporium';
+  if (value === 'gallery') return 'gallery';
+  return 'substack';
 }
 
 function formatDate(iso: string): string {
@@ -137,16 +140,15 @@ function HomeContent() {
   const view = parseHomeView(searchParams.get('embed'));
   const requestedPost = searchParams.get('post');
   const postSlug = requestedPost && POST_SLUG.test(requestedPost) ? requestedPost : null;
+  const [visitedGallery, setVisitedGallery] = useState(view === 'gallery');
   const [visitedEmporium, setVisitedEmporium] = useState(view === 'emporium');
+  if (view === 'gallery' && !visitedGallery) setVisitedGallery(true);
+  if (view === 'emporium' && !visitedEmporium) setVisitedEmporium(true);
   const [posts, setPosts] = useState<SalonPost[] | null>(null);
   const [listFailed, setListFailed] = useState(false);
   const [article, setArticle] = useState<SalonArticle | null>(null);
   const [articleFailed, setArticleFailed] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(view === 'substack');
-
-  useEffect(() => {
-    if (view === 'emporium') setVisitedEmporium(true);
-  }, [view]);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -201,8 +203,8 @@ function HomeContent() {
   const tabHref = (id: HomeView) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('paragraph');
-    if (id === 'emporium') params.set('embed', 'emporium');
-    else params.delete('embed');
+    if (id === 'substack') params.delete('embed');
+    else params.set('embed', id);
     const query = params.toString();
     return query ? `/?${query}` : '/';
   };
@@ -226,13 +228,22 @@ function HomeContent() {
     <div className="home-embed">
       <nav className="home-embed-tabs" role="tablist" aria-label="homepage embeds">
         <Link
+          href={tabHref('gallery')}
+          role="tab"
+          aria-selected={view === 'gallery'}
+          className={`home-embed-tab${view === 'gallery' ? ' is-on' : ''}`}
+          scroll={false}
+        >
+          gallery
+        </Link>
+        <Link
           href={tabHref('substack')}
           role="tab"
           aria-selected={view === 'substack'}
           className={`home-embed-tab${view === 'substack' ? ' is-on' : ''}`}
           scroll={false}
         >
-          salon
+          substack
         </Link>
         <Link
           href={tabHref('emporium')}
@@ -241,11 +252,16 @@ function HomeContent() {
           className={`home-embed-tab${view === 'emporium' ? ' is-on' : ''}`}
           scroll={false}
         >
-          emporium shop
+          emporium
         </Link>
       </nav>
 
       <div className="home-embed-stage">
+        {visitedGallery && (
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'gallery'} aria-hidden={view !== 'gallery'}>
+            <GalleryStack />
+          </div>
+        )}
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
             <header className="salon-mast">
@@ -343,8 +359,9 @@ function HomeFallback() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" aria-hidden="true">
-        <span className="home-embed-tab is-on">salon</span>
-        <span className="home-embed-tab">emporium shop</span>
+        <span className="home-embed-tab">gallery</span>
+        <span className="home-embed-tab is-on">substack</span>
+        <span className="home-embed-tab">emporium</span>
       </nav>
       <div className="home-embed-stage" />
     </div>
