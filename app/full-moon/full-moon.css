@@ -233,10 +233,9 @@
   margin-top: 0.15rem;
 }
 
-/* Same glass chips as the damsels links. */
 .fmt-links a {
-  isolation: isolate;
-  position: relative;
+  --neon: #ff3d8a;
+  --neon-hover: #3df0ff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -244,8 +243,8 @@
   min-height: clamp(1.2rem, 2.8vh, 1.85rem);
   padding: clamp(0.16rem, 0.45vh, 0.32rem) clamp(0.5rem, 1vw, 0.85rem);
   border-radius: 4px 12px 8px 10px;
-  border: 1px solid rgba(255, 138, 208, 0.42);
-  background: transparent;
+  border: 1px solid var(--neon);
+  background: #000;
   color: #fff;
   text-decoration: none;
   font-family: var(--font-menu);
@@ -253,28 +252,25 @@
   font-weight: 400;
   letter-spacing: 0.05em;
   text-transform: lowercase;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
-  transition: transform 0.16s ease, border-color 0.16s ease;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--neon) 60%, transparent);
+  transition: transform 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.fmt-links a::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255, 45, 123, 0.2), rgba(255, 255, 255, 0.08));
-  backdrop-filter: blur(14px) saturate(1.35);
-  -webkit-backdrop-filter: blur(14px) saturate(1.35);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  pointer-events: none;
+.fmt-links a:nth-child(2) {
+  --neon: #c45cff;
+  --neon-hover: #ffe14a;
+}
+
+.fmt-links a:nth-child(3) {
+  --neon: #3df0ff;
+  --neon-hover: #ff3d8a;
 }
 
 .fmt-links a:hover {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.55);
-  background: transparent;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  color: var(--neon-hover);
+  border-color: var(--neon-hover);
+  background: #000;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--neon-hover) 75%, transparent);
   transform: translateY(-1px);
 }
 
