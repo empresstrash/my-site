@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TwinkleRule } from './components/SpaceTwinkles';
+import SpaceTwinkles, { TwinkleRule } from './components/SpaceTwinkles';
 import BioPage from './bio/page';
 import DamselsLanding from './damsels/DamselsLanding';
 import FullMoonPage from './full-moon/page';
@@ -294,6 +294,7 @@ function HomeContent() {
         {visitedSubstack && (
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
+            <SpaceTwinkles count={48} />
             <header className="salon-mast">
               <TwinkleRule />
               <h1>Salon de l&apos;Empress</h1>

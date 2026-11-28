@@ -63,4 +63,13 @@ export const galleries: GalleryConfig[] = [
     chain: "ethereum",
     contract: "KT1QK69Z94UxoxCSux36aEKjD6fWHKg7CsQG",
   },
+  {
+    id: "open-haus",
+    title: "open haus art",
+    description:
+      "Art airdropped to attendees of Empress Trash's Open Haus in Decentraland at her Atelier.",
+    platform: "manifold",
+    chain: "base",
+    contract: "0xf48bf5381a31f8194a5c9d3872196113005a0ded",
+  },
 ];
