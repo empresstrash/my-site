@@ -2056,7 +2056,7 @@ body.gallery-wide .header-with-side > .mobile-menu-button {
   z-index: 1;
   width: min(60rem, 100%);
   margin: 0 auto;
-  padding: 1.05rem 1.15rem;
+  padding: 1.65rem 1.15rem;
   display: grid;
   grid-template-columns: minmax(0, 40rem) 17.5rem;
   gap: 1rem;
@@ -2069,10 +2069,10 @@ body.gallery-wide .header-with-side > .mobile-menu-button {
   color: #fff6fb;
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
-  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  font-size: clamp(2.2rem, 3.6vw, 2.95rem);
   font-weight: 400;
   letter-spacing: 0.12em;
-  line-height: 1.15;
+  line-height: 1.2;
   text-align: center;
   text-transform: uppercase;
 }
@@ -2519,13 +2519,13 @@ a.salon-bio {
 
   .salon-mast-line {
     grid-template-columns: minmax(0, 1fr);
-    padding: 0.7rem 0.85rem;
+    padding: 1.15rem 0.85rem;
   }
 
   .salon-mast h1 {
     grid-column: 1;
     grid-row: 1;
-    font-size: 1.52rem;
+    font-size: 1.85rem;
     padding-inline: 6.5rem;
   }
 

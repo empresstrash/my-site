@@ -1,7 +1,7 @@
 .gallery-pane {
   height: 100%;
   overflow: auto;
-  padding: 0.7rem 0.4rem 1.5rem;
+  padding: 0.45rem 0.4rem 0.35rem;
   background: #000;
   color: #fff;
 }
@@ -40,7 +40,7 @@
 .gallery-block h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
   font-weight: 400;
   letter-spacing: 0.12em;
   line-height: 1.15;
@@ -49,8 +49,8 @@
 }
 
 .gallery-block .gallery-desc {
-  margin: 0.75rem auto 0;
-  padding: 0.95rem 1.25rem;
+  margin: 0.4rem auto 0;
+  padding: 0.7rem 1.05rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(2, 1, 6, 0.94);
@@ -152,8 +152,8 @@
   justify-content: center;
   gap: 0.55rem 0.85rem;
   width: min(100%, 42rem);
-  margin: 0.85rem auto 0.2rem;
-  padding: 0.8rem 1.15rem;
+  margin: 0.35rem auto 0.15rem;
+  padding: 0.55rem 1rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(2, 1, 6, 0.94);

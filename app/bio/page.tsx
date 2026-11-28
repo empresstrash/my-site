@@ -2455,15 +2455,15 @@ export default function BioPage() {
       <style jsx>{`
         .bio-page {
           max-width: 42rem;
-          margin: 0.4rem auto 2rem;
-          padding: 0.35rem 0.6rem 3rem;
+          margin: 0 auto 2rem;
+          padding: 1.85rem 0.6rem 3rem;
           color: var(--color-text);
           line-height: 1.8;
           font-family: var(--font-family);
         }
         .bio-page h1 {
           margin: 0;
-          font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+          font-size: clamp(2.2rem, 3.6vw, 2.95rem);
           font-weight: 400;
           letter-spacing: 0.12em;
           line-height: 1.15;
@@ -2482,7 +2482,7 @@ export default function BioPage() {
           color: var(--accent-pink);
         }
         .bio-intro {
-          margin: 0.75rem auto 1.75rem;
+          margin: 1.35rem auto 1.85rem;
           padding: 0.95rem 1.25rem;
           border-radius: 0.75rem;
           border: 1px solid rgba(255, 255, 255, 0.14);
@@ -2729,10 +2729,10 @@ export default function BioPage() {
 
         @media (max-width: 768px) {
           .bio-page {
-            padding: 0 0.75rem 2.5rem;
+            padding: 1.25rem 0.75rem 2.5rem;
           }
           .bio-page h1 {
-            font-size: 1.8rem;
+            font-size: 1.95rem;
           }
           .bio-page h2 {
             font-size: 1.2rem;
@@ -2759,10 +2759,10 @@ export default function BioPage() {
           .bio-page {
             max-width: 100%;
             margin: 1rem auto;
-            padding: 0 0.5rem 2rem;
+            padding: 1.15rem 0.5rem 2rem;
           }
           .bio-page h1 {
-            font-size: 1.4rem;
+            font-size: 1.7rem;
             margin-bottom: 1rem;
           }
           .bio-page h2 {
