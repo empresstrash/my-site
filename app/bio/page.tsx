@@ -2493,7 +2493,7 @@ export default function BioPage() {
           padding: 0.95rem 1.25rem;
           border-radius: 0.75rem;
           border: 1px solid rgba(255, 255, 255, 0.14);
-          background: rgba(2, 1, 6, 0.94);
+          background: rgba(0, 0, 0, 0.84);
           line-height: 1.55;
           font-style: normal;
         }

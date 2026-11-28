@@ -181,7 +181,7 @@
 /* Blurb plaque — darker fill so copy stays readable on the sky */
 .fmt-tag-box {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(2, 1, 6, 0.94);
+  background: rgba(0, 0, 0, 0.84);
   box-sizing: border-box;
 }
 
@@ -614,7 +614,7 @@
   padding: 0.8rem 1.15rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(2, 1, 6, 0.94);
+  background: rgba(0, 0, 0, 0.84);
   font-family: var(--font-display);
   font-size: clamp(0.85rem, 2.2vh, 1.15rem);
   letter-spacing: 0.03em;
