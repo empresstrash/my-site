@@ -105,7 +105,7 @@ async function xJson<T>(url: string): Promise<T | null> {
 export function broadcastIds(html: string): string[] {
   const plain = html.replace(/\\"/g, '"');
   const ids = [...plain.matchAll(/\/i\/broadcasts\/([A-Za-z0-9]{8,})/g)].map((match) => match[1]);
-  return [...new Set(ids)].slice(0, 4);
+  return [...new Set(ids)].slice(0, 8);
 }
 
 let rememberedBroadcast: string | null = null;
@@ -115,7 +115,7 @@ async function findLive(): Promise<Live | null> {
     headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
     cache: "no-store",
   });
-  if (!page.ok) return null;
+  if (!page.ok) throw new Error("profile");
   const ids = broadcastIds(await page.text());
   if (rememberedBroadcast && !ids.includes(rememberedBroadcast)) ids.unshift(rememberedBroadcast);
   const rows = await Promise.all(
@@ -295,9 +295,25 @@ async function nameUnknown(lines: XChatLine[]): Promise<void> {
   }
 }
 
-async function consumeChat(url: string, token: string): Promise<void> {
+async function broadcastStillRunning(id: string): Promise<boolean | null> {
+  const shown = await xJson<{ broadcasts?: Record<string, { state?: string }> }>(
+    `${API}/broadcasts/show.json?ids=${encodeURIComponent(id)}`,
+  );
+  const state = shown?.broadcasts?.[id]?.state;
+  if (!state) return null;
+  return String(state).toUpperCase() === "RUNNING";
+}
+
+async function consumeChat(url: string, token: string, broadcastId: string): Promise<void> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 55000);
+  const watch = setInterval(() => {
+    void broadcastStillRunning(broadcastId)
+      .then((running) => {
+        if (running === false) controller.abort();
+      })
+      .catch(() => undefined);
+  }, 3000);
   try {
     const response = await fetch(url, { headers: chatHeaders(token), signal: controller.signal, cache: "no-store" });
     if (response.status === 401 || response.status === 403) guest = null;
@@ -321,28 +337,35 @@ async function consumeChat(url: string, token: string): Promise<void> {
     /* the stream ended or went quiet; the follower opens it again */
   } finally {
     clearTimeout(timer);
+    clearInterval(watch);
   }
 }
 
+function clearFeed(): void {
+  feed.status = "waiting";
+  feed.broadcast = "";
+  feed.cursor = "";
+  feed.lines = [];
+  seenLineIds.clear();
+}
+
 async function followChat(): Promise<void> {
-  let misses = 0;
   for (;;) {
-    const live = await findLive().catch(() => null);
-    feed.settled = true;
-    if (!live) {
-      misses += 1;
-      if (misses >= 2) {
-        feed.status = "waiting";
-        feed.broadcast = "";
-        feed.cursor = "";
-        feed.lines = [];
-        seenLineIds.clear();
-      }
+    let live: Live | null = null;
+    try {
+      live = await findLive();
+    } catch {
+      feed.settled = true;
       await new Promise((resolve) => setTimeout(resolve, 2000));
       continue;
     }
-    misses = 0;
-    if (feed.broadcast && feed.broadcast !== live.id) {
+    feed.settled = true;
+    if (!live) {
+      clearFeed();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      continue;
+    }
+    if (feed.broadcast !== live.id) {
       feed.lines = [];
       feed.cursor = "";
       seenLineIds.clear();
@@ -361,7 +384,7 @@ async function followChat(): Promise<void> {
         sessionId: status.sessionId,
         cursor: feed.cursor || "0",
       });
-      await consumeChat(`${LIVE_CHAT}?${params.toString()}`, token);
+      await consumeChat(`${LIVE_CHAT}?${params.toString()}`, token, live.id);
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }

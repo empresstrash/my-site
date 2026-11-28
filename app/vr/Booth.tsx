@@ -171,7 +171,6 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
   let retry: ReturnType<typeof setTimeout> | null = null;
   let broadcast = "";
   let since = "";
-  let misses = 0;
 
   const run = async () => {
     if (stopped) return;
@@ -189,7 +188,6 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
         lines?: { id: string; name: string; text: string; at: number }[];
       };
       if (body.status === "live" && body.broadcast) {
-        misses = 0;
         if (broadcast && body.broadcast !== broadcast) {
           since = "";
           onReset();
@@ -200,14 +198,11 @@ function connectX(onLine: (line: Line) => void, onStatus: (status: string) => vo
         for (const line of body.lines ?? []) {
           if (line.id && line.text) onLine({ id: line.id, source: "x", name: line.name || "X", text: line.text, at: line.at || Date.now() });
         }
-      } else if (!broadcast || misses >= 2) {
-        misses += 1;
+      } else {
         broadcast = "";
         since = "";
         onReset();
         onStatus("X waiting");
-      } else {
-        misses += 1;
       }
     } catch {
       if (!broadcast) onStatus("X reconnecting");
