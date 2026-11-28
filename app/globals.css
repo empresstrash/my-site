@@ -2070,7 +2070,7 @@ body.gallery-wide .header-with-side > .mobile-menu-button {
   color: #fff6fb;
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
-  font-size: clamp(2.2rem, 3.6vw, 2.95rem);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
   font-weight: 400;
   letter-spacing: 0.12em;
   line-height: 1.2;
@@ -2526,7 +2526,7 @@ a.salon-bio {
   .salon-mast h1 {
     grid-column: 1;
     grid-row: 1;
-    font-size: 1.85rem;
+    font-size: 1.7rem;
     padding-inline: 6.5rem;
   }
 

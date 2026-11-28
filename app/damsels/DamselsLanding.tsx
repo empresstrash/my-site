@@ -12,6 +12,7 @@ import {
   type DamselToken,
 } from "@/lib/damsels/constants";
 import CollapsibleCopy from "@/app/components/CollapsibleCopy";
+import SpaceTwinkles from "@/app/components/SpaceTwinkles";
 import "./damsels.css";
 
 function statusLabel(token: DamselToken): string {
@@ -325,14 +326,10 @@ export default function DamselsLanding() {
   return (
     <div className="damsels-page">
       <div className="damsels-glow" aria-hidden="true" />
+      <SpaceTwinkles count={48} />
       <div className="damsels-inner">
         <header className="damsels-hero">
-          <div className="damsels-title-block">
-            <span className="damsels-kicker">
-              collection <em>18+</em>
-            </span>
-            <h1 className="damsels-title">damsels</h1>
-          </div>
+          <h1 className="damsels-title">damsels</h1>
           <CollapsibleCopy
             className="damsels-lede"
             text="Damsels is a collection by Empress Trash celebrating feminine expression of all forms and destigmatizing sex work. Each Damsel is hand-drawn and animated in Procreate for the proprietary Damsel Wiggle™."

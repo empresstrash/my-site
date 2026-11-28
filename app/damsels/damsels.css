@@ -67,41 +67,15 @@
   box-shadow: none;
 }
 
-.damsels-title-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.4rem;
-}
-
-.damsels-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-family: var(--font-menu);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(180, 240, 235, 0.86);
-}
-
-.damsels-kicker em {
-  font-style: italic;
-  color: #3df0ff;
-  letter-spacing: 0.08em;
-}
-
 .damsels-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 2.7vw, 2.25rem);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: 0.12em;
-  color: #fff;
+  color: var(--accent-pink);
   text-transform: uppercase;
-  text-shadow: 0 0 18px rgba(0, 184, 176, 0.35);
 }
 
 .damsels-lede {
@@ -637,7 +611,7 @@
   }
 
   .damsels-title {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
   }
 
   .damsels-links {
@@ -695,7 +669,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .damsels-glow,
-  .damsels-kicker,
   .damsels-title,
   .damsels-slide,
   .damsels-search input {

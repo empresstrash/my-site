@@ -2463,7 +2463,8 @@ export default function BioPage() {
         }
         .bio-page h1 {
           margin: 0;
-          font-size: clamp(2.2rem, 3.6vw, 2.95rem);
+          font-size: clamp(1.8rem, 3vw, 2.6rem);
+          font-family: var(--font-display);
           font-weight: 400;
           letter-spacing: 0.12em;
           line-height: 1.15;
@@ -2732,7 +2733,7 @@ export default function BioPage() {
             padding: 1.25rem 0.75rem 2.5rem;
           }
           .bio-page h1 {
-            font-size: 1.95rem;
+            font-size: 1.7rem;
           }
           .bio-page h2 {
             font-size: 1.2rem;

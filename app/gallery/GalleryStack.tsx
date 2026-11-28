@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CollapsibleCopy from "@/app/components/CollapsibleCopy";
+import SpaceTwinkles, { TwinkleRule } from "@/app/components/SpaceTwinkles";
 import { galleries as galleryConfig } from "@/lib/gallery/galleries";
 import type { GalleryPayload, GalleryPlatform, GalleryWork } from "@/lib/gallery/types";
 import "./gallery.css";
@@ -396,10 +397,13 @@ export default function GalleryStack() {
 
   return (
     <div className="gallery-pane">
-      {galleryConfig.map((config) => {
+      <div className="gallery-sky" aria-hidden="true">
+        <SpaceTwinkles count={48} />
+      </div>
+      <div className="gallery-scroll">
+      {galleryConfig.map((config, index) => {
         const gallery = byId[config.id];
-        if (!gallery) {
-          return (
+        const fan = !gallery ? (
             <section key={config.id} className="gallery-block" aria-label={config.title}>
               <header>
                 <h2>{config.title}</h2>
@@ -407,10 +411,17 @@ export default function GalleryStack() {
               </header>
               <p className="gallery-empty">{failed[config.id] ? "This gallery didn’t load." : "Loading…"}</p>
             </section>
-          );
-        }
-        return <GalleryFan key={config.id} gallery={gallery} market={market[config.id]} />;
+        ) : (
+          <GalleryFan key={config.id} gallery={gallery} market={market[config.id]} />
+        );
+        return (
+          <Fragment key={config.id}>
+            {index > 0 ? <TwinkleRule /> : null}
+            {fan}
+          </Fragment>
+        );
       })}
+      </div>
     </div>
   );
 }
