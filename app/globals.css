@@ -2415,6 +2415,74 @@ a.salon-bio {
   max-width: 100%;
 }
 
+.salon-body .x-post {
+  margin: 1.15rem 0 1.35rem;
+  padding: 0.85rem 0.9rem 0.8rem;
+  border: 1px solid #ff3d8a;
+  border-radius: 4px 12px 8px 10px;
+  background: #000;
+  box-shadow: 0 0 8px color-mix(in srgb, #ff3d8a 45%, transparent);
+}
+
+.salon-body .x-post.is-quote {
+  margin: 0.75rem 0 0.15rem;
+  padding: 0.7rem 0.75rem;
+  border-color: rgba(61, 240, 255, 0.45);
+  box-shadow: none;
+}
+
+.salon-body .x-post-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.salon-body .x-post-head img {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: 0;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.salon-body .x-post-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.15;
+  -webkit-font-smoothing: none;
+}
+
+.salon-body .x-post-user {
+  display: block;
+  font-family: var(--font-family);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgba(236, 228, 242, 0.62);
+  -webkit-font-smoothing: auto;
+}
+
+.salon-body .x-post-text {
+  margin-top: 0.6rem;
+  white-space: pre-wrap;
+}
+
+.salon-body .x-post-photo {
+  margin: 0.75rem 0 0.2rem;
+  border-radius: 10px;
+}
+
+.salon-body .x-post-link {
+  display: inline-block;
+  margin-top: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  -webkit-font-smoothing: none;
+}
+
 .salon-pop {
   position: fixed;
   inset: 0;

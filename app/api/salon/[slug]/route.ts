@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchArchive } from "@/lib/substack/archive";
+import { renderXPosts } from "@/lib/substack/embeds";
 
 export const revalidate = 600;
 
@@ -84,7 +85,7 @@ export async function GET(_request: Request, context: Context) {
       subtitle: post.subtitle?.trim() || "",
       date: post.post_date || "",
       url: canonical.startsWith(POST_ORIGIN) ? canonical : `${POST_ORIGIN}${slug}`,
-      html: rewriteParagraphLinks(sanitize(post.body_html || ""), posts),
+      html: renderXPosts(rewriteParagraphLinks(sanitize(post.body_html || ""), posts)),
     });
   } catch {
     return NextResponse.json({ error: "missing" }, { status: 502 });
