@@ -3,12 +3,13 @@ import { mapPool } from "../media";
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-/** Her own wallets and names. A work she still holds is not shown as sold. */
-const ARTIST_NAMES = /^(empresstrash|empresstrashvault)(\.eth)?$/i;
-const ARTIST_ADDRESSES = new Set([
-  "0x8469b7b08d30c63fea3a248a198de9d634b63d70",
-  "0x4071284610ce3974b2999613980e043542862a37",
-]);
+/** Her creator wallet. A work she still holds is not labeled as sold. */
+const CREATOR_NAMES = /^empresstrash(\.eth)?$/i;
+const CREATOR_ADDRESS = "0x8469b7b08d30c63fea3a248a198de9d634b63d70";
+/** The vault is hers, and a work sitting there should say so. */
+const VAULT_NAMES = /^empresstrashvault(\.eth)?$/i;
+const VAULT_ADDRESS = "0x4071284610ce3974b2999613980e043542862a37";
+const VAULT_LABEL = "in the vault";
 
 export type SuperRareCard = {
   price: string | null;
@@ -32,7 +33,9 @@ export function formatWeiEth(wei: string): string | null {
 function displayName(value: string | undefined): string | null {
   if (!value || value === "null") return null;
   const name = value.trim();
-  if (!name || name.toLowerCase().startsWith("0x") || ARTIST_NAMES.test(name)) return null;
+  if (!name || name.toLowerCase().startsWith("0x")) return null;
+  if (VAULT_NAMES.test(name)) return VAULT_LABEL;
+  if (CREATOR_NAMES.test(name)) return null;
   return name;
 }
 
@@ -43,10 +46,16 @@ function readOwner(chunk: string): { name: string | null; address: string | null
   const address = slice.match(/\\"defaultAddress\\":\\"([^\\"]+)\\"/)?.[1] ?? null;
   const username = slice.match(/\\"username\\":\\"([^\\"]*)\\"/)?.[1];
   const fullName = slice.match(/\\"fullName\\":\\"([^\\"]*)\\"/)?.[1];
-  const artist = address ? ARTIST_ADDRESSES.has(address.toLowerCase()) : false;
+  const lower = address?.toLowerCase() ?? "";
+  if (lower === VAULT_ADDRESS || VAULT_NAMES.test(username || "") || VAULT_NAMES.test(fullName || "")) {
+    return { name: VAULT_LABEL, address };
+  }
+  if (lower === CREATOR_ADDRESS || CREATOR_NAMES.test(username || "") || CREATOR_NAMES.test(fullName || "")) {
+    return { name: null, address: null };
+  }
   return {
-    name: artist ? null : displayName(username) || displayName(fullName),
-    address: artist ? null : address,
+    name: displayName(username) || displayName(fullName),
+    address,
   };
 }
 

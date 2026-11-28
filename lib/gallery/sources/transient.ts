@@ -1,6 +1,6 @@
 import { gatewayUrls, isStoredUri, kindFrom, mapPool } from "../media";
 import { formatWeiEth } from "./superrare";
-import type { GalleryWork, WorkKind } from "../types";
+import { editionCopy, type GalleryWork, type WorkKind } from "../types";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 const API = "https://api.transient.xyz/v1/catalog";
@@ -103,6 +103,7 @@ export async function fetchTransientEditions(contract: string): Promise<GalleryW
     if (!urls.length) return;
     const open = live(stack);
     const price = open ? formatWeiEth(stack?.public_cost || "") : null;
+    const minted = details[index];
     works.push({
       tokenId,
       name: nft.name?.trim() || stack?.name?.trim() || `#${tokenId}`,
@@ -116,7 +117,8 @@ export async function fetchTransientEditions(contract: string): Promise<GalleryW
       height: null,
       forSale: Boolean(open && price),
       price,
-      minted: details[index],
+      edition: editionCopy(minted, open),
+      minting: open,
       owner: null,
     });
   });
@@ -142,7 +144,8 @@ export async function fetchTransientEditions(contract: string): Promise<GalleryW
       height: null,
       forSale: Boolean(price),
       price,
-      minted: null,
+      edition: null,
+      minting: true,
       owner: null,
     });
   }

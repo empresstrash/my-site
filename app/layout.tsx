@@ -29,10 +29,8 @@ const reading = Roboto_Mono({
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const requestHeaders = await headers();
   const path = requestHeaders.get('x-pathname') ?? '';
-  const search = requestHeaders.get('x-search') ?? '';
-  const embed = new URLSearchParams(search).get('embed');
   const onHome = path === '/' || path === '/home';
-  const galleryWide = onHome && embed !== 'substack' && embed !== 'emporium';
+  const galleryWide = onHome;
   const booth = path === '/vr' || path.startsWith('/vr/');
   const kidPix = path === '/kid-pix';
 

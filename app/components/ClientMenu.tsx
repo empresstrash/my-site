@@ -293,7 +293,6 @@ export default function ClientMenu(): React.ReactNode {
 
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const lastMenuClick = useRef({ key: '', at: 0 });
   const menuOpenedAt = useRef(0);
   const skipMenuWrite = useRef(true);
@@ -316,8 +315,7 @@ export default function ClientMenu(): React.ReactNode {
 
   const onBooth = pathname === '/vr';
   const onKidPix = pathname === '/kid-pix';
-  const [galleryWide, setGalleryWide] = useState(false);
-  const menuDrawer = isMobile || onBooth || onKidPix || galleryWide;
+  const menuDrawer = true;
   const [embeddedBrowser, setEmbeddedBrowser] = useState(false);
 
   useEffect(() => {
@@ -340,35 +338,7 @@ export default function ClientMenu(): React.ReactNode {
     };
   }, [still, onBooth, onKidPix]);
 
-  // detect mobile viewport on client only
-  useEffect(() => {
-    function update() {
-      setIsMobile(window.innerWidth < 769);
-    }
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-
-  // Gallery uses the drawer at every width. Other homepage tabs keep the sidebar.
-  useLayoutEffect(() => {
-    const read = () => {
-      const onHome = pathname === '/' || pathname === '/home';
-      const embed = new URLSearchParams(window.location.search).get('embed');
-      const wide = onHome && embed !== 'substack' && embed !== 'emporium';
-      setGalleryWide(wide);
-      if (!wide) setMobileOpen(false);
-    };
-    read();
-    window.addEventListener('home-menu', read);
-    window.addEventListener('popstate', read);
-    return () => {
-      window.removeEventListener('home-menu', read);
-      window.removeEventListener('popstate', read);
-    };
-  }, [pathname]);
-
-  // close mobile menu when navigating
+  // close the drawer when navigating
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);

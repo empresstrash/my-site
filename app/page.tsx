@@ -4,9 +4,22 @@ import Link from 'next/link';
 import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
+import GlassSparkles from './components/GlassSparkles';
+import BioPage from './bio/page';
+import DamselsLanding from './damsels/DamselsLanding';
+import FullMoonPage from './full-moon/page';
 import GalleryStack from './gallery/GalleryStack';
 
-type HomeView = 'gallery' | 'substack' | 'emporium';
+type HomeView = 'gallery' | 'full-moon' | 'damsels' | 'substack' | 'emporium' | 'bio';
+
+const HOME_TABS: { id: HomeView; label: string }[] = [
+  { id: 'gallery', label: 'gallery' },
+  { id: 'full-moon', label: 'full moon art' },
+  { id: 'damsels', label: 'damsels' },
+  { id: 'substack', label: 'substack' },
+  { id: 'emporium', label: 'merch shop' },
+  { id: 'bio', label: 'bio' },
+];
 
 type SalonPost = {
   title: string;
@@ -22,8 +35,11 @@ type SalonArticle = SalonPost & { html: string };
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function parseHomeView(value: string | null): HomeView {
+  if (value === 'full-moon') return 'full-moon';
+  if (value === 'damsels') return 'damsels';
   if (value === 'substack') return 'substack';
   if (value === 'emporium') return 'emporium';
+  if (value === 'bio') return 'bio';
   return 'gallery';
 }
 
@@ -141,11 +157,17 @@ function HomeContent() {
   const requestedPost = searchParams.get('post');
   const postSlug = requestedPost && POST_SLUG.test(requestedPost) ? requestedPost : null;
   const [visitedGallery, setVisitedGallery] = useState(view === 'gallery');
+  const [visitedFullMoon, setVisitedFullMoon] = useState(view === 'full-moon');
+  const [visitedDamsels, setVisitedDamsels] = useState(view === 'damsels');
   const [visitedSubstack, setVisitedSubstack] = useState(view === 'substack');
   const [visitedEmporium, setVisitedEmporium] = useState(view === 'emporium');
+  const [visitedBio, setVisitedBio] = useState(view === 'bio');
   if (view === 'gallery' && !visitedGallery) setVisitedGallery(true);
+  if (view === 'full-moon' && !visitedFullMoon) setVisitedFullMoon(true);
+  if (view === 'damsels' && !visitedDamsels) setVisitedDamsels(true);
   if (view === 'substack' && !visitedSubstack) setVisitedSubstack(true);
   if (view === 'emporium' && !visitedEmporium) setVisitedEmporium(true);
+  if (view === 'bio' && !visitedBio) setVisitedBio(true);
   const [posts, setPosts] = useState<SalonPost[] | null>(null);
   const [listFailed, setListFailed] = useState(false);
   const [article, setArticle] = useState<SalonArticle | null>(null);
@@ -164,14 +186,13 @@ function HomeContent() {
   }, []);
 
   useLayoutEffect(() => {
-    const wide = view === 'gallery';
-    document.body.classList.toggle('gallery-wide', wide);
+    document.body.classList.add('gallery-wide');
     window.dispatchEvent(new CustomEvent('home-menu'));
     return () => {
       document.body.classList.remove('gallery-wide');
       window.dispatchEvent(new CustomEvent('home-menu'));
     };
-  }, [view]);
+  }, []);
 
   useEffect(() => {
     if (!visitedSubstack) return;
@@ -240,33 +261,18 @@ function HomeContent() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" role="tablist" aria-label="homepage embeds">
-        <Link
-          href={tabHref('gallery')}
-          role="tab"
-          aria-selected={view === 'gallery'}
-          className={`home-embed-tab${view === 'gallery' ? ' is-on' : ''}`}
-          scroll={false}
-        >
-          gallery
-        </Link>
-        <Link
-          href={tabHref('substack')}
-          role="tab"
-          aria-selected={view === 'substack'}
-          className={`home-embed-tab${view === 'substack' ? ' is-on' : ''}`}
-          scroll={false}
-        >
-          substack
-        </Link>
-        <Link
-          href={tabHref('emporium')}
-          role="tab"
-          aria-selected={view === 'emporium'}
-          className={`home-embed-tab${view === 'emporium' ? ' is-on' : ''}`}
-          scroll={false}
-        >
-          merch shop
-        </Link>
+        {HOME_TABS.map((tab) => (
+          <Link
+            key={tab.id}
+            href={tabHref(tab.id)}
+            role="tab"
+            aria-selected={view === tab.id}
+            className={`home-embed-tab${view === tab.id ? ' is-on' : ''}`}
+            scroll={false}
+          >
+            <span className="home-embed-tab-label">{tab.label}</span>
+          </Link>
+        ))}
       </nav>
 
       <div className="home-embed-stage">
@@ -275,10 +281,21 @@ function HomeContent() {
             <GalleryStack />
           </div>
         )}
+        {visitedFullMoon && (
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'full-moon'} aria-hidden={view !== 'full-moon'}>
+            <FullMoonPage />
+          </div>
+        )}
+        {visitedDamsels && (
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'damsels'} aria-hidden={view !== 'damsels'}>
+            <DamselsLanding />
+          </div>
+        )}
         {visitedSubstack && (
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
             <header className="salon-mast">
+              <GlassSparkles count={28} />
               <div className="salon-mast-line">
                 <h1>Salon de l&apos;Empress</h1>
                 <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
@@ -361,6 +378,11 @@ function HomeContent() {
             <iframe src="/frame/emporium" className="home-embed-frame" allow="fullscreen *" allowFullScreen title="Emporium shop" />
           </div>
         )}
+        {visitedBio && (
+          <div className="home-embed-pane home-embed-pane-scroll" role="tabpanel" hidden={view !== 'bio'} aria-hidden={view !== 'bio'}>
+            <BioPage />
+          </div>
+        )}
       </div>
 
       {subscribeOpen ? <SubscribePopup onClose={() => setSubscribeOpen(false)} /> : null}
@@ -372,9 +394,12 @@ function HomeFallback() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" aria-hidden="true">
-        <span className="home-embed-tab is-on">gallery</span>
-        <span className="home-embed-tab">substack</span>
-        <span className="home-embed-tab">merch shop</span>
+        <span className="home-embed-tab is-on"><span className="home-embed-tab-label">gallery</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">full moon art</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">damsels</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">substack</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">merch shop</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">bio</span></span>
       </nav>
       <div className="home-embed-stage" />
     </div>

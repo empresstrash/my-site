@@ -15,11 +15,22 @@ export type GalleryWork = {
   height: number | null;
   forSale: boolean;
   price: string | null;
-  /** Editions only: how many were minted. One card per artwork. */
-  minted?: number | null;
-  /** Collector name on a sold 1/1. Never a raw wallet. */
+  /** "1/1 edition", "10/10 edition", or "2 minted" while a mint is still open. */
+  edition?: string | null;
+  /** True while a mint is open. The button says mint, and the label is a count. */
+  minting?: boolean;
+  /** Collector name on a sold 1/1, or "in the vault". Never a raw wallet. */
   owner?: string | null;
 };
+
+/** Closed works read "N/N edition". An open mint reads "N minted". */
+export function editionCopy(count: number | null | undefined, minting: boolean): string | null {
+  if (count == null || !Number.isFinite(count) || count < 0) return null;
+  const n = Math.trunc(count);
+  if (minting) return `${n} minted`;
+  if (n < 1) return null;
+  return `${n}/${n} edition`;
+}
 
 export type GalleryPayload = {
   id: string;

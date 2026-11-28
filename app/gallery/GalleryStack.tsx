@@ -10,6 +10,7 @@ const MARKET_LABEL: Record<GalleryPlatform, string> = {
   manifold: "view on manifold",
   transient: "view on transient",
   objkt: "view on objkt",
+  ord: "view on ord",
 };
 
 function wrapIndex(i: number, len: number): number {
@@ -94,8 +95,14 @@ function placeDeck(
 }
 
 function marketCopy(platform: GalleryPlatform, work: GalleryWork): { label: string; price: string | null } {
+  if (work.minting && work.price) {
+    if (platform === "transient") return { label: "mint on transient", price: work.price };
+    if (platform === "objkt") return { label: "mint on objkt", price: work.price };
+  }
   if (work.forSale && work.price) {
     if (platform === "superrare") return { label: "buy on superrare", price: work.price };
+    if (platform === "objkt") return { label: "buy on objkt", price: work.price };
+    if (platform === "ord") return { label: "buy on ord", price: work.price };
     if (platform === "transient") return { label: "mint on transient", price: work.price };
   }
   return { label: MARKET_LABEL[platform], price: null };
@@ -335,8 +342,12 @@ function GalleryFan({ gallery, market }: { gallery: GalleryPayload; market?: Mar
       {current && listing ? (
         <div className="gallery-now">
           <strong>{current.name}</strong>
-          {current.minted != null ? <span className="gallery-price">{current.minted} minted</span> : null}
-          {current.owner ? <span className="gallery-price">owned by {current.owner}</span> : null}
+          {current.edition ? <span className="gallery-price">{current.edition}</span> : null}
+          {current.owner ? (
+            <span className="gallery-price">
+              {current.owner === "in the vault" ? "in the vault" : `owned by ${current.owner}`}
+            </span>
+          ) : null}
           {listing.price ? <span className="gallery-price">{listing.price}</span> : null}
           <a className="gallery-market" href={current.url} target="_blank" rel="noopener noreferrer">
             {listing.label}

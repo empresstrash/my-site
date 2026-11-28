@@ -1,6 +1,7 @@
 import { galleries, type GalleryConfig } from "./galleries";
 import { fetchEvmContract } from "./sources/evm";
 import { fetchObjktContract } from "./sources/objkt";
+import { fetchOrdCollection } from "./sources/ordinals";
 import { fetchSuperRareMarket, type SuperRareCard } from "./sources/superrare";
 import { fetchTransientEditions } from "./sources/transient";
 import type { GalleryPayload, GalleryWork } from "./types";
@@ -9,10 +10,17 @@ function findGallery(id: string): GalleryConfig | undefined {
   return galleries.find((gallery) => gallery.id === id);
 }
 
-async function loadWorks(gallery: GalleryConfig): Promise<GalleryWork[]> {
-  if (gallery.kind === "editions") return fetchTransientEditions(gallery.contract);
+type Loaded = {
+  works: GalleryWork[];
+  title?: string | null;
+  description?: string | null;
+};
+
+async function loadWorks(gallery: GalleryConfig): Promise<Loaded> {
+  if (gallery.platform === "ord") return { works: await fetchOrdCollection(gallery.contract) };
+  if (gallery.kind === "editions") return { works: await fetchTransientEditions(gallery.contract) };
   if (gallery.platform === "objkt") return fetchObjktContract(gallery.contract);
-  return fetchEvmContract(gallery.platform, gallery.chain, gallery.contract);
+  return { works: await fetchEvmContract(gallery.platform, gallery.chain, gallery.contract) };
 }
 
 function payload(gallery: GalleryConfig, works: GalleryWork[], error: string | null): GalleryPayload {
@@ -32,8 +40,17 @@ export async function loadGallery(id: string): Promise<GalleryPayload | null> {
   const gallery = findGallery(id);
   if (!gallery) return null;
   try {
-    const works = await loadWorks(gallery);
-    return payload(gallery, works, works.length ? null : "No works with IPFS or Arweave media on this contract.");
+    const loaded = await loadWorks(gallery);
+    const titled: GalleryConfig = {
+      ...gallery,
+      title: loaded.title?.trim() || gallery.title,
+      description: loaded.description?.trim() || gallery.description,
+    };
+    return payload(
+      titled,
+      loaded.works,
+      loaded.works.length ? null : "Nothing in this gallery yet.",
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "This gallery didn’t load.";
     return payload(gallery, [], message);

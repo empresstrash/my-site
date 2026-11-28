@@ -1,6 +1,6 @@
 import { loadGalleryMarket, type MarketItem } from "@/lib/gallery/load";
 
-export const revalidate = 120;
+export const revalidate = 15;
 
 /** Collector names and buy prices. Not on the art response, so the fan can paint first. */
 
@@ -18,10 +18,10 @@ export async function GET(request: Request) {
 
   const now = Date.now();
   const hit = marketCache.get(cacheKey);
-  if (hit && now - hit.at < 180_000) {
+  if (hit && now - hit.at < 15_000) {
     return Response.json(
       { id, items: hit.items },
-      { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300" } },
+      { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" } },
     );
   }
 
@@ -29,6 +29,6 @@ export async function GET(request: Request) {
   marketCache.set(cacheKey, { at: now, items });
   return Response.json(
     { id, items },
-    { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300" } },
+    { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" } },
   );
 }

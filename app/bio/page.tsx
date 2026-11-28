@@ -2454,31 +2454,45 @@ export default function BioPage() {
 
       <style jsx>{`
         .bio-page {
-          max-width: 1000px;
-          margin: 2rem auto;
-          padding: 0 1rem 3rem;
+          max-width: 42rem;
+          margin: 0.4rem auto 2rem;
+          padding: 0.35rem 0.6rem 3rem;
           color: var(--color-text);
           line-height: 1.8;
           font-family: var(--font-family);
         }
         .bio-page h1 {
-          font-size: 2.5rem;
-          margin-bottom: 1.5rem;
+          margin: 0;
+          font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+          font-weight: 400;
+          letter-spacing: 0.12em;
+          line-height: 1.15;
           text-align: center;
+          text-transform: uppercase;
           color: var(--accent-pink);
         }
         .bio-page h2 {
-          font-size: 1.5rem;
+          font-size: clamp(1.25rem, 2vw, 1.5rem);
+          font-weight: 400;
+          letter-spacing: 0.1em;
+          line-height: 1.2;
+          text-transform: uppercase;
           margin-top: 2rem;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.85rem;
           color: var(--accent-pink);
         }
         .bio-intro {
-          background: rgba(255, 0, 127, 0.05);
-          padding: 1.5rem;
-          border-left: 4px solid var(--accent-pink);
-          margin-bottom: 2rem;
-          font-style: italic;
+          margin: 0.75rem auto 1.75rem;
+          padding: 0.95rem 1.25rem;
+          border-radius: 0.75rem;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(2, 1, 6, 0.94);
+          line-height: 1.55;
+          font-style: normal;
+        }
+        .bio-intro p {
+          margin: 0;
+          text-align: center;
         }
         .bio-section {
           margin-bottom: 2rem;

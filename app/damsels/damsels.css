@@ -60,22 +60,22 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.28rem;
+  gap: 0.7rem;
   flex: 0 0 auto;
   align-self: center;
-  width: var(--damsels-frame);
-  padding: 0.28rem 0.65rem 0.32rem;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #050505;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  width: min(100%, 42rem);
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .damsels-title-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
+  align-items: center;
+  text-align: center;
+  gap: 0.7rem;
 }
 
 .damsels-kicker {
@@ -87,7 +87,6 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(180, 240, 235, 0.86);
-  animation: damselsTealHue 22s linear infinite;
 }
 
 .damsels-kicker em {
@@ -99,21 +98,26 @@
 .damsels-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.45rem, 2.6vw, 2.1rem);
-  line-height: 0.92;
-  letter-spacing: 0.04em;
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.12em;
   color: #fff;
-  text-transform: lowercase;
+  text-transform: uppercase;
   text-shadow: 0 0 18px rgba(0, 184, 176, 0.35);
-  animation: damselsTealHue 22s linear infinite;
 }
 
 .damsels-lede {
   margin: 0 auto;
-  max-width: 100%;
+  width: 100%;
+  padding: 0.95rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 1, 6, 0.94);
   text-align: center;
-  font-size: clamp(0.8rem, 1.1vw, 0.92rem);
-  line-height: 1.4;
+  font-family: var(--font-menu);
+  font-size: 0.98rem;
+  line-height: 1.55;
   color: rgba(220, 240, 238, 0.92);
 }
 
@@ -625,18 +629,18 @@
   }
 
   .damsels-hero {
-    padding: 0.28rem 0.5rem 0.3rem;
-    gap: 0.14rem;
+    gap: 0.55rem;
     width: 100%;
   }
 
   .damsels-lede {
-    font-size: 0.7rem;
-    line-height: 1.28;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    padding: 0.8rem 0.95rem;
   }
 
   .damsels-title {
-    font-size: 1.28rem;
+    font-size: 1.55rem;
   }
 
   .damsels-links {
@@ -679,11 +683,12 @@
 
 @media (max-height: 700px) {
   .damsels-hero {
-    padding: 0.18rem 0.5rem 0.2rem;
+    gap: 0.45rem;
   }
 
   .damsels-lede {
-    font-size: 0.68rem;
+    font-size: 0.84rem;
+    padding: 0.7rem 0.9rem;
   }
 
   .damsels-now {

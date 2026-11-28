@@ -1,7 +1,7 @@
 .gallery-pane {
   height: 100%;
   overflow: auto;
-  padding: 0.55rem 0.4rem 0.35rem;
+  padding: 0.7rem 0.4rem 1.5rem;
   background: #000;
   color: #fff;
 }
@@ -21,30 +21,47 @@
   height: 100%;
   min-height: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.gallery-block + .gallery-block {
+  margin-top: 4.75rem;
+  padding-top: 2.4rem;
+  border-top: 1px solid rgba(255, 46, 184, 0.42);
 }
 
 .gallery-block header {
   flex: 0 0 auto;
   margin: 0 auto 0.35rem;
-  max-width: 42rem;
+  width: min(100%, 42rem);
+  padding: 0 0.35rem;
 }
 
 .gallery-block h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
   font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
+  letter-spacing: 0.12em;
+  line-height: 1.15;
+  text-transform: uppercase;
   color: var(--accent-pink);
 }
 
 .gallery-block .gallery-desc {
-  margin: 0.45rem 0 0;
+  margin: 0.75rem auto 0;
+  padding: 0.95rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 1, 6, 0.94);
   font-family: var(--font-menu);
   font-size: 0.98rem;
-  line-height: 1.45;
-  color: rgba(232, 226, 238, 0.82);
+  line-height: 1.55;
+  color: rgba(232, 226, 238, 0.9);
+}
+
+.gallery-block .gallery-desc:empty {
+  display: none;
 }
 
 .gallery-stage {
@@ -133,8 +150,14 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem 0.8rem;
-  margin-top: 0.2rem;
+  gap: 0.55rem 0.85rem;
+  width: min(100%, 42rem);
+  margin: 0.85rem auto 0.2rem;
+  padding: 0.8rem 1.15rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 1, 6, 0.94);
+  box-sizing: border-box;
   font-family: var(--font-menu);
 }
 

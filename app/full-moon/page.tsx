@@ -654,9 +654,9 @@ export default function FullMoonPage() {
 
       <div className="fmt-page-inner">
       <header className="fmt-head">
+        <p className="fmt-kicker">since 2022</p>
         <h1 className="fmt-title-box">Full Moon Token</h1>
         <div className="fmt-head-stack">
-          <p className="fmt-kicker">since 2022</p>
           <p className="fmt-tag-box">
             The Full Moon Token is your key. Hold it on Tezos or Base and receive
             new art from Empress Trash every full moon.

@@ -7,9 +7,9 @@ import {
   mapPool,
   pickFromMetadata,
 } from "../media";
-import type { GalleryWork, WorkKind } from "../types";
+import { editionCopy, type GalleryWork, type WorkKind } from "../types";
 
-const ALCHEMY_HOST: Record<GalleryChain, string> = {
+const ALCHEMY_HOST: Partial<Record<GalleryChain, string>> = {
   ethereum: "eth-mainnet",
   base: "base-mainnet",
 };
@@ -68,6 +68,9 @@ export function listingUrl(
   if (platform === "transient") {
     const chainId = chain === "base" ? "8453" : "1";
     return `https://www.transient.xyz/token/${chainId}/${contract}/${tokenId}`;
+  }
+  if (platform === "ord") {
+    return `https://ord.net/inscription/${tokenId}`;
   }
   return `https://objkt.com/tokens/${contract}/${tokenId}`;
 }
@@ -136,6 +139,7 @@ async function resolveNft(
     height: picked?.height ?? null,
     forSale: false,
     price: null,
+    edition: editionCopy(1, false),
   };
 }
 
@@ -144,9 +148,9 @@ async function fetchAlchemyPage(
   contract: string,
   pageKey?: string,
 ): Promise<{ nfts: AlchemyNft[]; pageKey?: string }> {
-  const url = new URL(
-    `https://${ALCHEMY_HOST[chain]}.g.alchemy.com/nft/v3/${alchemyKey()}/getNFTsForContract`,
-  );
+  const host = ALCHEMY_HOST[chain];
+  if (!host) throw new Error(`No NFT index for ${chain}.`);
+  const url = new URL(`https://${host}.g.alchemy.com/nft/v3/${alchemyKey()}/getNFTsForContract`);
   url.searchParams.set("contractAddress", contract);
   url.searchParams.set("withMetadata", "true");
   url.searchParams.set("limit", "100");
