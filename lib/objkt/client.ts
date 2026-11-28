@@ -22,9 +22,14 @@ export async function objktGraphql<T>(
 ): Promise<T> {
   const res = await fetch(OBJKT_GRAPHQL, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 0 },
+    cache: "no-store",
   });
 
   if (!res.ok) {

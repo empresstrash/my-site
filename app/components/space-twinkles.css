@@ -1,0 +1,64 @@
+.space-twinkles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.space-twinkle-field {
+  position: absolute;
+  inset: 0;
+}
+
+.space-twinkle {
+  position: absolute;
+  display: block;
+  width: 2px;
+  height: 2px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 7px 1px rgba(200, 220, 255, 0.45);
+  opacity: 0.25;
+  will-change: opacity, transform;
+}
+
+.space-twinkle:nth-child(3n) {
+  width: 1.5px;
+  height: 1.5px;
+  background: rgba(200, 240, 255, 0.95);
+  box-shadow: 0 0 4px rgba(0, 200, 220, 0.6);
+}
+
+.space-twinkle:nth-child(4n) {
+  width: 2.5px;
+  height: 2.5px;
+  background: rgba(255, 210, 230, 0.95);
+  box-shadow: 0 0 5px rgba(255, 120, 180, 0.5);
+}
+
+.space-twinkle:nth-child(5n) {
+  width: 1.5px;
+  height: 1.5px;
+}
+
+.twinkle-rule {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: space-evenly;
+  width: 66.67%;
+  margin: 0.15rem auto 0.55rem;
+  padding: 0.2rem 0 0;
+  pointer-events: none;
+}
+
+.twinkle-rule .space-twinkle {
+  position: relative;
+  left: auto;
+  top: auto;
+}

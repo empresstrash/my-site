@@ -1,11 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
+import SpaceTwinkles, { TwinkleRule } from './components/SpaceTwinkles';
+import BioPage from './bio/page';
+import DamselsLanding from './damsels/DamselsLanding';
+import FullMoonPage from './full-moon/page';
+import GalleryStack from './gallery/GalleryStack';
 
-type HomeView = 'substack' | 'emporium';
+type HomeView = 'gallery' | 'full-moon' | 'damsels' | 'substack' | 'emporium' | 'bio';
+
+const HOME_TABS: { id: HomeView; label: string }[] = [
+  { id: 'gallery', label: 'gallery' },
+  { id: 'full-moon', label: 'full moon art' },
+  { id: 'damsels', label: 'damsels' },
+  { id: 'substack', label: 'substack' },
+  { id: 'emporium', label: 'merch shop' },
+  { id: 'bio', label: 'bio' },
+];
 
 type SalonPost = {
   title: string;
@@ -21,7 +35,12 @@ type SalonArticle = SalonPost & { html: string };
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function parseHomeView(value: string | null): HomeView {
-  return value === 'emporium' ? 'emporium' : 'substack';
+  if (value === 'full-moon') return 'full-moon';
+  if (value === 'damsels') return 'damsels';
+  if (value === 'substack') return 'substack';
+  if (value === 'emporium') return 'emporium';
+  if (value === 'bio') return 'bio';
+  return 'gallery';
 }
 
 function formatDate(iso: string): string {
@@ -137,16 +156,23 @@ function HomeContent() {
   const view = parseHomeView(searchParams.get('embed'));
   const requestedPost = searchParams.get('post');
   const postSlug = requestedPost && POST_SLUG.test(requestedPost) ? requestedPost : null;
+  const [visitedGallery, setVisitedGallery] = useState(view === 'gallery');
+  const [visitedFullMoon, setVisitedFullMoon] = useState(view === 'full-moon');
+  const [visitedDamsels, setVisitedDamsels] = useState(view === 'damsels');
+  const [visitedSubstack, setVisitedSubstack] = useState(view === 'substack');
   const [visitedEmporium, setVisitedEmporium] = useState(view === 'emporium');
+  const [visitedBio, setVisitedBio] = useState(view === 'bio');
+  if (view === 'gallery' && !visitedGallery) setVisitedGallery(true);
+  if (view === 'full-moon' && !visitedFullMoon) setVisitedFullMoon(true);
+  if (view === 'damsels' && !visitedDamsels) setVisitedDamsels(true);
+  if (view === 'substack' && !visitedSubstack) setVisitedSubstack(true);
+  if (view === 'emporium' && !visitedEmporium) setVisitedEmporium(true);
+  if (view === 'bio' && !visitedBio) setVisitedBio(true);
   const [posts, setPosts] = useState<SalonPost[] | null>(null);
   const [listFailed, setListFailed] = useState(false);
   const [article, setArticle] = useState<SalonArticle | null>(null);
   const [articleFailed, setArticleFailed] = useState(false);
-  const [subscribeOpen, setSubscribeOpen] = useState(view === 'substack');
-
-  useEffect(() => {
-    if (view === 'emporium') setVisitedEmporium(true);
-  }, [view]);
+  const [subscribeOpen, setSubscribeOpen] = useState(true);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -159,7 +185,17 @@ function HomeContent() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    document.body.classList.add('gallery-wide');
+    window.dispatchEvent(new CustomEvent('home-menu'));
+    return () => {
+      document.body.classList.remove('gallery-wide');
+      window.dispatchEvent(new CustomEvent('home-menu'));
+    };
+  }, []);
+
   useEffect(() => {
+    if (!visitedSubstack) return;
     let cancelled = false;
     fetch('/api/salon')
       .then((response) => {
@@ -175,7 +211,7 @@ function HomeContent() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [visitedSubstack]);
 
   useEffect(() => {
     if (!postSlug) return;
@@ -201,8 +237,8 @@ function HomeContent() {
   const tabHref = (id: HomeView) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('paragraph');
-    if (id === 'emporium') params.set('embed', 'emporium');
-    else params.delete('embed');
+    if (id === 'gallery') params.delete('embed');
+    else params.set('embed', id);
     const query = params.toString();
     return query ? `/?${query}` : '/';
   };
@@ -225,36 +261,46 @@ function HomeContent() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" role="tablist" aria-label="homepage embeds">
-        <Link
-          href={tabHref('substack')}
-          role="tab"
-          aria-selected={view === 'substack'}
-          className={`home-embed-tab${view === 'substack' ? ' is-on' : ''}`}
-          scroll={false}
-        >
-          salon
-        </Link>
-        <Link
-          href={tabHref('emporium')}
-          role="tab"
-          aria-selected={view === 'emporium'}
-          className={`home-embed-tab${view === 'emporium' ? ' is-on' : ''}`}
-          scroll={false}
-        >
-          emporium shop
-        </Link>
+        {HOME_TABS.map((tab) => (
+          <Link
+            key={tab.id}
+            href={tabHref(tab.id)}
+            role="tab"
+            aria-selected={view === tab.id}
+            className={`home-embed-tab${view === tab.id ? ' is-on' : ''}`}
+            scroll={false}
+          >
+            <span className="home-embed-tab-label">{tab.label}</span>
+          </Link>
+        ))}
       </nav>
 
       <div className="home-embed-stage">
+        {visitedGallery && (
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'gallery'} aria-hidden={view !== 'gallery'}>
+            <GalleryStack />
+          </div>
+        )}
+        {visitedFullMoon && (
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'full-moon'} aria-hidden={view !== 'full-moon'}>
+            <FullMoonPage />
+          </div>
+        )}
+        {visitedDamsels && (
+          <div className="home-embed-pane" role="tabpanel" hidden={view !== 'damsels'} aria-hidden={view !== 'damsels'}>
+            <DamselsLanding />
+          </div>
+        )}
+        {visitedSubstack && (
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
+            <SpaceTwinkles count={48} />
             <header className="salon-mast">
-              <div className="salon-mast-line">
-                <h1>Salon de l&apos;Empress</h1>
-                <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
-                  subscribe
-                </button>
-              </div>
+              <TwinkleRule />
+              <h1>Salon de l&apos;Empress</h1>
+              <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
+                subscribe
+              </button>
             </header>
 
             <div className="salon-scroll">
@@ -324,17 +370,21 @@ function HomeContent() {
             </div>
           </div>
         </div>
+        )}
 
         {visitedEmporium && (
           <div className="home-embed-pane" role="tabpanel" hidden={view !== 'emporium'} aria-hidden={view !== 'emporium'}>
             <iframe src="/frame/emporium" className="home-embed-frame" allow="fullscreen *" allowFullScreen title="Emporium shop" />
           </div>
         )}
+        {visitedBio && (
+          <div className="home-embed-pane home-embed-pane-scroll" role="tabpanel" hidden={view !== 'bio'} aria-hidden={view !== 'bio'}>
+            <BioPage />
+          </div>
+        )}
       </div>
 
-      {view === 'substack' && subscribeOpen && (posts !== null || listFailed) ? (
-        <SubscribePopup onClose={() => setSubscribeOpen(false)} />
-      ) : null}
+      {subscribeOpen ? <SubscribePopup onClose={() => setSubscribeOpen(false)} /> : null}
     </div>
   );
 }
@@ -343,8 +393,12 @@ function HomeFallback() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" aria-hidden="true">
-        <span className="home-embed-tab is-on">salon</span>
-        <span className="home-embed-tab">emporium shop</span>
+        <span className="home-embed-tab is-on"><span className="home-embed-tab-label">gallery</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">full moon art</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">damsels</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">substack</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">merch shop</span></span>
+        <span className="home-embed-tab"><span className="home-embed-tab-label">bio</span></span>
       </nav>
       <div className="home-embed-stage" />
     </div>

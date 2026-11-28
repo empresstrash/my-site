@@ -293,7 +293,6 @@ export default function ClientMenu(): React.ReactNode {
 
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const lastMenuClick = useRef({ key: '', at: 0 });
   const menuOpenedAt = useRef(0);
   const skipMenuWrite = useRef(true);
@@ -316,7 +315,7 @@ export default function ClientMenu(): React.ReactNode {
 
   const onBooth = pathname === '/vr';
   const onKidPix = pathname === '/kid-pix';
-  const menuDrawer = isMobile || onBooth || onKidPix;
+  const menuDrawer = true;
   const [embeddedBrowser, setEmbeddedBrowser] = useState(false);
 
   useEffect(() => {
@@ -339,17 +338,7 @@ export default function ClientMenu(): React.ReactNode {
     };
   }, [still, onBooth, onKidPix]);
 
-  // detect mobile viewport on client only
-  useEffect(() => {
-    function update() {
-      setIsMobile(window.innerWidth < 769);
-    }
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-
-  // close mobile menu when navigating
+  // close the drawer when navigating
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);

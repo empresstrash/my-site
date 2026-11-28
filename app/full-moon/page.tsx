@@ -9,6 +9,8 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import CollapsibleCopy from "@/app/components/CollapsibleCopy";
+import SpaceTwinkles, { TwinkleRule } from "@/app/components/SpaceTwinkles";
 import {
   KEY_TOKENS,
   timelineByMoon,
@@ -17,64 +19,6 @@ import {
   type MoonWork,
 } from "./data";
 import "./full-moon.css";
-
-/**
- * Twinkling stars — JS-driven so Windows "reduced motion" / CSS animation
- * kills can't freeze them (header glass-sparkles aren't under that rule).
- */
-function SpaceTwinkles({ count = 48 }: { count?: number }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const stars = Array.from(
-      root.querySelectorAll<HTMLElement>(".fmt-twinkle"),
-    );
-    if (!stars.length) return;
-
-    let raf = 0;
-    const t0 = performance.now();
-
-    const tick = (now: number) => {
-      const t = now - t0;
-      for (let i = 0; i < stars.length; i++) {
-        // ~3.5–5.5s per cycle, staggered (slow gentle twinkle)
-        const dur = 3500 + (i % 6) * 350;
-        const delay = (i * 420) % 4200;
-        const phase = (((t - delay) % dur) + dur) % dur;
-        // sharp peak mid-cycle (sparkle), dim base
-        const u = phase / dur; // 0..1
-        const peak = Math.exp(-Math.pow((u - 0.5) * 6, 2)); // gaussian around mid
-        const opacity = 0.2 + 0.8 * peak;
-        const scale = 0.85 + 0.55 * peak;
-        const el = stars[i];
-        el.style.opacity = String(opacity);
-        el.style.transform = `scale(${scale})`;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [count]);
-
-  return (
-    <div className="fmt-twinkles" ref={rootRef} aria-hidden="true">
-      {Array.from({ length: count }, (_, i) => (
-        <span
-          key={i}
-          className="fmt-twinkle"
-          style={{
-            left: `${(i * 37 + 11) % 97}%`,
-            top: `${(i * 53 + 7) % 96}%`,
-            opacity: 0.25,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 const HEN_FA2 = "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton";
 const OBJKT_PATH_ALIASES: Record<string, string> = {
@@ -654,13 +598,13 @@ export default function FullMoonPage() {
 
       <div className="fmt-page-inner">
       <header className="fmt-head">
+        <TwinkleRule />
         <h1 className="fmt-title-box">Full Moon Token</h1>
         <div className="fmt-head-stack">
-          <p className="fmt-kicker">since 2022</p>
-          <p className="fmt-tag-box">
-            The Full Moon Token is your key. Hold it on Tezos or Base and receive
-            new art from Empress Trash every full moon.
-          </p>
+          <CollapsibleCopy
+            className="fmt-tag-box"
+            text="Since 2022, the Full Moon Token is your key. Hold it on Tezos or Base and receive new art from Empress Trash every full moon."
+          />
           <nav className="fmt-links" aria-label="more links">
             <a
               href="https://objkt.com/curations/objkt/empress-trash's-full-moon-token-%2B-airdrops-93a99301"

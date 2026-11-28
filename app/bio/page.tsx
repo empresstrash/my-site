@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { TwinkleRule } from "@/app/components/SpaceTwinkles";
 
 type CvLink = {
   label: string;
@@ -2389,7 +2390,9 @@ function CvEntryRow({ item }: { item: CvItem }) {
 
 export default function BioPage() {
   return (
-    <div className="bio-page">
+    <div className="bio-shell">
+      <TwinkleRule />
+      <div className="bio-page">
       <h1>Empress Trash</h1>
 
       <section className="bio-intro">
@@ -2453,32 +2456,50 @@ export default function BioPage() {
       </section>
 
       <style jsx>{`
+        .bio-shell {
+          width: 100%;
+        }
         .bio-page {
-          max-width: 1000px;
-          margin: 2rem auto;
-          padding: 0 1rem 3rem;
+          max-width: 42rem;
+          margin: 0 auto 2rem;
+          padding: 0.15rem 0.6rem 3rem;
           color: var(--color-text);
           line-height: 1.8;
           font-family: var(--font-family);
         }
         .bio-page h1 {
-          font-size: 2.5rem;
-          margin-bottom: 1.5rem;
+          margin: 0;
+          font-size: clamp(1.8rem, 3vw, 2.6rem);
+          font-family: var(--font-display);
+          font-weight: 400;
+          letter-spacing: 0.12em;
+          line-height: 1.15;
           text-align: center;
+          text-transform: uppercase;
           color: var(--accent-pink);
         }
         .bio-page h2 {
-          font-size: 1.5rem;
+          font-size: clamp(1.25rem, 2vw, 1.5rem);
+          font-weight: 400;
+          letter-spacing: 0.1em;
+          line-height: 1.2;
+          text-transform: uppercase;
           margin-top: 2rem;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.85rem;
           color: var(--accent-pink);
         }
         .bio-intro {
-          background: rgba(255, 0, 127, 0.05);
-          padding: 1.5rem;
-          border-left: 4px solid var(--accent-pink);
-          margin-bottom: 2rem;
-          font-style: italic;
+          margin: 1.35rem auto 1.85rem;
+          padding: 0.95rem 1.25rem;
+          border-radius: 0.75rem;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(0, 0, 0, 0.84);
+          line-height: 1.55;
+          font-style: normal;
+        }
+        .bio-intro p {
+          margin: 0;
+          text-align: center;
         }
         .bio-section {
           margin-bottom: 2rem;
@@ -2715,10 +2736,10 @@ export default function BioPage() {
 
         @media (max-width: 768px) {
           .bio-page {
-            padding: 0 0.75rem 2.5rem;
+            padding: 1.25rem 0.75rem 2.5rem;
           }
           .bio-page h1 {
-            font-size: 1.8rem;
+            font-size: 1.7rem;
           }
           .bio-page h2 {
             font-size: 1.2rem;
@@ -2745,10 +2766,10 @@ export default function BioPage() {
           .bio-page {
             max-width: 100%;
             margin: 1rem auto;
-            padding: 0 0.5rem 2rem;
+            padding: 1.15rem 0.5rem 2rem;
           }
           .bio-page h1 {
-            font-size: 1.4rem;
+            font-size: 1.7rem;
             margin-bottom: 1rem;
           }
           .bio-page h2 {
@@ -2776,6 +2797,7 @@ export default function BioPage() {
           }
         }
       `}</style>
+      </div>
     </div>
   );
 }
