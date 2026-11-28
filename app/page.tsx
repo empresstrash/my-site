@@ -296,6 +296,14 @@ function HomeContent() {
           <div className="salon-pane">
             <SpaceTwinkles count={48} />
             <header className="salon-mast">
+              {postSlug ? (
+                <div className="salon-read-bar">
+                  <button type="button" onClick={closePost}>all posts</button>
+                  <a href={article?.url ?? `https://empresstrash.substack.com/p/${postSlug}`} target="_blank" rel="noopener noreferrer">
+                    open on substack
+                  </a>
+                </div>
+              ) : null}
               <TwinkleRule />
               <h1>Salon de l&apos;Empress</h1>
               <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
@@ -306,12 +314,6 @@ function HomeContent() {
             <div className="salon-scroll">
             {postSlug ? (
               <div className="salon-read">
-                <div className="salon-read-bar">
-                  <button type="button" onClick={closePost}>all posts</button>
-                  <a href={article?.url ?? `https://empresstrash.substack.com/p/${postSlug}`} target="_blank" rel="noopener noreferrer">
-                    open on substack
-                  </a>
-                </div>
                 {articleFailed ? (
                   <p className="salon-status">This post didn’t load.</p>
                 ) : !article ? (

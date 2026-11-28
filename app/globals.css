@@ -2335,9 +2335,19 @@ a.salon-bio {
   display: flex;
   flex-shrink: 0;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.45rem 0.85rem;
-  border-bottom: 1px solid rgba(160, 140, 220, 0.12);
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+  padding: 0 0.15rem;
+  border-bottom: 0;
+}
+
+.salon-mast .salon-read-bar button,
+.salon-mast .salon-read-bar a {
+  padding: 0.16rem 0.48rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 6px color-mix(in srgb, #ff3d8a 55%, transparent);
 }
 
 .salon-article {
