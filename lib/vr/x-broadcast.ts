@@ -260,75 +260,133 @@ function linesFromNdjson(body: string): XChatLine[] {
     .slice(-40);
 }
 
-function hasNewerLine(body: string, since: string): boolean {
-  for (const row of body.split("\n")) {
-    const ts = /"ts":"(\d+)"/.exec(row)?.[1];
-    if (ts && ts > since) return true;
-  }
-  return false;
+function lineStamp(line: XChatLine): string {
+  return line.id.split("-")[1] || "";
 }
 
-async function readOpenChat(url: string, token: string, since: string): Promise<string> {
+type Feed = {
+  status: "live" | "waiting";
+  broadcast: string;
+  lines: XChatLine[];
+  cursor: string;
+  settled: boolean;
+};
+
+const feed: Feed = { status: "waiting", broadcast: "", lines: [], cursor: "", settled: false };
+const seenLineIds = new Set<string>();
+let following = false;
+
+function rememberLine(line: XChatLine) {
+  if (seenLineIds.has(line.id)) return;
+  seenLineIds.add(line.id);
+  feed.lines = [...feed.lines, line].sort((a, b) => a.at - b.at).slice(-80);
+  const stamp = lineStamp(line);
+  if (stamp > feed.cursor) feed.cursor = stamp;
+}
+
+async function nameUnknown(lines: XChatLine[]): Promise<void> {
+  const unnamed = lines.filter((line) => line.name === "X");
+  if (!unnamed.length) return;
+  await rememberSenders(unnamed.map((line) => line.id.split("-").pop() || ""));
+  for (const line of unnamed) {
+    const name = senderNames.get(line.id.split("-").pop() || "");
+    if (!name) continue;
+    line.name = name;
+  }
+}
+
+async function consumeChat(url: string, token: string): Promise<void> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), since ? 4000 : 2000);
-  let quiet: ReturnType<typeof setTimeout> | null = null;
-  let text = "";
-  const stopSoon = () => {
-    if (quiet) return;
-    quiet = setTimeout(() => controller.abort(), 300);
-  };
+  const timer = setTimeout(() => controller.abort(), 55000);
   try {
     const response = await fetch(url, { headers: chatHeaders(token), signal: controller.signal, cache: "no-store" });
     if (response.status === 401 || response.status === 403) guest = null;
-    if (!response.ok || !response.body) return "";
+    if (!response.ok || !response.body) return;
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let pending = "";
     while (true) {
       const { done, value } = await reader.read();
+      pending += decoder.decode(value || new Uint8Array(), { stream: !done });
+      const parts = pending.split("\n");
+      pending = parts.pop() ?? "";
+      const arrived = linesFromNdjson(parts.join("\n"));
+      if (arrived.length) {
+        await nameUnknown(arrived);
+        for (const line of arrived) rememberLine(line);
+      }
       if (done) break;
-      text += decoder.decode(value, { stream: true });
-      if (!since && text.includes("\n")) stopSoon();
-      if (since && hasNewerLine(text, since)) stopSoon();
-      if (text.length > 200000) break;
     }
   } catch {
-    /* closed once the lines we need have arrived, or the wait ran out */
+    /* the stream ended or went quiet; the follower opens it again */
   } finally {
     clearTimeout(timer);
-    if (quiet) clearTimeout(quiet);
   }
-  return text;
 }
 
-function lineCursor(lines: XChatLine[]): string {
-  return lines.reduce((cursor, line) => {
-    const ts = line.id.split("-")[1] || "";
-    return ts > cursor ? ts : cursor;
-  }, "");
+async function followChat(): Promise<void> {
+  let misses = 0;
+  for (;;) {
+    const live = await findLive().catch(() => null);
+    feed.settled = true;
+    if (!live) {
+      misses += 1;
+      if (misses >= 2) {
+        feed.status = "waiting";
+        feed.broadcast = "";
+        feed.cursor = "";
+        feed.lines = [];
+        seenLineIds.clear();
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      continue;
+    }
+    misses = 0;
+    if (feed.broadcast && feed.broadcast !== live.id) {
+      feed.lines = [];
+      feed.cursor = "";
+      seenLineIds.clear();
+    }
+    feed.broadcast = live.id;
+    feed.status = "live";
+    const token = await guestToken();
+    const status = token
+      ? await xJson<{ sessionId?: string }>(
+          `${API}/live_video_stream/status/${encodeURIComponent(live.mediaKey)}?client=web&use_syndication_guest_id=false&cookie_set_host=x.com`,
+        )
+      : null;
+    if (token && status?.sessionId) {
+      const params = new URLSearchParams({
+        broadcastId: live.id,
+        sessionId: status.sessionId,
+        cursor: feed.cursor || "0",
+      });
+      await consumeChat(`${LIVE_CHAT}?${params.toString()}`, token);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
 }
 
-async function liveChatLines(broadcastId: string, mediaKey: string, since: string): Promise<XChatLine[] | null> {
-  const token = await guestToken();
-  if (!token) return null;
-  const status = await xJson<{ sessionId?: string }>(
-    `${API}/live_video_stream/status/${encodeURIComponent(mediaKey)}?client=web&use_syndication_guest_id=false&cookie_set_host=x.com`,
-  );
-  if (!status?.sessionId) return null;
-  const params = new URLSearchParams({ broadcastId, sessionId: status.sessionId });
-  if (since) params.set("cursor", since);
-  const body = await readOpenChat(`${LIVE_CHAT}?${params.toString()}`, token, since);
-  const lines = linesFromNdjson(body).filter((line) => !since || (line.id.split("-")[1] || "") > since);
-  if (lines.some((line) => line.name === "X")) {
-    await rememberSenders(lines.filter((line) => line.name === "X").map((line) => line.id.split("-").pop() || ""));
-    return lines.map((line) => ({ ...line, name: senderNames.get(line.id.split("-").pop() || "") || line.name }));
-  }
-  return lines;
+function ensureFeed(): void {
+  if (following) return;
+  following = true;
+  void followChat();
 }
 
 export async function readXChat(since = ""): Promise<{ status: "live" | "waiting"; broadcast?: string; cursor?: string; lines: XChatLine[] }> {
-  const live = await findLive().catch(() => null);
-  if (!live) return { status: "waiting", lines: [] };
-  const lines = (await liveChatLines(live.id, live.mediaKey, since).catch(() => null)) ?? [];
-  const cursor = lineCursor(lines) || since || undefined;
-  return { status: "live", broadcast: live.id, cursor, lines };
+  ensureFeed();
+  const started = Date.now();
+  while (!feed.settled && Date.now() - started < 2500) {
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  }
+  while (!since && feed.status === "live" && feed.lines.length === 0 && Date.now() - started < 2500) {
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  }
+  const lines = feed.lines.filter((line) => !since || lineStamp(line) > since);
+  return {
+    status: feed.status,
+    broadcast: feed.broadcast || undefined,
+    cursor: feed.cursor || since || undefined,
+    lines,
+  };
 }
