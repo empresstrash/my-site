@@ -30,7 +30,7 @@ export const galleries: GalleryConfig[] = [
     id: "genesis",
     title: "genesis oeuvre",
     description:
-      "Empress Trash’s Genesis Ordinals (20 Jan 2024 – 3 Mar 2026) are the artist’s first Bitcoin inscriptions: images, texts, gifs, and hybrid AI works that place glitch, painting, and personal record on-chain as a permanent early archive.",
+      "Empress Trash’s Genesis Ordinals (20 Jan 2024 – 3 Mar 2026) are the artist’s first Bitcoin inscriptions: images, texts, gifs, and hybrid AI works that place glitch, painting, and personal record on-chain as a permanent early archive. Each is the original 1/1 inscription with some having Gamma digital print editions connected.",
     platform: "ord",
     chain: "bitcoin",
     contract: "genesis-oeuvre",

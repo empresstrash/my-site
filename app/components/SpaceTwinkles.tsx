@@ -37,7 +37,7 @@ function useTwinkle(count: number) {
   return rootRef;
 }
 
-export function TwinkleRule({ count = 15 }: { count?: number }) {
+export function TwinkleRule({ count = 31 }: { count?: number }) {
   const rootRef = useTwinkle(count);
 
   return (
