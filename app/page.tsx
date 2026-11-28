@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
-import GlassSparkles from './components/GlassSparkles';
+import { TwinkleRule } from './components/SpaceTwinkles';
 import BioPage from './bio/page';
 import DamselsLanding from './damsels/DamselsLanding';
 import FullMoonPage from './full-moon/page';
@@ -295,13 +295,11 @@ function HomeContent() {
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
             <header className="salon-mast">
-              <GlassSparkles count={28} />
-              <div className="salon-mast-line">
-                <h1>Salon de l&apos;Empress</h1>
-                <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
-                  subscribe
-                </button>
-              </div>
+              <TwinkleRule />
+              <h1>Salon de l&apos;Empress</h1>
+              <button type="button" className="salon-sub-btn" onClick={() => setSubscribeOpen(true)}>
+                subscribe
+              </button>
             </header>
 
             <div className="salon-scroll">

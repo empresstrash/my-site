@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { TwinkleRule } from "@/app/components/SpaceTwinkles";
 
 type CvLink = {
   label: string;
@@ -2389,7 +2390,9 @@ function CvEntryRow({ item }: { item: CvItem }) {
 
 export default function BioPage() {
   return (
-    <div className="bio-page">
+    <div className="bio-shell">
+      <TwinkleRule />
+      <div className="bio-page">
       <h1>Empress Trash</h1>
 
       <section className="bio-intro">
@@ -2453,10 +2456,13 @@ export default function BioPage() {
       </section>
 
       <style jsx>{`
+        .bio-shell {
+          width: 100%;
+        }
         .bio-page {
           max-width: 42rem;
           margin: 0 auto 2rem;
-          padding: 1.85rem 0.6rem 3rem;
+          padding: 0.15rem 0.6rem 3rem;
           color: var(--color-text);
           line-height: 1.8;
           font-family: var(--font-family);
@@ -2791,6 +2797,7 @@ export default function BioPage() {
           }
         }
       `}</style>
+      </div>
     </div>
   );
 }

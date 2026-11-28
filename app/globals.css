@@ -2042,49 +2042,35 @@ body.gallery-wide .header-with-side > .mobile-menu-button {
 .salon-mast {
   position: relative;
   flex-shrink: 0;
-  isolation: isolate;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255, 46, 184, 0.28);
-  background: rgba(255, 0, 140, 0.16);
-}
-
-.salon-mast .glass-shimmer {
-  z-index: 0;
-}
-
-.salon-mast-line {
-  position: relative;
-  z-index: 1;
-  width: min(60rem, 100%);
-  margin: 0 auto;
-  padding: 1.65rem 1.15rem;
-  display: grid;
-  grid-template-columns: minmax(0, 40rem) 17.5rem;
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.2rem 0.4rem 0.45rem;
+  border: 0;
+  background: none;
+  overflow: visible;
 }
 
 .salon-mast h1 {
-  grid-column: 1;
   margin: 0;
-  color: #fff6fb;
+  color: var(--accent-pink);
   font-family: var(--font-display);
   -webkit-font-smoothing: none;
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   font-weight: 400;
   letter-spacing: 0.12em;
-  line-height: 1.2;
+  line-height: 1.15;
   text-align: center;
   text-transform: uppercase;
 }
 
 .salon-mast .salon-sub-btn {
-  grid-column: 2;
-  justify-self: end;
-  border-radius: 12px;
-  border-color: #ffd0ea;
-  background: #ff4db8;
-  color: #1a0612;
+  border-radius: 4px 12px 8px 10px;
+  border-color: rgba(255, 138, 208, 0.42);
+  background: transparent;
+  color: #fff;
 }
 
 .salon-sub-btn,
@@ -2518,22 +2504,8 @@ a.salon-bio {
     grid-row: 2;
   }
 
-  .salon-mast-line {
-    grid-template-columns: minmax(0, 1fr);
-    padding: 1.15rem 0.85rem;
-  }
-
   .salon-mast h1 {
-    grid-column: 1;
-    grid-row: 1;
     font-size: 1.7rem;
-    padding-inline: 6.5rem;
-  }
-
-  .salon-mast .salon-sub-btn {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: end;
   }
 
   .salon-pop-card {

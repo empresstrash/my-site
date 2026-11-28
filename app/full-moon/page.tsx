@@ -10,7 +10,7 @@ import {
   type CSSProperties,
 } from "react";
 import CollapsibleCopy from "@/app/components/CollapsibleCopy";
-import SpaceTwinkles from "@/app/components/SpaceTwinkles";
+import SpaceTwinkles, { TwinkleRule } from "@/app/components/SpaceTwinkles";
 import {
   KEY_TOKENS,
   timelineByMoon,
@@ -598,6 +598,7 @@ export default function FullMoonPage() {
 
       <div className="fmt-page-inner">
       <header className="fmt-head">
+        <TwinkleRule />
         <h1 className="fmt-title-box">Full Moon Token</h1>
         <div className="fmt-head-stack">
           <CollapsibleCopy

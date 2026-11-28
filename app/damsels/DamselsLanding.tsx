@@ -12,7 +12,7 @@ import {
   type DamselToken,
 } from "@/lib/damsels/constants";
 import CollapsibleCopy from "@/app/components/CollapsibleCopy";
-import SpaceTwinkles from "@/app/components/SpaceTwinkles";
+import SpaceTwinkles, { TwinkleRule } from "@/app/components/SpaceTwinkles";
 import "./damsels.css";
 
 function statusLabel(token: DamselToken): string {
@@ -328,6 +328,7 @@ export default function DamselsLanding() {
       <div className="damsels-glow" aria-hidden="true" />
       <SpaceTwinkles count={48} />
       <div className="damsels-inner">
+        <TwinkleRule />
         <header className="damsels-hero">
           <h1 className="damsels-title">damsels</h1>
           <CollapsibleCopy
