@@ -3400,3 +3400,95 @@ html.pvr-still .title-particle-layer {
   cursor: pointer;
   white-space: nowrap;
 }
+
+/* Phones and iPads scroll the page. Desktop keeps the locked panes. */
+@media (hover: none), (pointer: coarse) {
+  html,
+  body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .content:has(.home-embed),
+  body.home-page-active .content {
+    overflow: visible;
+    max-height: none;
+    height: auto;
+  }
+
+  .home-embed {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .home-embed-stage {
+    flex: none;
+    height: auto;
+    overflow: visible;
+  }
+
+  .home-embed-pane {
+    position: relative;
+    inset: auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .home-embed .gallery-pane,
+  .home-embed .gallery-scroll,
+  .home-embed .damsels-page,
+  .home-embed .fmt-page,
+  .home-embed .fmt-page-inner,
+  .home-embed .salon-pane,
+  .home-embed .salon-scroll {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .home-embed .gallery-sky,
+  .home-embed .damsels-page > .space-twinkles,
+  .home-embed .fmt-page > .space-twinkles,
+  .home-embed .salon-pane > .space-twinkles,
+  .home-embed .fmt-space {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    width: 100%;
+  }
+
+  .home-embed .gallery-block {
+    height: auto;
+    min-height: 0;
+  }
+
+  .home-embed .gallery-stage,
+  .home-embed .damsels-stage,
+  .home-embed .damsels-coverflow {
+    flex: none;
+    height: 62dvh;
+    min-height: 280px;
+  }
+
+  .home-embed .damsels-stage-section {
+    flex: none;
+    min-height: 0;
+  }
+
+  .home-embed .fmt-cycle {
+    flex: none;
+    height: 72dvh;
+    min-height: 420px;
+  }
+
+  .home-embed .salon-mast {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #020108;
+  }
+}
