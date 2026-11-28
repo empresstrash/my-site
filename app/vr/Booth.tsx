@@ -608,13 +608,13 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
     if (!box) return;
 
     const measure = () => {
-      const copy = box.querySelector(".vr-songcopy");
-      if (!(copy instanceof HTMLElement) || box.clientWidth < 2) return;
-      const padRight = Number.parseFloat(getComputedStyle(copy).paddingRight) || 0;
-      const needed = copy.scrollWidth - padRight;
-      const overflow = needed > box.clientWidth + 2;
-      setSongScroll(overflow);
-      if (overflow) box.style.setProperty("--song-seconds", `${Math.max(20, Math.round(needed / 18))}s`);
+      const sample = box.querySelector(".vr-songmeasure");
+      if (!(sample instanceof HTMLElement) || box.clientWidth < 2) return;
+      const needed = sample.scrollWidth;
+      const width = box.clientWidth;
+      setSongScroll((on) => (on ? needed > width - 32 : needed > width + 4));
+      const seconds = `${Math.max(16, Math.round(needed / 28))}s`;
+      if (box.style.getPropertyValue("--song-seconds") !== seconds) box.style.setProperty("--song-seconds", seconds);
     };
 
     measure();
@@ -879,6 +879,7 @@ export default function Booth({ initialOpen = false }: { initialOpen?: boolean }
             <span className="vr-volume-readout">{Math.round(volume * 100)}%</span>
             {now.art.startsWith("https://") ? <img className="vr-art" src={now.art} alt="" /> : null}
             <span className="vr-songbox" ref={songBox} title={songText}>
+              <span className="vr-songmeasure">{songText}</span>
               <span className={songScroll ? "vr-songline is-scroll" : "vr-songline"}>
                 <span className="vr-songcopy">{songText}</span>
                 {songScroll ? (
