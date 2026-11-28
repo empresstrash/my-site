@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import CollapsibleCopy from "@/app/components/CollapsibleCopy";
 import { galleries as galleryConfig } from "@/lib/gallery/galleries";
 import type { GalleryPayload, GalleryPlatform, GalleryWork } from "@/lib/gallery/types";
 import "./gallery.css";
@@ -275,7 +276,7 @@ function GalleryFan({ gallery, market }: { gallery: GalleryPayload; market?: Mar
       <section className="gallery-block" aria-label={gallery.title}>
         <header>
           <h2>{gallery.title}</h2>
-          <p className="gallery-desc">{gallery.description}</p>
+          <CollapsibleCopy className="gallery-desc" text={gallery.description} />
         </header>
         <p className="gallery-empty">{gallery.error}</p>
       </section>
@@ -291,7 +292,7 @@ function GalleryFan({ gallery, market }: { gallery: GalleryPayload; market?: Mar
     >
       <header>
         <h2>{gallery.title}</h2>
-        <p className="gallery-desc">{gallery.description}</p>
+        <CollapsibleCopy className="gallery-desc" text={gallery.description} />
       </header>
       <div
         className="gallery-stage"
@@ -402,7 +403,7 @@ export default function GalleryStack() {
             <section key={config.id} className="gallery-block" aria-label={config.title}>
               <header>
                 <h2>{config.title}</h2>
-                <p className="gallery-desc">{config.description}</p>
+                <CollapsibleCopy className="gallery-desc" text={config.description} />
               </header>
               <p className="gallery-empty">{failed[config.id] ? "This gallery didn’t load." : "Loading…"}</p>
             </section>

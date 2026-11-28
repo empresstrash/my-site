@@ -275,12 +275,12 @@
 .fmt-tag-box {
   margin: 0;
   width: 100%;
-  padding: 0.95rem 1.25rem;
+  padding: 0.38rem 0.8rem;
   border-radius: 0.75rem;
   font-family: var(--font-menu);
-  font-size: 0.98rem;
+  font-size: clamp(0.68rem, 1.35vh, 0.84rem);
   color: rgba(255, 236, 242, 0.95);
-  line-height: 1.55;
+  line-height: 1.35;
   text-align: center;
 }
 
@@ -301,15 +301,15 @@
   align-items: center;
   justify-content: center;
   flex: 0 1 auto;
-  min-height: 2.4rem;
-  padding: 0.55rem 1.25rem;
+  min-height: clamp(1.2rem, 2.8vh, 1.85rem);
+  padding: clamp(0.16rem, 0.45vh, 0.32rem) clamp(0.5rem, 1vw, 0.85rem);
   border-radius: 4px 12px 8px 10px;
   border: 1px solid rgba(255, 138, 208, 0.42);
   background: transparent;
   color: #fff;
   text-decoration: none;
   font-family: var(--font-menu);
-  font-size: 0.86rem;
+  font-size: clamp(0.62rem, 1.25vh, 0.78rem);
   font-weight: 400;
   letter-spacing: 0.05em;
   text-transform: lowercase;
@@ -727,18 +727,18 @@
   }
 
   .fmt-tag-box {
-    font-size: 0.88rem;
-    padding: 0.8rem 0.95rem;
-    line-height: 1.5;
+    font-size: clamp(0.66rem, 1.4vh, 0.8rem);
+    padding: 0.32rem 0.7rem;
+    line-height: 1.35;
   }
 
   .fmt-links {
-    gap: 0.55rem 0.65rem;
+    gap: 0.35rem 0.45rem;
   }
 
   .fmt-links a {
-    padding: 0.45rem 0.9rem;
-    font-size: 0.78rem;
+    padding: 0.16rem 0.55rem;
+    font-size: clamp(0.6rem, 1.2vh, 0.74rem);
     letter-spacing: 0.04em;
   }
 
@@ -823,14 +823,14 @@
   }
 
   .fmt-tag-box {
-    font-size: 0.82rem;
-    padding: 0.65rem 0.85rem;
-    line-height: 1.45;
+    font-size: clamp(0.64rem, 1.3vh, 0.76rem);
+    padding: 0.26rem 0.6rem;
+    line-height: 1.3;
   }
 
   .fmt-links a {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.72rem;
+    padding: 0.14rem 0.5rem;
+    font-size: clamp(0.58rem, 1.15vh, 0.7rem);
   }
 
   .fmt-cycle {
@@ -864,13 +864,13 @@
   }
 
   .fmt-tag-box {
-    font-size: 0.86rem;
-    padding: 0.7rem 0.9rem;
+    font-size: clamp(0.66rem, 1.35vh, 0.8rem);
+    padding: 0.3rem 0.7rem;
   }
 
   .fmt-links a {
-    padding: 0.45rem 0.85rem;
-    font-size: 0.78rem;
+    padding: 0.16rem 0.6rem;
+    font-size: clamp(0.6rem, 1.2vh, 0.74rem);
   }
 
   .fmt-head {

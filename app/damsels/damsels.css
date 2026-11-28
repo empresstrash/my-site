@@ -11,6 +11,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background:
+    radial-gradient(ellipse 70% 50% at 18% 12%, rgba(40, 12, 60, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 82% 88%, rgba(12, 28, 55, 0.16) 0%, transparent 50%),
+    radial-gradient(circle at 72% 22%, rgba(255, 61, 110, 0.045) 0%, transparent 32%),
+    radial-gradient(circle at 22% 78%, rgba(0, 184, 176, 0.04) 0%, transparent 36%),
+    linear-gradient(180deg, #05030c 0%, #020108 50%, #000000 100%);
 }
 
 .damsels-page * {
@@ -31,16 +37,7 @@
 }
 
 .damsels-glow {
-  pointer-events: none;
-  position: absolute;
-  inset: -2rem 0 auto;
-  height: 28rem;
-  background:
-    radial-gradient(ellipse 55% 50% at 18% 20%, rgba(0, 184, 176, 0.16) 0%, transparent 58%),
-    radial-gradient(ellipse 45% 40% at 88% 8%, rgba(61, 240, 255, 0.1) 0%, transparent 52%),
-    radial-gradient(ellipse 40% 30% at 55% 40%, rgba(125, 45, 255, 0.08) 0%, transparent 60%);
-  z-index: 0;
-  animation: damselsTealHue 22s linear infinite;
+  display: none;
 }
 
 .damsels-inner {
@@ -110,14 +107,14 @@
 .damsels-lede {
   margin: 0 auto;
   width: 100%;
-  padding: 0.95rem 1.25rem;
+  padding: 0.38rem 0.8rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(2, 1, 6, 0.94);
   text-align: center;
   font-family: var(--font-menu);
-  font-size: 0.98rem;
-  line-height: 1.55;
+  font-size: clamp(0.68rem, 1.35vh, 0.84rem);
+  line-height: 1.35;
   color: rgba(220, 240, 238, 0.92);
 }
 
@@ -126,7 +123,7 @@
   grid-template-columns: auto auto auto;
   justify-content: center;
   align-items: stretch;
-  gap: 0.75rem 1rem;
+  gap: clamp(0.25rem, 0.7vh, 0.5rem) clamp(0.4rem, 1vw, 0.75rem);
   width: var(--damsels-frame);
   max-width: 100%;
   align-self: center;
@@ -137,7 +134,7 @@
 .damsels-link-col {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: clamp(0.18rem, 0.5vh, 0.32rem);
   min-width: 0;
 }
 
@@ -153,13 +150,13 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 2.4rem;
-  padding: 0.55rem 1.25rem;
+  min-height: clamp(1.2rem, 2.8vh, 1.85rem);
+  padding: clamp(0.16rem, 0.45vh, 0.32rem) clamp(0.5rem, 1vw, 0.85rem);
   border-radius: 4px 12px 8px 10px;
   text-decoration: none;
   color: #fff;
   font-family: var(--font-menu);
-  font-size: 0.86rem;
+  font-size: clamp(0.62rem, 1.25vh, 0.78rem);
   letter-spacing: 0.05em;
   text-transform: lowercase;
   background: transparent;
@@ -217,8 +214,8 @@
 }
 
 .damsels-stage-section {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 58%;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -429,8 +426,8 @@
   isolation: isolate;
   overflow: hidden;
   margin: 0;
-  height: 2.25rem;
-  padding: 0 1.05rem;
+  height: clamp(1.2rem, 2.8vh, 1.85rem);
+  padding: 0 clamp(0.45rem, 1vw, 0.75rem);
   border-radius: 4px 12px 8px 10px;
   border: 1.5px solid rgba(0, 184, 176, 0.62);
   background-color: rgba(5, 18, 22, 0.72);
@@ -634,9 +631,9 @@
   }
 
   .damsels-lede {
-    font-size: 0.88rem;
-    line-height: 1.5;
-    padding: 0.8rem 0.95rem;
+    font-size: clamp(0.66rem, 1.4vh, 0.8rem);
+    line-height: 1.35;
+    padding: 0.32rem 0.7rem;
   }
 
   .damsels-title {
@@ -649,9 +646,9 @@
   }
 
   .damsels-btn {
-    min-height: 2.15rem;
-    font-size: 0.78rem;
-    padding: 0.45rem 0.9rem;
+    min-height: clamp(1.15rem, 2.6vh, 1.7rem);
+    font-size: clamp(0.6rem, 1.2vh, 0.74rem);
+    padding: 0.16rem 0.55rem;
   }
 
   .damsels-coverflow {
@@ -687,8 +684,8 @@
   }
 
   .damsels-lede {
-    font-size: 0.84rem;
-    padding: 0.7rem 0.9rem;
+    font-size: clamp(0.64rem, 1.3vh, 0.78rem);
+    padding: 0.28rem 0.65rem;
   }
 
   .damsels-now {

@@ -9,6 +9,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import CollapsibleCopy from "@/app/components/CollapsibleCopy";
 import {
   KEY_TOKENS,
   timelineByMoon,
@@ -657,10 +658,10 @@ export default function FullMoonPage() {
         <p className="fmt-kicker">since 2022</p>
         <h1 className="fmt-title-box">Full Moon Token</h1>
         <div className="fmt-head-stack">
-          <p className="fmt-tag-box">
-            The Full Moon Token is your key. Hold it on Tezos or Base and receive
-            new art from Empress Trash every full moon.
-          </p>
+          <CollapsibleCopy
+            className="fmt-tag-box"
+            text="The Full Moon Token is your key. Hold it on Tezos or Base and receive new art from Empress Trash every full moon."
+          />
           <nav className="fmt-links" aria-label="more links">
             <a
               href="https://objkt.com/curations/objkt/empress-trash's-full-moon-token-%2B-airdrops-93a99301"

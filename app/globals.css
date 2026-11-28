@@ -3312,3 +3312,40 @@ html.pvr-still .icon-particle-layer,
 html.pvr-still .title-particle-layer {
   display: none !important;
 }
+
+.collapsible-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+.collapsible-copy.is-open {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  row-gap: 0.3rem;
+}
+
+.collapsible-copy-body.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-align: inherit;
+}
+
+.collapsible-copy-toggle {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78em;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+  white-space: nowrap;
+}
