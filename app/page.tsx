@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import GalleryStack from './gallery/GalleryStack';
@@ -141,14 +141,16 @@ function HomeContent() {
   const requestedPost = searchParams.get('post');
   const postSlug = requestedPost && POST_SLUG.test(requestedPost) ? requestedPost : null;
   const [visitedGallery, setVisitedGallery] = useState(view === 'gallery');
+  const [visitedSubstack, setVisitedSubstack] = useState(view === 'substack');
   const [visitedEmporium, setVisitedEmporium] = useState(view === 'emporium');
   if (view === 'gallery' && !visitedGallery) setVisitedGallery(true);
+  if (view === 'substack' && !visitedSubstack) setVisitedSubstack(true);
   if (view === 'emporium' && !visitedEmporium) setVisitedEmporium(true);
   const [posts, setPosts] = useState<SalonPost[] | null>(null);
   const [listFailed, setListFailed] = useState(false);
   const [article, setArticle] = useState<SalonArticle | null>(null);
   const [articleFailed, setArticleFailed] = useState(false);
-  const [subscribeOpen, setSubscribeOpen] = useState(view === 'substack');
+  const [subscribeOpen, setSubscribeOpen] = useState(true);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
@@ -161,7 +163,18 @@ function HomeContent() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    const wide = view === 'gallery';
+    document.body.classList.toggle('gallery-wide', wide);
+    window.dispatchEvent(new CustomEvent('home-menu'));
+    return () => {
+      document.body.classList.remove('gallery-wide');
+      window.dispatchEvent(new CustomEvent('home-menu'));
+    };
+  }, [view]);
+
   useEffect(() => {
+    if (!visitedSubstack) return;
     let cancelled = false;
     fetch('/api/salon')
       .then((response) => {
@@ -177,7 +190,7 @@ function HomeContent() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [visitedSubstack]);
 
   useEffect(() => {
     if (!postSlug) return;
@@ -262,6 +275,7 @@ function HomeContent() {
             <GalleryStack />
           </div>
         )}
+        {visitedSubstack && (
         <div className="home-embed-pane" role="tabpanel" hidden={view !== 'substack'} aria-hidden={view !== 'substack'}>
           <div className="salon-pane">
             <header className="salon-mast">
@@ -340,6 +354,7 @@ function HomeContent() {
             </div>
           </div>
         </div>
+        )}
 
         {visitedEmporium && (
           <div className="home-embed-pane" role="tabpanel" hidden={view !== 'emporium'} aria-hidden={view !== 'emporium'}>
@@ -348,9 +363,7 @@ function HomeContent() {
         )}
       </div>
 
-      {view === 'substack' && subscribeOpen && (posts !== null || listFailed) ? (
-        <SubscribePopup onClose={() => setSubscribeOpen(false)} />
-      ) : null}
+      {subscribeOpen ? <SubscribePopup onClose={() => setSubscribeOpen(false)} /> : null}
     </div>
   );
 }

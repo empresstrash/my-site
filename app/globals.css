@@ -1930,7 +1930,52 @@ html.vr-booth .header-with-side > .mobile-menu-button {
 }
 
 .home-embed-pane[hidden] {
-  display: none;
+  display: none !important;
+}
+
+/* Gallery landing: the menu is a hamburger at every width so the art gets the page. */
+body.gallery-wide .side-menu {
+  width: min(80vw, 360px);
+  transform: translateX(-110%);
+  transition: transform 260ms ease;
+  z-index: 3000;
+  padding: calc(3.4rem + env(safe-area-inset-top, 0px)) 0.85rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+body.gallery-wide .side-menu.open {
+  transform: translateX(0);
+}
+
+body.gallery-wide .content,
+body.gallery-wide .header-with-side {
+  margin-left: 0;
+}
+
+body.gallery-wide .mobile-menu-button,
+body.gallery-wide .header-with-side > .mobile-menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, hsl(268, 42%, 8%) 0%, hsl(268, 40%, 4%) 100%);
+  border: 1px solid var(--glass-deep-edge);
+  color: var(--color-text);
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  font-size: 1.15rem;
+  line-height: 1;
+  position: fixed !important;
+  left: max(0.6rem, env(safe-area-inset-left, 0px));
+  top: max(0.5rem, env(safe-area-inset-top, 0px));
+  right: auto;
+  bottom: auto;
+  margin: 0;
+  z-index: 3100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(160, 140, 220, 0.1), 0 6px 16px rgba(0, 0, 0, 0.4);
+  min-width: 2.5rem;
+  min-height: 2.5rem;
 }
 
 .home-embed-frame {

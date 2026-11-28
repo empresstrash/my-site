@@ -1,21 +1,30 @@
-import { loadGalleries } from "@/lib/gallery/load";
+import { loadGallery, loadGalleries } from "@/lib/gallery/load";
 import type { GalleryPayload } from "@/lib/gallery/types";
 
 export const revalidate = 30;
 
-let cache: { at: number; galleries: GalleryPayload[] } | null = null;
+/** Art only. Prices and owner names load from /api/gallery/market. */
 
-export async function GET() {
+const artCache = new Map<string, { at: number; gallery: GalleryPayload }>();
+
+export async function GET(request: Request) {
+  const id = new URL(request.url).searchParams.get("id");
   const now = Date.now();
-  if (!cache || now - cache.at > 30_000) {
-    cache = { at: now, galleries: await loadGalleries() };
+
+  if (id) {
+    const hit = artCache.get(id);
+    const gallery = hit && now - hit.at < 30_000 ? hit.gallery : await loadGallery(id);
+    if (!gallery) return Response.json({ error: "Unknown gallery." }, { status: 404 });
+    if (!hit || now - hit.at >= 30_000) artCache.set(id, { at: now, gallery });
+    return Response.json(
+      { gallery },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120" } },
+    );
   }
+
+  const galleries = await loadGalleries();
   return Response.json(
-    { galleries: cache.galleries },
-    {
-      headers: {
-        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
-      },
-    },
+    { galleries },
+    { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120" } },
   );
 }

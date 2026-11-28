@@ -1,6 +1,8 @@
 export type GalleryPlatform = "objkt" | "manifold" | "transient" | "superrare";
 export type GalleryChain = "ethereum" | "base";
 
+export type GalleryKind = "works" | "editions";
+
 export type GalleryConfig = {
   id: string;
   title: string;
@@ -9,6 +11,11 @@ export type GalleryConfig = {
   /** EVM chain. Objkt galleries ignore this. */
   chain: GalleryChain;
   contract: string;
+  /**
+   * works: one card per token (Fusion).
+   * editions: one card per artwork, with a mint count and a live mint link.
+   */
+  kind?: GalleryKind;
 };
 
 /**
@@ -27,5 +34,15 @@ export const galleries: GalleryConfig[] = [
     platform: "superrare",
     chain: "ethereum",
     contract: "0x3caabfcad9c7bb04f62a1d0703fb202cb31d9dd4",
+    kind: "works",
+  },
+  {
+    id: "editions",
+    title: "editions",
+    description: "Open editions on Transient. Each piece shows once, with how many were minted.",
+    platform: "transient",
+    chain: "ethereum",
+    contract: "0xe278959dfbbf88227651222526814e280397274f",
+    kind: "editions",
   },
 ];

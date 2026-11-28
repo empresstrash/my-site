@@ -15,6 +15,10 @@ export type GalleryWork = {
   height: number | null;
   forSale: boolean;
   price: string | null;
+  /** Editions only: how many were minted. One card per artwork. */
+  minted?: number | null;
+  /** Collector name on a sold 1/1. Never a raw wallet. */
+  owner?: string | null;
 };
 
 export type GalleryPayload = {

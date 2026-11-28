@@ -7,7 +7,6 @@ import {
   mapPool,
   pickFromMetadata,
 } from "../media";
-import { fetchSuperRarePrices } from "./superrare";
 import type { GalleryWork, WorkKind } from "../types";
 
 const ALCHEMY_HOST: Record<GalleryChain, string> = {
@@ -179,18 +178,8 @@ export async function fetchEvmContract(
     if (!pageKey) break;
   }
 
-  const tokenIds = nfts
-    .map((nft) => (nft.tokenId ? normalizeTokenId(nft.tokenId) : ""))
-    .filter(Boolean);
-  const pricesPromise =
-    platform === "superrare" ? fetchSuperRarePrices(contract, tokenIds) : Promise.resolve(new Map<string, string>());
   const works = await mapPool(nfts, 8, (nft) => resolveNft(nft, platform, chain, contract));
-  const prices = await pricesPromise;
   return works
     .filter((work): work is GalleryWork => work !== null)
-    .map((work) => {
-      const price = prices.get(work.tokenId) ?? null;
-      return { ...work, forSale: Boolean(price), price };
-    })
     .sort((a, b) => Number(b.tokenId) - Number(a.tokenId));
 }

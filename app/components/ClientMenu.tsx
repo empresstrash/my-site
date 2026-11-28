@@ -316,7 +316,8 @@ export default function ClientMenu(): React.ReactNode {
 
   const onBooth = pathname === '/vr';
   const onKidPix = pathname === '/kid-pix';
-  const menuDrawer = isMobile || onBooth || onKidPix;
+  const [galleryWide, setGalleryWide] = useState(false);
+  const menuDrawer = isMobile || onBooth || onKidPix || galleryWide;
   const [embeddedBrowser, setEmbeddedBrowser] = useState(false);
 
   useEffect(() => {
@@ -348,6 +349,24 @@ export default function ClientMenu(): React.ReactNode {
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
   }, []);
+
+  // Gallery uses the drawer at every width. Other homepage tabs keep the sidebar.
+  useLayoutEffect(() => {
+    const read = () => {
+      const onHome = pathname === '/' || pathname === '/home';
+      const embed = new URLSearchParams(window.location.search).get('embed');
+      const wide = onHome && embed !== 'substack' && embed !== 'emporium';
+      setGalleryWide(wide);
+      if (!wide) setMobileOpen(false);
+    };
+    read();
+    window.addEventListener('home-menu', read);
+    window.addEventListener('popstate', read);
+    return () => {
+      window.removeEventListener('home-menu', read);
+      window.removeEventListener('popstate', read);
+    };
+  }, [pathname]);
 
   // close mobile menu when navigating
   useEffect(() => {

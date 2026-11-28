@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { galleries as galleryConfig } from "@/lib/gallery/galleries";
 import type { GalleryPayload, GalleryPlatform, GalleryWork } from "@/lib/gallery/types";
 import "./gallery.css";
 
@@ -93,10 +94,28 @@ function placeDeck(
 }
 
 function marketCopy(platform: GalleryPlatform, work: GalleryWork): { label: string; price: string | null } {
-  if (platform === "superrare" && work.forSale && work.price) {
-    return { label: "buy on superrare", price: work.price };
+  if (work.forSale && work.price) {
+    if (platform === "superrare") return { label: "buy on superrare", price: work.price };
+    if (platform === "transient") return { label: "mint on transient", price: work.price };
   }
   return { label: MARKET_LABEL[platform], price: null };
+}
+
+type MarketItem = {
+  tokenId: string;
+  forSale: boolean;
+  price: string | null;
+  owner: string | null;
+};
+
+function withMarket(works: GalleryWork[], market: MarketItem[] | undefined): GalleryWork[] {
+  if (!market?.length) return works;
+  const byId = new Map(market.map((item) => [item.tokenId, item]));
+  return works.map((work) => {
+    const item = byId.get(work.tokenId);
+    if (!item) return work;
+    return { ...work, forSale: item.forSale, price: item.price, owner: item.owner };
+  });
 }
 
 function WorkMedia({
@@ -162,10 +181,10 @@ function WorkMedia({
   );
 }
 
-function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
-  const works = gallery.works;
+function GalleryFan({ gallery, market }: { gallery: GalleryPayload; market?: MarketItem[] }) {
   const [index, setIndex] = useState(0);
   const [hot, setHot] = useState(false);
+  const works = useMemo(() => withMarket(gallery.works, market), [gallery.works, market]);
   const [measured, setMeasured] = useState<Record<string, number>>({});
   const stageRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState({ w: 0, h: 0 });
@@ -225,7 +244,7 @@ function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
   );
 
   const current = works[safeIndex];
-  const market = current ? marketCopy(gallery.platform, current) : null;
+  const listing = current ? marketCopy(gallery.platform, current) : null;
 
   const onPointerDown = (e: React.PointerEvent) => {
     drag.current = { x: e.clientX, active: true, swiped: false };
@@ -313,12 +332,14 @@ function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
           })}
         </div>
       </div>
-      {current && market ? (
+      {current && listing ? (
         <div className="gallery-now">
           <strong>{current.name}</strong>
-          {market.price ? <span className="gallery-price">{market.price}</span> : null}
+          {current.minted != null ? <span className="gallery-price">{current.minted} minted</span> : null}
+          {current.owner ? <span className="gallery-price">owned by {current.owner}</span> : null}
+          {listing.price ? <span className="gallery-price">{listing.price}</span> : null}
           <a className="gallery-market" href={current.url} target="_blank" rel="noopener noreferrer">
-            {market.label}
+            {listing.label}
           </a>
         </div>
       ) : null}
@@ -327,42 +348,57 @@ function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
 }
 
 export default function GalleryStack() {
-  const [galleries, setGalleries] = useState<GalleryPayload[] | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [byId, setById] = useState<Record<string, GalleryPayload>>({});
+  const [market, setMarket] = useState<Record<string, MarketItem[]>>({});
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/gallery", { cache: "no-store" })
-      .then((response) => {
-        if (!response.ok) throw new Error("gallery");
-        return response.json() as Promise<{ galleries?: GalleryPayload[] }>;
-      })
-      .then((payload) => {
-        if (!cancelled) setGalleries(Array.isArray(payload.galleries) ? payload.galleries : []);
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
+    for (const config of galleryConfig) {
+      fetch(`/api/gallery?id=${config.id}`, { cache: "no-store" })
+        .then((response) => {
+          if (!response.ok) throw new Error("gallery");
+          return response.json() as Promise<{ gallery?: GalleryPayload }>;
+        })
+        .then((payload) => {
+          if (cancelled || !payload.gallery) return;
+          const gallery = payload.gallery;
+          setById((prev) => ({ ...prev, [config.id]: gallery }));
+          if (gallery.platform !== "superrare" || !gallery.works.length) return;
+          const tokens = gallery.works.map((work) => work.tokenId).join(",");
+          fetch(`/api/gallery/market?id=${config.id}&tokens=${tokens}`, { cache: "no-store" })
+            .then((response) => (response.ok ? response.json() : null))
+            .then((body: { items?: MarketItem[] } | null) => {
+              if (!cancelled && body?.items) setMarket((prev) => ({ ...prev, [config.id]: body.items as MarketItem[] }));
+            })
+            .catch(() => {});
+        })
+        .catch(() => {
+          if (!cancelled) setFailed((prev) => ({ ...prev, [config.id]: true }));
+        });
+    }
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (failed) {
-    return <p className="gallery-status">The gallery didn’t load.</p>;
-  }
-  if (!galleries) {
-    return <p className="gallery-status">Loading the gallery…</p>;
-  }
-  if (!galleries.length) {
-    return <p className="gallery-status">No galleries yet.</p>;
-  }
-
   return (
     <div className="gallery-pane">
-      {galleries.map((gallery) => (
-        <GalleryFan key={gallery.id} gallery={gallery} />
-      ))}
+      {galleryConfig.map((config) => {
+        const gallery = byId[config.id];
+        if (!gallery) {
+          return (
+            <section key={config.id} className="gallery-block" aria-label={config.title}>
+              <header>
+                <h2>{config.title}</h2>
+                <p className="gallery-desc">{config.description}</p>
+              </header>
+              <p className="gallery-empty">{failed[config.id] ? "This gallery didn’t load." : "Loading…"}</p>
+            </section>
+          );
+        }
+        return <GalleryFan key={config.id} gallery={gallery} market={market[config.id]} />;
+      })}
     </div>
   );
 }
