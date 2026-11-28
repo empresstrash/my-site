@@ -21,6 +21,84 @@ function ratioOf(work: GalleryWork, measured: Record<string, number>): number {
   return measured[`${work.tokenId}`] || 1;
 }
 
+type Slide = { work: GalleryWork; offset: number; i: number };
+type Box = { x: number; w: number; h: number };
+
+function placeDeck(
+  slides: Slide[],
+  stageW: number,
+  stageH: number,
+  measured: Record<string, number>,
+): Map<number, Box> {
+  const map = new Map<number, Box>();
+  const center = slides.find((slide) => slide.offset === 0);
+  if (!center || stageW < 40 || stageH < 40) return map;
+  const pad = 10;
+  const ratio = Math.max(0.35, ratioOf(center.work, measured));
+  let h = stageH * 0.92;
+  let w = h * ratio;
+  const maxW = stageW * 0.7;
+  if (w > maxW) {
+    w = maxW;
+    h = w / ratio;
+  }
+  if (h > stageH * 0.94) {
+    h = stageH * 0.94;
+    w = Math.min(h * ratio, maxW);
+    h = w / ratio;
+  }
+  map.set(0, { x: 0, w, h });
+
+  const half = stageW / 2;
+  const leftover = Math.max(0, half - w / 2 - pad);
+  const stepGuess = h * 0.13;
+
+  const cardAt = (slide: Slide) => {
+    const abs = Math.abs(slide.offset);
+    let cardH = h * (0.786 - abs * 0.12);
+    let cardW = cardH * Math.max(0.35, ratioOf(slide.work, measured));
+    const limit = stageW - pad * 2;
+    if (cardW > limit) {
+      cardW = limit;
+      cardH = cardW / Math.max(0.35, ratioOf(slide.work, measured));
+    }
+    return { w: cardW, h: cardH };
+  };
+
+  for (const dir of [-1, 1]) {
+    const group = slides
+      .filter((slide) => Math.sign(slide.offset) === dir)
+      .sort((a, b) => Math.abs(a.offset) - Math.abs(b.offset));
+    if (!group.length) continue;
+    const first = cardAt(group[0]);
+    const peek = Math.min(first.w * 0.36, leftover);
+    const base = w / 2 + peek - first.w / 2;
+    let count = 1;
+    for (let k = 2; k <= group.length; k += 1) {
+      const size = cardAt(group[k - 1]);
+      const shift = base + (k - 1) * stepGuess;
+      if (shift + size.w / 2 <= half - pad && shift - size.w / 2 >= -half + pad) count = k;
+      else break;
+    }
+    const last = cardAt(group[count - 1]);
+    const maxShift = half - pad - last.w / 2;
+    const step = count > 1 ? Math.max(8, Math.min(stepGuess, (maxShift - base) / (count - 1))) : stepGuess;
+    for (let k = 1; k <= count; k += 1) {
+      const size = cardAt(group[k - 1]);
+      const shift = base + (k - 1) * step;
+      map.set(group[k - 1].offset, { x: dir * shift, w: size.w, h: size.h });
+    }
+  }
+  return map;
+}
+
+function marketCopy(platform: GalleryPlatform, work: GalleryWork): { label: string; price: string | null } {
+  if (platform === "superrare" && work.forSale && work.price) {
+    return { label: "buy on superrare", price: work.price };
+  }
+  return { label: MARKET_LABEL[platform], price: null };
+}
+
 function WorkMedia({
   work,
   onRatio,
@@ -107,7 +185,6 @@ function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
     return () => ro.disconnect();
   }, [works.length]);
 
-  const side = stage.w < 640 ? 1 : stage.w < 980 ? 2 : 3;
   const safeIndex = works.length ? Math.min(index, works.length - 1) : 0;
   const go = useCallback(
     (next: number) => {
@@ -131,68 +208,24 @@ function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
 
   const slides = useMemo(() => {
     if (!works.length) return [];
-    const out: Array<{ work: GalleryWork; offset: number; i: number }> = [
-      { work: works[safeIndex], offset: 0, i: safeIndex },
-    ];
-    let left = 0;
-    let right = 0;
-    const place = (i: number, prefer: "left" | "right") => {
-      if (prefer === "left" && left < side) {
-        left += 1;
-        out.push({ work: works[i], offset: -left, i });
-        return;
-      }
-      if (prefer === "right" && right < side) {
-        right += 1;
-        out.push({ work: works[i], offset: right, i });
-        return;
-      }
-      if (left < side) {
-        left += 1;
-        out.push({ work: works[i], offset: -left, i });
-      } else if (right < side) {
-        right += 1;
-        out.push({ work: works[i], offset: right, i });
-      }
-    };
-    for (let n = 1; n < works.length && (left < side || right < side); n += 1) {
-      const newer = safeIndex - n;
-      const older = safeIndex + n;
-      if (newer >= 0) place(newer, "left");
-      if (older < works.length && (left < side || right < side)) place(older, "right");
+    const maxSide = Math.min(3, Math.max(0, Math.floor((works.length - 1) / 2)));
+    const out: Slide[] = [{ work: works[safeIndex], offset: 0, i: safeIndex }];
+    for (let o = 1; o <= maxSide; o += 1) {
+      const prev = wrapIndex(safeIndex - o, works.length);
+      const next = wrapIndex(safeIndex + o, works.length);
+      out.push({ work: works[prev], offset: -o, i: prev });
+      if (next !== prev) out.push({ work: works[next], offset: o, i: next });
     }
     return out;
-  }, [works, safeIndex, side]);
+  }, [works, safeIndex]);
 
-  const placed = useMemo(() => {
-    const map = new Map<number, { x: number; w: number; h: number }>();
-    const center = slides.find((slide) => slide.offset === 0);
-    if (!center || stage.w < 40 || stage.h < 40) return map;
-    const ratio = ratioOf(center.work, measured);
-    let h = stage.h * 0.9;
-    let w = h * ratio;
-    const maxW = stage.w * (stage.w < 720 ? 0.78 : 0.56);
-    if (w > maxW) {
-      w = maxW;
-      h = w / ratio;
-    }
-    map.set(0, { x: 0, w, h });
-    const scales = [0.7, 0.54, 0.4];
-    for (const slide of slides) {
-      if (slide.offset === 0) continue;
-      const abs = Math.abs(slide.offset);
-      const scale = scales[abs - 1] ?? 0.34;
-      const r = ratioOf(slide.work, measured);
-      const sh = h * scale;
-      const sw = sh * r;
-      const step = Math.max(72, sw * 0.38);
-      const x = Math.sign(slide.offset) * (w / 2 + sw * 0.08 + (abs - 1) * step);
-      map.set(slide.offset, { x, w: sw, h: sh });
-    }
-    return map;
-  }, [slides, stage, measured]);
+  const placed = useMemo(
+    () => placeDeck(slides, stage.w, stage.h, measured),
+    [slides, stage, measured],
+  );
 
   const current = works[safeIndex];
+  const market = current ? marketCopy(gallery.platform, current) : null;
 
   const onPointerDown = (e: React.PointerEvent) => {
     drag.current = { x: e.clientX, active: true, swiped: false };
@@ -251,37 +284,41 @@ function GalleryFan({ gallery }: { gallery: GalleryPayload }) {
         }}
       >
         <div className="gallery-cover">
-          {slides.map(({ work, offset }) => {
+          {slides.map(({ work, offset, i }) => {
             const box = placed.get(offset);
+            if (!box) return null;
             const center = offset === 0;
             const style = {
               ["--o" as string]: offset,
               ["--abs" as string]: Math.abs(offset),
-              ["--x" as string]: `${box?.x ?? 0}px`,
-              ["--w" as string]: `${box?.w ?? 0}px`,
-              ["--h" as string]: `${box?.h ?? 0}px`,
+              ["--x" as string]: `${box.x}px`,
+              ["--w" as string]: `${box.w}px`,
+              ["--h" as string]: `${box.h}px`,
             };
             return (
-              <a
+              <button
                 key={`${work.tokenId}-${offset}`}
+                type="button"
                 className={`gallery-slide${center ? " is-center" : " is-side"}`}
                 style={style}
-                href={work.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${work.name}, ${MARKET_LABEL[gallery.platform]}`}
+                aria-label={center ? work.name : `show ${work.name}`}
+                onClick={() => {
+                  if (drag.current.swiped) return;
+                  if (!center) go(i);
+                }}
               >
                 <WorkMedia key={`${work.tokenId}:${work.urls[0] ?? ""}`} work={work} onRatio={onRatio} />
-              </a>
+              </button>
             );
           })}
         </div>
       </div>
-      {current ? (
+      {current && market ? (
         <div className="gallery-now">
           <strong>{current.name}</strong>
+          {market.price ? <span className="gallery-price">{market.price}</span> : null}
           <a className="gallery-market" href={current.url} target="_blank" rel="noopener noreferrer">
-            {MARKET_LABEL[gallery.platform]}
+            {market.label}
           </a>
         </div>
       ) : null}

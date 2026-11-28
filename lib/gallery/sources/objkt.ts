@@ -60,6 +60,8 @@ export async function fetchObjktContract(contract: string): Promise<GalleryWork[
       poster: gatewayUrls(poster),
       width: null,
       height: null,
+      forSale: false,
+      price: null,
     });
   }
 

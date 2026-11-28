@@ -22,9 +22,9 @@ type SalonArticle = SalonPost & { html: string };
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function parseHomeView(value: string | null): HomeView {
+  if (value === 'substack') return 'substack';
   if (value === 'emporium') return 'emporium';
-  if (value === 'gallery') return 'gallery';
-  return 'substack';
+  return 'gallery';
 }
 
 function formatDate(iso: string): string {
@@ -203,7 +203,7 @@ function HomeContent() {
   const tabHref = (id: HomeView) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('paragraph');
-    if (id === 'substack') params.delete('embed');
+    if (id === 'gallery') params.delete('embed');
     else params.set('embed', id);
     const query = params.toString();
     return query ? `/?${query}` : '/';
@@ -252,7 +252,7 @@ function HomeContent() {
           className={`home-embed-tab${view === 'emporium' ? ' is-on' : ''}`}
           scroll={false}
         >
-          emporium
+          merch shop
         </Link>
       </nav>
 
@@ -359,9 +359,9 @@ function HomeFallback() {
   return (
     <div className="home-embed">
       <nav className="home-embed-tabs" aria-hidden="true">
-        <span className="home-embed-tab">gallery</span>
-        <span className="home-embed-tab is-on">substack</span>
-        <span className="home-embed-tab">emporium</span>
+        <span className="home-embed-tab is-on">gallery</span>
+        <span className="home-embed-tab">substack</span>
+        <span className="home-embed-tab">merch shop</span>
       </nav>
       <div className="home-embed-stage" />
     </div>

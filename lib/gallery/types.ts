@@ -13,6 +13,8 @@ export type GalleryWork = {
   poster: string[];
   width: number | null;
   height: number | null;
+  forSale: boolean;
+  price: string | null;
 };
 
 export type GalleryPayload = {
